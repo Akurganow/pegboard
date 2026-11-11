@@ -115,9 +115,15 @@ class Claude:
     # Read lets the skill open its reference files. With only Skill allowed,
     # Claude Code 2.1.293 denied the skill's Read call (running, 2026-10-08:
     # https://github.com/Akurganow/pegboard/actions/runs/37784785554).
+    # WebSearch and WebFetch need approval, and a bare tool name allows every
+    # call of that tool (documentation, read 2026-11-11:
+    # https://code.claude.com/docs/en/permissions.md, "Permission system" and
+    # "Match all uses of a tool"). Without them Claude's answers in the
+    # distilled-research--v0.2.0 records report web search and fetch as denied,
+    # while Codex and Oh-My-Pi reached the web in the same run.
     def command(self, prompt: str, arm: str) -> list[str]:
         return ["claude", "-p", prompt, "--model", self.model, "--output-format", "stream-json",
-                "--verbose", "--allowedTools", "Skill", "Read"]
+                "--verbose", "--allowedTools", "Skill", "Read", "WebSearch", "WebFetch"]
 
     # `claude plugin disable` and `enable` change the plugin's state across sessions,
     # so `run_job` disables it once and restores it in `finally` (documentation:
