@@ -16,10 +16,10 @@ A candidates file is `candidates-<lane>.md` or `candidates-user.md`, with the co
 1. Vet only your rows, because another vetter owns the others. One row is one source: a list of repositories gets one row each, even on a shared host.
 2. Read `../records.md`. For each new kind of source and place, choose the records by its method.
 3. Word each row's one lateral-reading search with the hostname alone and reuse it for other rows on that host, except for a row on a code forge or another host that serves many sources: that row's search uses the source's title alone.
-4. Look each row up in each chosen record by an identifier `../records.md` allows, one per lookup. Take the DOI from the row or its URL. A row with no DOI there waits for step 5.
+4. Look each row up in each chosen record by an identifier `../records.md` allows, one per lookup. Take the DOI from the row or its URL. A lookup that needs a DOI the row lacks waits for step 5.
 5. Fetch the source page once, and for a repository its repository page on the same host. When the page gives a DOI the row lacked, run the step 4 lookups for it now.
    - A pasted source has its text in `pasted-<id>.md` or the attachment its `url` names. Fetch its URL or DOI once if it has one. If the page opens and holds the quoted words, vet it like any source. Otherwise rate it from the pasted text by `../tiers.md` and write "as pasted, not confirmed" in `reason`.
-   - On a host that is `not looked up` or has a negative record, fetch nothing: set `keep` = `no`, reason `host not fetched`.
+   - On a host that is `not looked up` or has a negative record, fetch nothing and skip step 6: set `keep` = `no`, reason `host not fetched`.
 6. Run the row's search. A source with no outside mention reads "no mention found". Note a retraction that the page or the results show.
 7. Assign a tier from `../tiers.md` and name its evidence in `reason`. Read what a correction notice changes. If the record is silent, say so in `reason` and lower no tier. For a repository, note its created and last-pushed dates, and flag one with stars, no forks and a history under a week.
 8. Set `keep` by the rule below, after the lookups of steps 4 and 5.

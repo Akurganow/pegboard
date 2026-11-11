@@ -155,7 +155,7 @@ This plugin ships no scripts, tools or servers. It is instructions, and what the
 
 - As of 2026-11-05 the method's stages had run three times: once by hand and twice as the built plugin, on a science/health topic and on a practice/technology topic, with an earlier wording that asked for a report and a yes first. No news/facts topic was run.
 - As of 2026-11-11 no recorded run covers the direct mode, the survey plan message, the handling of pasted sources or the self-check of a direct run.
-- The evals run one turn in an empty directory, and the agent finds its own sources. They reach the direct mode and the survey's plan message, and no later survey stage, so dispatch, parallelism, folder writes and injection are not measured.
+- The evals run one turn in an empty directory, and the agent finds its own sources. They stop at the direct mode or the survey's plan message, so dispatch, parallelism, folder writes and injection are not measured.
 - No test has measured how often an Established point is right.
 - Without a search or page-reading tool, and without a shell that reaches the web, the agent can only rate what you paste and otherwise answers from memory, marked as not graded.
 - A fetch tool that follows redirects without showing the target can reach a host the agent would have skipped. The text names no check on redirect targets except for hosts you asked it to avoid.
