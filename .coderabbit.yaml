@@ -1,10 +1,8 @@
 # CodeRabbit skips a pull request with more files than its limit, and "the
 # count is the files left after path filters" (documentation:
 # https://docs.coderabbit.ai/ide/review, "File limits", read 2026-11-11).
-# bundles/ and plugins/ are generated copies of src/. The matrix folder holds
-# one line of numbers per cell.
+# bundles/ and plugins/ are generated copies of src/.
 reviews:
   path_filters:
     - "!bundles/**"
     - "!plugins/**"
-    - "!src/triz-thinking/skills/contradiction/references/matrix/**"
