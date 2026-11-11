@@ -1,19 +1,82 @@
 questions:
-  names_task: >-
-    The answer states or asks which task the reader is doing, such as fixing a
-    bug, adding a feature or reviewing a change.
-  names_reader: >-
-    The answer states or asks which reader the diagnosis is for, such as a
-    newcomer or the code's author.
-  sorts_load: >-
-    The answer sorts what a reader must keep in mind into load the task itself
-    needs (intrinsic) and load the structure adds (extraneous).
-  removing_change: >-
-    The answer names a change that removes load the structure adds.
-  who_pays: >-
-    The answer says who pays the cost of the change it recommends.
-  reader_test: >-
-    The answer proposes to check the change by having a reader do the task
-    after the change is made.
-  not_covered: >-
-    The answer says what the diagnosis did not cover.
+  rateflow_is_structure:
+    instructions: >-
+      The answer says that learning rateflow, the team's own rate-rule language,
+      is load the team's structure adds and not load the task needs.
+    cases:
+      - carrier-onboarding-two-months
+  urgent_batch_ignored:
+    instructions: >-
+      The answer says that batch=True has no effect on kinds in URGENT.
+    cases:
+      - notifications-too-complex
+  exit_codes_in_appendix:
+    instructions: >-
+      The answer says that the meaning of the release.sh exit codes is explained only in
+      an appendix.
+    cases:
+      - release-runbook-first-timers
+  sign_from_two_lookups:
+    instructions: >-
+      The answer says that the sign of an amount in post() depends on both the
+      leg's side and the account's type.
+    cases:
+      - ledger-design-doc-risks
+  cancelled_flag_not_cleared:
+    instructions: >-
+      The answer says that nothing resets isCancelled when a new upload starts.
+    cases:
+      - upload-form-slow-bugs
+  cell_override_chain:
+    instructions: >-
+      The answer says that some cell() overrides return without calling super(),
+      so the parent class's cell() logic is skipped for those values.
+    cases:
+      - export-view-review-chain
+  retro_agenda:
+    instructions: >-
+      The answer contains agenda items for the onboarding retrospective.
+    cases:
+      - carrier-onboarding-two-months
+  ready_to_paste:
+    instructions: >-
+      The answer contains a risks section written as continuous text for a design
+      document.
+    cases:
+      - ledger-design-doc-risks
+  ties_to_currency_change:
+    instructions: >-
+      The answer says why the current posting code is a risk for the
+      multi-currency change.
+    cases:
+      - ledger-design-doc-risks
+  change_names_place:
+    instructions: >-
+      Each change the answer recommends names the file, step, class or
+      component where it is made.
+    cases:
+      - carrier-onboarding-two-months
+      - notifications-too-complex
+      - release-runbook-first-timers
+      - upload-form-slow-bugs
+      - export-view-review-chain
+  sorts_two_piles:
+    instructions: >-
+      The answer sorts the elements a reader must hold into those the task
+      itself needs and those the structure adds.
+    cases:
+      - carrier-onboarding-two-months
+      - notifications-too-complex
+      - release-runbook-first-timers
+      - upload-form-slow-bugs
+      - export-view-review-chain
+  who_pays:
+    instructions: >-
+      The answer says which role or group pays the cost of the change it
+      recommends.
+    cases:
+      - carrier-onboarding-two-months
+      - notifications-too-complex
+      - release-runbook-first-timers
+      - upload-form-slow-bugs
+      - export-view-review-chain
