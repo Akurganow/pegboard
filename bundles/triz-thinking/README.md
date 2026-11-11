@@ -2,7 +2,7 @@
 
 <!-- description:start -->
 
-Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part with the user.
+Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part.
 
 <!-- description:end -->
 
@@ -84,56 +84,56 @@ A longer cache lifetime takes load off the database but serves stale reads.
 Find a way out that is not a compromise.
 ```
 
-The `contradiction` skill restates the problem as a contradiction and says
-it assumes that restatement. It writes the ideal final result and maps both
-sides to two of Altshuller's 39 parameters, taking the first candidate on
-each side. It reads the matching cell of the
-contradiction matrix. It returns up to four directions, each named after
-its principle and stated as a change to your system. A problem the matrix
-route does not crack, or one that keeps coming back, goes on to the `ariz`
-skill. It walks ARIZ-85C part by part with you. When ARIZ restates the
-problem as a new technical contradiction, `ariz` offers it back to
-`contradiction`.
+The `contradiction` skill reads your code and history when the session has
+them. It states the contradiction and the ideal final result, maps both sides
+to two or three of Altshuller's 39 parameters, reads each pair's cell of the
+contradiction matrix, and writes what each principle in the cell would mean
+in your system. The reply leads with the strongest direction, stated as a
+change to a named part of your system.
+
+A problem that has outlasted earlier fixes, or whose tensions feed each
+other, goes to the `ariz` skill. It walks ARIZ-85C: Parts 1 to 3 compactly in
+the first reply, then directions from Parts 4 and 5, with assumed facts
+marked. A restated technical contradiction goes back to `contradiction`.
 
 ## What's inside
 
 | Path | What it is |
 | :-- | :-- |
-| [`skills/contradiction/SKILL.md`](skills/contradiction/SKILL.md) | the matrix route: contradiction, ideal final result, separation, parameters, matrix, principles |
+| [`skills/contradiction/SKILL.md`](skills/contradiction/SKILL.md) | the matrix route |
 | [`skills/contradiction/references/parameters.md`](skills/contradiction/references/parameters.md) | the 39 parameters, each with a reading for software |
-| [`skills/contradiction/references/principles.md`](skills/contradiction/references/principles.md) | the 40 principles, each with a paraphrase of Altshuller's sub-items and a reading for software; `ariz` reads it too |
-| [`skills/contradiction/references/matrix.md`](skills/contradiction/references/matrix.md) | the classic matrix, one line per cell, with its provenance and the disputed cells |
-| [`skills/contradiction/references/sources.md`](skills/contradiction/references/sources.md) | the copy and commit each reference of both skills rests on, and the sources that stayed out of reach |
-| [`skills/ariz/SKILL.md`](skills/ariz/SKILL.md) | the ARIZ-85C walk, part by part, for a problem the matrix route did not crack or that keeps coming back |
+| [`skills/contradiction/references/principles.md`](skills/contradiction/references/principles.md) | the 40 principles with a reading for software and, where one exists, the analogy of Rea or Fulbright; `ariz` reads it too |
+| [`skills/contradiction/references/matrix/`](skills/contradiction/references/matrix/) | the classic matrix as 39 files, `01.md` to `39.md`, one per improving parameter, and `provenance.md` |
+| [`skills/contradiction/references/sources.md`](skills/contradiction/references/sources.md) | where each reference of both skills was read, and what was not read |
+| [`skills/ariz/SKILL.md`](skills/ariz/SKILL.md) | the ARIZ-85C walk, for a problem that has outlasted earlier fixes |
 | [`skills/ariz/references/ariz-85c.md`](skills/ariz/references/ariz-85c.md) | the nine parts and forty steps of ARIZ-85C, with the formulas quoted and a software gloss |
-| [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
-| [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy of `plugin.json` at the one manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
+| `plugin.json` in `plugins/triz-thinking/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/triz-thinking/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
-The package has no script, hook, rule file or network access. The agent
-searches the matrix for one line, so the lookup needs nothing installed.
+The package has no script, hook, rule file or network access. A lookup is
+one file read, such as `matrix/09.md`.
 
-The matrix is the classic 39-by-39 table with 1,248 non-empty cells. It
-merges two public transcriptions, which differ on 40 cells. A third, and
-for three cells a fourth, settle those 40 by majority. `matrix.md` lists
-every reading of each disputed cell. No transcription read here has more
-than 1,248 cells, so the often-quoted count of 1,263 stays unconfirmed.
-`sources.md` names each copy by commit.
+The matrix is the classic 39-by-39 table with 1,248 non-empty cells, settled
+by majority from several public transcriptions. [The Altshuller Foundation's
+page](https://www.altshuller.ru/triz/technique2.asp) of the table, read on
+2026-11-11, presents itself as Appendix 1 of the 1973 edition of «Алгоритм изобретения». The 1973 print was not read.
+`matrix/provenance.md` lists every reading of each disputed cell.
 
 ## Boundaries
 
-- The matrix, the principles and ARIZ give directions with a published
-  origin, not guarantees. Your knowledge of your system decides which
-  direction survives.
-- A problem with no trade-off in it is not a TRIZ problem.
-  `contradiction` says so before any lookup, and `ariz` before Part 1.
-- The software readings of the parameters and principles are this
-  package's own. `sources.md` reports finding no published mapping of the
-  39 parameters to software, and no study of the matrix on software
-  problems.
-- A tangle of symptoms with no trade-off in sight belongs to the
-  `root-cause` skill of [`toc-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/toc-thinking).
-  Both skills hand over only when `root-cause` is installed.
+- The matrix, the principles and ARIZ give directions, not guarantees. Your
+  knowledge of your system decides which direction survives.
+- A problem with no trade-off in it is not a TRIZ problem. Both skills say so.
+- The software readings of the parameters and principles are this package's
+  own, except the analogies marked with their author. `sources.md` reports
+  finding no published mapping of the parameters to software, no study of the
+  classic matrix on software problems, and no published software reading of
+  the 76 standard solutions. The package carries ARIZ-85C's table of typical
+  transformations, not the standard solutions or the pointer to physical
+  effects.
+- A tangle of symptoms with no trade-off in sight belongs to the `root-cause`
+  skill of [`toc-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/toc-thinking).
+  Both skills hand over only when it is installed.
 
 ## License
 

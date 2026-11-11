@@ -4,6 +4,7 @@
 - [Complexity, as the book defines it](#complexity-as-the-book-defines-it)
   - [Definition](#definition)
   - [The weighting](#the-weighting)
+  - [Change history as a stand-in for time spent](#change-history-as-a-stand-in-for-time-spent)
   - [Three symptoms](#three-symptoms)
   - [Two causes](#two-causes)
   - [Incremental](#incremental)
@@ -13,41 +14,56 @@
 
 # Complexity, as the book defines it
 
-The definitions the review rests on. Quotations marked with a section
-number are from *A Philosophy of Software Design*. A section number is
-the second edition's. "1e" or "2e" after it names the edition whose
-wording is quoted, and `sources.md` names the copy each was read in.
+Section numbers are those of the second edition of *A Philosophy of Software
+Design*. "1e" or "2e" names the edition whose wording is quoted.
 
 ## Definition
 
-Section 2.1 defines complexity as "anything related to the structure of a
-software system that makes it hard to understand and modify the system"
-(§2.1, 1e). Ousterhout restates it in his discussion with Robert Martin:
-"I use the term 'complexity' to refer to things that make it hard to
-understand and modify a system. The most important contributors to
-complexity relate to information: How much information must a developer
-have in their head in order to carry out a task? How accessible and obvious
-is the information that the developer needs?" (`aposd-vs-clean-code`,
-Introductions).
-
-Complexity is a property of a particular design, and the reader decides it.
-"If you write code that someone else thinks is complicated, then you must
-accept that the code is probably complicated" (`aposd-vs-clean-code`,
-Comments). The same rule in the book: "If someone reading your code says
-it's not obvious, then it's not obvious, no matter how clear it may seem to
-you" (§18, 2e).
+Complexity is "anything related to the structure of a software system that
+makes it hard to understand and modify the system" (§2.1, 1e). The reader
+decides: "If someone reading your code says it's not obvious, then it's not
+obvious, no matter how clear it may seem to you" (ch. 18, 2e). It comes down
+to information: how much a developer must hold in mind to do a task, and how
+obvious that information is (`aposd-vs-clean-code`, Introductions).
 
 ## The weighting
 
-The book gives the overall complexity of a system as a weighted sum. In
-its words: "The overall complexity of a system (C) is determined by the
-complexity of each part p (cp) weighted by the fraction of time developers
-spend working on that part (tp). Isolating complexity in a place where it
-will never be seen is almost as good as eliminating the complexity
-entirely" (§2.1, 1e). The formula itself is typeset as an image in the
-copy read, so it is not reproduced here. The book calls the formula crude.
-The review uses it for one thing: ranking findings by how often the part
-is touched, times how much it costs to touch.
+The book gives a system's complexity as a sum over its parts of each part's
+complexity c_p times t_p, "the fraction of time developers spend working on
+that part" (§2.1, 1e), "a crude mathematical way" to say that complexity is
+"determined by the activities that are most common". Isolating complexity where
+it is never seen "is almost as good as eliminating the complexity entirely."
+
+## Change history as a stand-in for time spent
+
+No study read tests change frequency times complexity as a ranking, so the
+ranking is this skill's judgement. The studies below bear on its ingredients
+and mostly measure defects, not how hard a design is to understand or change.
+
+- Graves and others, *IEEE TSE* 26(7), 2000 (abstract): in one large system,
+  "the number of times code has been changed is a better indication of how
+  many faults it will contain than is its length."
+- Nagappan and Ball, ICSE 2005 (full text): on Windows Server 2003, absolute
+  churn "is a poor predictor of defect density", while churn relative to size
+  separates fault-prone binaries from the rest with 89.0% accuracy. Limit: one
+  product, binary level, check-ins only.
+- Ostrand, Weyuker and Bell, *IEEE TSE* 31(4), 2005 (abstract): a model using
+  modification history placed 71 to 92% of the faults, 83% on average, in the
+  20% of files it ranked worst, over two industrial systems.
+- Moser, Pedrycz and Succi, ICSE 2008, and Rahman and Devanbu, ICSE 2013
+  (abstracts): process metrics beat code metrics as defect predictors.
+- Sjøberg and others, *IEEE TSE* 39(8), 2013 (abstract): file size and the
+  number of changes explained almost all modelled variation in effort. Limit: 6
+  developers, 298 files.
+- Tornhill and Borg, TechDebt 2022 (full text, nearly all): in 39 proprietary
+  codebases, low-quality code had 15 times more defects and took 124% more
+  development time. Limits: the score comes from the first author's company's
+  tool, the data cover 6 to 12 months, and the study shows association and does
+  not test change frequency.
+
+For Step 7: three studies compare history with size and favour history. Absolute
+churn, a close relative of a raw commit count, predicted poorly and churn
+relative to size predicted well (Nagappan and Ball).
 
 ## Three symptoms
 
@@ -56,67 +72,38 @@ is touched, times how much it costs to touch.
 1. **Change amplification.** "A seemingly simple change requires code
    modifications in many different places."
 2. **Cognitive load.** "How much a developer needs to know in order to
-   complete a task." The book adds: "Sometimes an approach that requires
-   more lines of code is actually simpler, because it reduces cognitive
-   load."
+   complete a task."
 3. **Unknown unknowns.** "It is not obvious which pieces of code must be
-   modified to complete a task, or what information a developer must have
-   to carry out the task successfully."
+   modified to complete a task, or what information a developer must have to
+   carry out the task successfully."
 
 "Of the three manifestations of complexity, unknown unknowns are the worst"
-(§2.2, 1e). The book grades a few other things in passing: information
-leakage is "one of the most important red flags in software design" (§5.2,
-1e), and exception handling "one of the worst sources of complexity in
-software systems" (§10, 2e). It gives no overall ranking. Where this skill
-ranks a finding higher, it says so as its own judgement.
+(§2.2, 1e). The book gives no other overall ranking.
 
-The book's "cognitive load" is an amount of information a developer must
-know. It is not cognitive load theory's working-memory load, which the
-`cognitive-load` package of this marketplace uses. When a finding is about
-how many things a reader must keep in mind at once, it is that package's.
+The book's "cognitive load" is an amount of information a developer must know,
+not working-memory load. When a finding is about how many things a reader
+must keep in mind at once, it belongs to the `cognitive-load` package.
 
 ## Two causes
 
-"Complexity is caused by two things: dependencies and obscurity" (§2.3,
-1e). "A dependency exists when a given piece of code cannot be understood
-and modified in isolation." "Obscurity occurs when important information
-is not obvious." The chapter's conclusion: "Complexity comes from an
-accumulation of dependencies and obscurities" (§2.5, 2e).
-
-Dependencies "can't be completely eliminated" (§2.3, 1e). The book's goal
-is fewer of them, and simpler and more obvious ones. Every finding in a
-review names which cause it rests on.
+"Complexity is caused by two things: dependencies and obscurity" (§2.3, 1e).
+"A dependency exists when a given piece of code cannot be understood and
+modified in isolation." "Obscurity occurs when important information is not
+obvious." Dependencies "can't be completely eliminated"; the goal is fewer,
+simpler and more obvious ones.
 
 ## Incremental
 
-"Complexity is incremental: you have to sweat the small stuff" (Summary of
-Design Principles, item 1, 2e). The book's chapter 3 sets the investment:
-"I suggest spending about 10–20% of your total development time on
-investments" (§3.3, 1e). The figure is the book's suggestion and not a
-measured result.
+"Complexity is incremental: you have to sweat the small stuff" (principle 1,
+2e). The book suggests spending "about 10-20% of your total development time
+on investments" (§3.3, 1e). That figure is a suggestion, not a measured
+result.
 
 ## What this definition is not
 
-Brooks' "No Silver Bullet" divides the difficulties of software into
-"essence — the difficulties inherent in the nature of the software — and
-accidents — those difficulties that today attend its production but that
-are not inherent". His essence is "a construct of interlocking concepts:
-data sets, relationships among data items, algorithms, and invocations of
-functions", and he holds "the hard part of building software to be the
-specification, design, and testing of this conceptual construct, not the
-labor of representing it". So Brooks puts design inside the essence, and
-his accidents are the labour of representation.
-
-Ousterhout's complexity cuts across that line. It is how hard one
-particular design makes a system to understand and change, whichever of
-Brooks' categories the cause falls in. A finding under this skill is not
-"accidental" by virtue of being removable. When a finding says "accidental
-complexity", the word is Brooks' and the skill says so. That reading of
-the two texts is this skill's own.
-
-Google's reviewer guide gives a one-line reading of the second kind: "Too
-complex" usually means "can't be understood quickly by code readers." It
-names a particular type: "over-engineering, where developers have made the
-code more generic than it needs to be, or added functionality that isn't
-presently needed by the system." The skill uses that line as the
-counterweight to the book's preference for general-purpose modules.
+Brooks separates essence from accidents, "those difficulties that today attend
+its production but that are not inherent", and puts design inside the essence.
+Ousterhout's complexity cuts across that line: it is how hard one design makes
+a system to understand and change, whichever category the cause falls in. A
+removable finding is therefore not "accidental" by that fact, and the word
+"accidental" is Brooks'. This reading of the two texts is the skill's own.

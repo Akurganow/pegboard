@@ -20,7 +20,7 @@
     {
       "name": "distilled-research",
       "source": "./bundles/distilled-research",
-      "description": "Vets sources, reads them in parallel, collapses copies to independent origins, and grades each claim by how many independent origins support it."
+      "description": "Vets sources, collapses copies to independent origins, and grades each claim by how many independent origins support it."
     },
     {
       "name": "prose-discipline",
@@ -35,7 +35,7 @@
     {
       "name": "triz-thinking",
       "source": "./bundles/triz-thinking",
-      "description": "Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part with the user."
+      "description": "Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part."
     }
   ]
 }

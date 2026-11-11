@@ -1,83 +1,51 @@
-# Artifact Formats: Depth
+# Artifact formats: depth
 
-Extends the Artifact formats section of the core rule with full templates.
+Extends "Artifact formats" and the sections on progress updates, final reports, briefs and unverified claims in the core rules.
 
-## Review comments (Conventional Comments)
+## Review comments
 
-Every review comment starts with a label. An unlabeled comment is a `major`
-finding: the author cannot tell whether it blocks the merge.
+Conventional Comments: `<label> [decorations]: <subject>`, then an optional discussion.
 
-| Label | Meaning |
-| --- | --- |
-| `praise:` | Highlight something positive (rarely needed) |
-| `nitpick:` | Trivial preference, non-blocking by nature |
-| `suggestion:` | Improve the approach, non-blocking unless decorated |
-| `issue:` | A concrete problem, blocking by default |
-| `todo:` | Small, trivial, but necessary changes (docs, typos, config) |
-| `question:` | Request for information or clarification |
-| `thought:` | Idea worth considering, no action required |
-| `chore:` | Simple task for the author (docs, tests, cleanup) |
+The labels are `praise:`, `nitpick:`, `suggestion:`, `issue:`, `todo:`, `question:`, `thought:`, `chore:` and `note:`. The site recommends pairing `issue:` with a suggestion, and `question:` stands in for `issue:` when you are unsure the problem exists. It warns that false praise does damage.
 
-Decorations change blocking defaults: `(blocking)`, `(non-blocking)`,
-`(security)`, `(if-minor)`.
+Decorations go in parentheses: `(blocking)`, `(non-blocking)`, `(if-minor)`. The site leaves the default to each organization.
 
-Anatomy: `label: finding`, then the impact, then the concrete fix. Provide
-the fix as a diff or a precise instruction, not as a wish.
-
-Before: "I was just wondering if maybe we could somehow avoid the query
-inside the loop since it might be slow?"
-After: "`issue (blocking):` This query runs inside the loop and produces an
-N+1 pattern on a 10k-row page. Fetch all IDs upfront and query once with
-`WHERE id IN (...)`."
+Google's guide leaves open how explicit a reviewer should be. A known fix as an instruction spares the author a round trip. When the fix is unknown, write `question:`. Label every comment, because without labels authors may read each one as mandatory.
 
 ## Commit message
 
-- Subject: imperative mood, 50 chars max, states what and hints why.
-- "Replace custom OAuth handler with provider adapter", not "changes" and
-  not "Update code".
-- Body only when the why is non-obvious from the diff. Wrap at 72 chars.
+Subject: imperative, at most 50 characters, no full stop (Git SubmittingPatches, Tim Pope). Body: only when the why is not obvious from the diff, wrapped near 72 characters (Tim Pope). The Linux kernel documents 75, so the column is a project choice.
 
 ## Change description
 
-Any human-readable description of work, at minimum three blocks:
+Google's guide asks for a first line that says what is being done. The body gives the problem, the reason for this approach and its shortcomings. This standard adds the verification, because a reader who must trust a change needs the evidence.
 
-- **What changed**: the contract-level delta, one bullet per change.
-- **Why**: the defect, requirement, or decision driving it.
-- **Verification**: tests run, commands executed, evidence produced.
-  One to three lines by default, scaled to the change, not to the
-  session's process.
+- What changed: the contract-level difference, one bullet per change.
+- Why: the defect, requirement or decision behind it.
+- Verification: commands and results, and what was not verified, in one to three lines.
 
-No effort narration ("we spent significant effort"), no apologies, no
-thanks paragraphs, no session-process narrative (patterns:
-`slop-pruning.md`). Verification states commands and results, never
-the process that produced them. Where another format in this file is
-stricter, such as the commit message, that format governs.
+Leave out effort, apologies, thanks and the session process (see `slop-pruning.md`). A stricter format, such as a commit message, governs. A host or repository template, such as a pull-request form, outranks these formats: fill its fields and add nothing above them.
 
 ## Error message
 
-Three parts, no apology, no filler:
+Microsoft's Windows guide asks for the problem, the reason and the solution, and allows leaving out a solution that is trivial to deduce. GOV.UK asks for what happened and how to fix it. A developer message may name the code or setting. An end-user message states the cause in the user's terms, because the user cannot act on an internal code.
 
-1. What failed, with the subject named.
-2. The root cause or error code.
-3. The actionable resolution.
+## Agent instructions and briefs
 
-Before: "Oops! Something went wrong while attempting to establish a
-connection. Please verify your settings or contact support if the issue
-persists."
-After: "Connection to Postgres failed: authentication rejected for user
-`app`. Verify `DB_PASSWORD` in `.env` and retry."
+Each step is one imperative action of at most 20 words, with the context above the steps. A reason may follow in its own sentence, because Google's procedures guide says action first, justification second. Anthropic's guide and the Agent Skills guide say a stated purpose lets an agent decide unforeseen cases.
 
-## Agent and subagent instructions
+## Progress updates
 
-- One intent per step, 20 words max, inputs named explicitly.
-- No motivation or context paragraphs inside instruction steps. Context goes
-  above the steps.
+Anthropic's guide for Fable 5.2 wants updates that say what the model found and does next. A text-only client can look silent in a long turn. The guide for Opus 5 asks for one when something important turns up or the direction changes. So write one at a finding or a change of plan, and after a long stretch with none.
 
-## Audit severity
+## Final reports and handoffs
 
-- Review feedback without a label, a change description that states no
-  verification result anywhere: `major`. A short verification that
-  states commands and results is never a finding. Template precedence
-  applies: the verification result goes wherever the governing
-  template has room for it.
-- Format deviations in any artifact format above: `minor`.
+Anthropic's guide for Fable 5 says a final message is the reader's first look at the work. It asks for the outcome first, then the one or two things needed from the reader, each explained as if new. The guide for Fable 5.2 adds that readers have not seen the tool calls or files.
+
+## What was not verified
+
+Anthropic's guide for Fable 5 asks the model to say explicitly what is not yet verified and to state a verified result plainly. The guide for Sonnet 5.5 asks it to name the check it did not run and not to report the change as done. A gap stated as a fact tells the reader what to check. "Probably" and "should work" in place of a check are deleted.
+
+## Rules of this package
+
+No published source was found for three rules. They are the severity words `major`, `minor` and `nit`, the quoted phrases in a report of cuts, and the verification line of a change description. The nearest practice is Google's review labels. Drop each if the reason in the core rules stops holding.

@@ -3,119 +3,127 @@ name: ariz
 description: >
   Use this skill whenever a hard software problem has outlasted the obvious
   fixes and the user wants a way out. Phrasings: "we keep going back and
-  forth on this", "every compromise failed", "what is the way out?". It
-  covers a setting flipped back and forth between two teams who each hold a
-  rule. It covers a fix that breaks something else, while the next fix
-  brings the first problem back. It covers an issue that keeps returning,
-  two or three tied tensions, and a problem that may be stated wrong. It
-  covers a contradiction-matrix lookup that gave nothing usable. Use it even
-  when TRIZ is never named. Use it instead of generic tips. It walks the
-  problem through ARIZ-85C, Altshuller's nine-part algorithm, part by part.
-  For a trade-off seen at first sight, before any fix was tried, use
-  contradiction. Skip it for interview-style puzzles, document rewrites and
-  plain bugs or incidents.
+  forth on this", "every compromise failed", "what is the way out?". It covers
+  a setting flipped back and forth between two teams who each hold a rule, a
+  fix that breaks something else while the next fix brings the first problem
+  back, an issue that keeps returning, two or three tied tensions, a problem
+  that may be stated wrong, and a contradiction-matrix lookup that gave
+  nothing usable. Use it even when TRIZ is never named. It walks the problem through ARIZ-85C,
+  Altshuller's nine-part algorithm. For a trade-off seen at first sight,
+  before any fix was tried, use contradiction. Skip it for interview-style
+  puzzles, document rewrites and plain bugs or incidents.
 license: MIT
 ---
 
 # ARIZ
 
-You walk the user through ARIZ-85C on a software problem. The output is
-the mini-problem, the physical contradiction and the solution directions
-the algorithm produces. Write each in the wording the algorithm gives,
-and fill it from the user's system. Reply in the user's language.
-Think between steps. The formulations carry the method. Filling them from
-the system is the work.
+You walk a hard software problem through ARIZ-85C. The result is the
+strongest solution direction you can find, reached through the algorithm's
+own formulations. Reply in the user's language. The user asked for the answer,
+not the procedure: do not say that a skill or an algorithm is being applied,
+and do not narrate its steps.
 
-Do not present a guess about the system as a fact. When a step needs a
-fact you do not have, draft the step from what the user said and mark the
-assumed fact. Then ask for it after the draft. Examples: "Is the cache the
-tool and the stale read the product?", "When exactly does the conflict
-happen?", "What does the system already contain that nobody uses?"
+If a reference file cannot be read, say which and do not quote it from
+memory: the wording carries the method.
 
-Three files serve this skill. Read each at the point its row names, and
-not before. The last two belong to the `contradiction` skill of this
-package, and this skill reads them where they are.
+## Work from what is at hand
 
-| File | What it holds | Read when |
-| --- | --- | --- |
-| [`references/ariz-85c.md`](references/ariz-85c.md) | ARIZ-85C part by part, with the formulas quoted and a software gloss under each step | before Part 1, and again at each part as you reach it |
-| [`../contradiction/references/principles.md`](../contradiction/references/principles.md) | the 40 inventive principles, with a reading of each for software | Step 2, when the user wants them tried at ARIZ step 5.3; ARIZ step 9.2, to compare the solution with them |
-| [`../contradiction/references/sources.md`](../contradiction/references/sources.md) | where each reference of both skills was read, and what could not be opened | when the user asks where a formula or a step comes from |
+Read the code, history, logs, tests and documents the session has before you
+ask anything, and quote what you read with its path and line. Ask only for
+what only the user knows: intent, priorities, readers, what was observed
+outside the system. Say which facts you read, which the user gave and which
+you assume.
+
+## Give the answer in this reply
+
+- The first reply walks Parts 1 to 3 compactly and goes on to directions
+  from Parts 4 and 5. Never end after Part 1, or with questions in place of
+  the walk. Write each formulation from what you have, mark the assumed
+  facts, and let the user correct it.
+- A missing fact is a reason to assume, not to stop, unless the action spends
+  the user's money, sends private data out or cannot be undone.
+- Answer in the form asked: a decision, a summary, a message, a number of
+  lines. Deliver exactly that, with any method note after it in one or two
+  sentences.
+- Name the concrete behaviour, defect or change, and where it goes. An answer
+  that fills every formulation and leaves the problem open has failed.
+- End with at most three questions whose answers would change the result,
+  or with none.
+
+## Reference files
+
+The last two files belong to `contradiction`.
+
+| File | Read when |
+| --- | --- |
+| [`references/ariz-85c.md`](references/ariz-85c.md), formulas, tables and software glosses | before Part 1, and at each part as you reach it |
+| [`../contradiction/references/principles.md`](../contradiction/references/principles.md), the 40 principles | the user asks for them at step 5.3, or you compare the solution with them at step 9.2 |
+| [`../contradiction/references/sources.md`](../contradiction/references/sources.md), where each reference was read | the user asks where a formula or step comes from |
 
 ## Step 1: take the problem in
 
-Start from what the user brings. When the `contradiction` skill hands
-the problem over, it passes the technical contradiction, the ideal final
-result and the reason for the hand-over. Keep them in view. ARIZ restates
-the problem in its own form in Part 1 all the same.
+When `contradiction` hands the problem over, keep its technical
+contradiction, ideal final result and reason. Part 1 restates it all the
+same.
 
-A problem with no contradiction in it is not an ARIZ problem. Say so
-before Part 1, because ARIZ has nothing to add.
+Keep the solution you would give without the algorithm as a candidate. The
+algorithm adds candidates and never replaces your best one. A problem with no
+contradiction is not an ARIZ problem: say so in one sentence and answer
+directly.
 
-Open the first reply with one sentence that gives the number. Altshuller's
-text asks for at least 80 academic hours of study before ARIZ is applied
-to a new practical problem, and this guided walk does not replace that
-study. Write 80, not "substantial study".
+## Step 2: walk the parts
 
-## Step 2: walk the nine parts
+Write each part as a short block holding the formulation, with the user's
+facts in the wording `references/ariz-85c.md` gives. Head each block with what
+it states, not with a part number. A part that adds nothing gets one line
+saying so. The default depth is Parts 1 to 5. Add Part 6 when
+nothing came out and Part 7 for the direction you recommend. Add Parts 8 and
+9 only when the user asks.
 
-Walk the parts in order. Do not skip a part and do not compress two into
-one. Write each formulation out in the wording the reference gives, and
-fill it from the user's system.
+- **Part 1.** Write the mini-problem (1.1), with TC-1 and TC-2 as "if <state
+  of the tool>, then <good effect>, but <bad effect>". Name the tool and the
+  product (1.2) and the shape of each contradiction (1.3). Choose the one
+  whose good effect is the main function, and keep its state: no middle value
+  (1.4). Write it at its limit, in the user's own parameter (1.5), then the
+  model with the X-element (1.6).
+- **Part 2.** Name the operating zone, the operating time and the resources
+  the system already holds.
+- **Part 3.** Write IFR-1, the macro-level physical contradiction and IFR-2.
+  The micro-level statement is one line.
+- **Parts 4 and 5.** Write at least one direction for the user's system.
+  Part 5 applies the table of eleven typical transformations (5.3). The
+  package does not carry the standard solutions (1.7, 3.6, 5.1), the earlier
+  solved problems (5.2) or the pointer to physical effects (5.4), and no
+  published software reading of the standards was found. Say this once. Read
+  the 40 principles at 5.3 only when the user asks.
+- **Parts 6 to 9.** Part 6 restates the problem. Part 7 checks the recommended
+  direction, and a failed check sends you back to 1.1.
+  Parts 8 and 9 apply the answer and review the walk.
 
-Write Part 1 whole in your first reply, steps 1.1 to 1.6. Draft it from
-what the user said and mark each assumed fact. Ask for the missing facts in
-one list after the draft. Never end a reply at 1.1 or 1.2: a formulation
-the user can correct is worth more than a question. Write the formulations
-in the same reply that carries your questions. Write each later part the
-same way, whole, before you ask.
+## Step 3: write the result
 
-Write these in Part 1:
+Lead with the recommended direction. Then give the formulations and the
+directions, most direct first, each a change to a named part of the user's
+system, with path and line when the code is at hand, and the new trade-off it
+brings. Name an algorithm element, such as a transformation of
+Table 2, only when it led you to the direction. When the algorithm added
+nothing beyond the direct solution, say so in one sentence. State when the
+direction fails, and which parts you did not walk when that limits the
+conclusion.
 
-- Open 1.1 with "A technical system for <purpose> includes <main parts>."
-  Then write TC-1 and TC-2 each as one sentence in the form IF <state of
-  the tool>, THEN <good effect>, BUT <bad effect>. Use all three words.
-- End 1.1 with "It is necessary, with minimum changes to the system, to
-  <the required result>." Keep the words "with minimum changes".
-- In 1.2 write "Tool: ..." and "Product: ..." from the user's text. Ask the
-  user to correct them. Do not ask the user to supply them.
-- In 1.5 write each contradiction at its limit, as "Not <the user's value>,
-  but <never, always, zero or unbounded>". Use the user's own parameter,
-  not the reference's cache example.
-- In 1.6 write "The X-element must keep <useful action> and must remove,
-  improve or provide <what the conflict demands>". Use the name X-element.
+## Step 4: hand back
 
-Then cover the parts in this order.
-
-- Parts 1 to 3 produce the mini-problem, the conflicting pair, the
-  intensified conflict, the operative zone and time, and the resource
-  list. They end with the two ideal final results and the physical
-  contradiction.
-- Parts 4 and 5 produce the solution directions from the resources and
-  from the information fund. Step 5.3 applies the algorithm's own table of
-  eleven transformations. Read the 40 principles at 5.3 only when the
-  user asks, and note that the algorithm names them only in step 9.2.
-- Part 6 restates the problem when nothing came out.
-- Parts 7 to 9 check the solution, generalise it and record what the walk
-  taught.
-
-Stop after any part when the user has a direction they can act on, and
-say which parts were not walked.
-
-## Step 3: hand back
-
-- When Part 6 restates the problem as a new technical contradiction
-  between two parameters, offer the `contradiction` skill of this package
-  for it. The matrix may crack the restated problem in one lookup.
-- When the physical contradiction from Part 3 fits a separation of later
-  teaching, offer the `contradiction` skill's Step 4.
+- When Part 6 restates the problem as a new technical contradiction between
+  two parameters, load `contradiction` for it: the matrix may crack it in one
+  lookup. A problem that came from `contradiction` is not handed back to it
+  in the same reply.
+- When the physical contradiction of Part 3 fits a separation of later
+  teaching, use Step 4 of `contradiction`.
+- Offer the `root-cause` skill of `toc-thinking` when the problem is a tangle
+  of symptoms rather than a trade-off, and only when it is installed.
 
 ## Boundaries
 
-- ARIZ gives directions with a published origin. They are not a
-  guarantee. When a direction contradicts what the user knows about their
-  system, the user's knowledge wins and the direction is dropped.
-- A root cause hidden behind many symptoms belongs to the `root-cause`
-  skill of this marketplace's `toc-thinking` package, which builds the
-  cause-and-effect tree. Hand over when the user's problem is a tangle of
-  symptoms rather than a trade-off, and only if that skill is installed.
+ARIZ gives directions, not guarantees. The software glosses are this skill's
+own. Drop a direction that contradicts what the user knows about their
+system.

@@ -1,72 +1,88 @@
 questions:
-  lists_tools:
+  pairing_magazine_repeats_meta_analysis:
     instructions: >-
-      The answer lists the tools found for the research.
+      The answer says the DevWeekly article repeats the meta-analysis and is not a separate study.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - fasting-sources-agree
-      - bronze-age-collapse-field-survey
-  names_sources:
+      - pairing-defects-managers-split
+  pairing_claim_contested:
     instructions: >-
-      The answer names the sources it plans to use.
+      The answer rates the claim that pairing reduces defects as Contested.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - fasting-sources-agree
-      - finland-basic-income-viral-claim
-      - bronze-age-collapse-field-survey
-  rates_each_source:
+      - pairing-defects-managers-split
+  pairing_experiment_contradicts_meta_analysis:
     instructions: >-
-      The answer gives each planned source a rating.
+      The answer says the experiment on professional developers contradicts the meta-analysis on post-release defects.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - fasting-sources-agree
-      - finland-basic-income-viral-claim
-      - bronze-age-collapse-field-survey
-  asks_run_folder:
+      - pairing-defects-managers-split
+  db_listicle_repeats_vendor:
     instructions: >-
-      The answer asks the user where to write the run folder.
+      The answer says the Top 10 listicle repeats Fenwick's own benchmark instead of measuring anything.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - fasting-sources-agree
-      - finland-basic-income-viral-claim
-      - bronze-age-collapse-field-survey
-  asks_approval:
+      - embedded-db-three-times-faster
+  db_three_times_probable:
     instructions: >-
-      The answer asks the user to approve the plan before research starts.
+      The answer rates the claim that Fenwick reads are about three times faster as Probable.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - fasting-sources-agree
-      - finland-basic-income-viral-claim
-      - bronze-age-collapse-field-survey
-  says_nothing_started:
+      - embedded-db-three-times-faster
+  db_gives_a_pick:
     instructions: >-
-      The answer says that no research has started yet.
+      The answer gives a pick between Fenwick and Tarn.
     cases:
-      - creatine-cognition-evidence-review
-      - fasting-sources-agree
-      - finland-basic-income-viral-claim
-  names_catalogue:
+      - embedded-db-three-times-faster
+  db_load_tradeoff:
     instructions: >-
-      The answer names the catalogue that a source rating comes from.
+      The answer says that bulk loads ran slower on Fenwick than on Tarn in the university benchmark.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - bronze-age-collapse-field-survey
-  no_numeric_score:
+      - embedded-db-three-times-faster
+  meeting_no_harvard_study_shown:
     instructions: >-
-      The answer gives no numeric trust score for any source.
+      The answer says that none of the sources shows a Harvard study behind the 2.5-hour figure.
     cases:
-      - fasting-sources-agree
-      - finland-basic-income-viral-claim
-  calls_none_safe:
+      - meeting-hours-harvard-stat
+  meeting_factcheck_lead_unconfirmed:
     instructions: >-
-      The answer calls no source safe.
+      The answer treats the fact-checker's account of a 2012 vendor survey as a lead that it has not confirmed.
     cases:
-      - vector-db-options-comparison
-      - creatine-cognition-evidence-review
-      - finland-basic-income-viral-claim
+      - meeting-hours-harvard-stat
+  meeting_not_established:
+    instructions: >-
+      The answer rates the 2.5-hour claim as Not established.
+    cases:
+      - meeting-hours-harvard-stat
+  magnesium_review_pools_same_trials:
+    instructions: >-
+      The answer says the systematic review pools the same two trials and so is not additional independent evidence.
+    cases:
+      - magnesium-sleep-shelf-note
+  magnesium_claim_probable:
+    instructions: >-
+      The answer rates the claim that magnesium helps people fall asleep faster as Probable.
+    cases:
+      - magnesium-sleep-shelf-note
+  magnesium_trials_differ_in_people:
+    instructions: >-
+      The answer says the two trials studied different groups of people: adults with insomnia and adults aged 65 and over.
+    cases:
+      - magnesium-sleep-shelf-note
+  magnesium_leaflet_overstates:
+    instructions: >-
+      The answer says the distributor's leaflet claims more than the research shows.
+    cases:
+      - magnesium-sleep-shelf-note
+  rests_on_pasted_text:
+    instructions: >-
+      The answer says its grades rest on the pasted excerpts, which it could not confirm at their sources.
+    cases:
+      - pairing-defects-managers-split
+      - embedded-db-three-times-faster
+      - magnesium-sleep-shelf-note
+  survey_names_sub_questions:
+    instructions: >-
+      The answer names the sub-questions or explanations it covers.
+    cases:
+      - bronze-age-collapse-broad-look
+  survey_waits_for_go_ahead:
+    instructions: >-
+      The answer asks for the user's go-ahead before the research starts.
+    cases:
+      - bronze-age-collapse-broad-look

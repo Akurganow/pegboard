@@ -1,41 +1,43 @@
 questions:
-  names_sources:
-    instructions: >-
-      The answer names the sources it rates.
-    cases:
-      - can-i-cite-wikipedia-and-statista
-      - github-repos-benchmark-evidence
-      - is-this-a-reliable-source-single
-      - econ-papers-trust-ordering
-  rates_each_source:
-    instructions: >-
-      The answer gives each source a rating.
-    cases:
-      - can-i-cite-wikipedia-and-statista
-      - github-repos-benchmark-evidence
-      - is-this-a-reliable-source-single
-      - econ-papers-trust-ordering
   names_catalogue:
     instructions: >-
-      The answer names the catalogue behind a rating.
+      The answer names a catalogue or record that a rating comes from.
     cases:
       - can-i-cite-wikipedia-and-statista
       - github-repos-benchmark-evidence
       - is-this-a-reliable-source-single
       - econ-papers-trust-ordering
-  no_numeric_score:
+  calls_no_source_safe:
     instructions: >-
-      The answer gives no numeric trust score.
+      The answer does not describe any source as safe.
     cases:
       - can-i-cite-wikipedia-and-statista
       - github-repos-benchmark-evidence
       - is-this-a-reliable-source-single
       - econ-papers-trust-ordering
-  calls_none_safe:
+  gives_a_tier_each:
     instructions: >-
-      The answer calls no source safe.
+      The answer gives each source a tier.
+    cases:
+      - github-repos-benchmark-evidence
+      - econ-papers-trust-ordering
+  rejects_medium_post:
+    instructions: >-
+      The answer advises against citing the Medium post by ev_guru_2021 as evidence.
     cases:
       - can-i-cite-wikipedia-and-statista
+  warns_off_weak_repo:
+    instructions: >-
+      The answer says the repository with 14 stars and no commits since 2021 is weak evidence.
+    cases:
       - github-repos-benchmark-evidence
+  flags_unreliable_site:
+    instructions: >-
+      The answer says natural-news.com is not reliable for nutrition claims.
+    cases:
       - is-this-a-reliable-source-single
+  substack_below_journal_papers:
+    instructions: >-
+      The answer rates the Substack post below the two American Economic Review papers.
+    cases:
       - econ-papers-trust-ordering

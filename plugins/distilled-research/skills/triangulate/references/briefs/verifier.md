@@ -1,29 +1,23 @@
 # Verifier brief
 
-You start with no context from the run. You check `distillate.md` against the run folder and write your verdicts.
+You start with no context from the run, so you do not share the lead's mistakes. You check `distillate.md`, the table of graded points, against the run folder and write your verdicts.
 
 - Reads: `distillate.md`, `origins-index.md`, `plan.md`, `../origins-and-grades.md`, every `cards-<shard>.md` and every `origins/<theme>.md`.
 - Writes: `verify.md`.
-- Fetch: the pages of up to five quotes from the highest-graded points, on hosts the dispatch lists.
+- Fetch: the pages of up to five quotes from the highest-graded points, on public hosts. Five is a sample, because each fetch adds a page to your context.
 - Search: none.
-- Done marker: the last line of your file is `## Done`.
 
 ## Check
 
-1. Read `distillate.md` and `origins-index.md`. Read cluster and claim files only as the steps below say.
-2. Read the topic type in `plan.md`.
-3. Re-add each point from `origins-index.md`. Count each origin id once.
-   - Take `N`, `M`, `K` and best tier for its cluster ids.
-   - Take the tier and review status of each measured origin, and the `all opinion` mark.
-4. Apply the Measured term of `../origins-and-grades.md` to `M`.
-   - Drop an origin from `M` when every quote of its claim rows starts with `paraphrase:`.
-   - Drop it too when its card section shows `fetch returned` as `summary`.
-   - Drop an opened origin when its quote in `origins/<theme>.md` is `paraphrase:` or missing.
-5. Pick up to two clusters per theme, or all when it has fewer.
-   - Re-derive each from the cards and `origins/<theme>.md`.
-6. For each sampled cluster, find one claim row quote in its source section. Confirm it supports the claim.
-   - A cluster with only `snippet` claims has no quote. Record "no quote", report the cluster as unchecked and invent none.
-7. Fetch the pages of up to five checked quotes, from the highest-graded points. Judge each result by this table.
+1. Read `distillate.md`, `origins-index.md` and the topic type in `plan.md`. Read cluster and claim files only as the steps below say.
+2. Re-add each point from `origins-index.md`, counting each origin id once: `N`, `M`, `K` and best tier for its cluster ids, the tier and review status of each measured origin, and the `all opinion` mark.
+3. Apply the Measured term of `../origins-and-grades.md` to `M`. Drop an origin from `M` when
+   - every quote of its claim rows starts with `paraphrase:`, or its card section shows `fetch returned` as `summary`;
+   - it is an opened origin whose quote in `origins/<theme>.md` is `paraphrase:` or missing;
+   - its card shows `read` as `as pasted`.
+4. Pick up to two clusters per theme, or all when it has fewer, and re-derive each from the cards and `origins/<theme>.md`.
+5. For each sampled cluster, find one claim row quote in its source section and confirm it supports the claim. A cluster with only `snippet` claims has no quote: record "no quote", report the cluster as unchecked and invent none.
+6. Fetch the pages of up to five checked quotes, from the highest-graded points, and judge each by this table.
 
 | Fetch gives | Result | Effect on the recount |
 | :-- | :-- | :-- |
@@ -32,28 +26,20 @@ You start with no context from the run. You check `distillate.md` against the ru
 | A tool summary | not matched | none; count it as fetched |
 | A failed fetch | not matched | none; count it as not fetched |
 
-8. Compare your values with the point's stated values. Give each point one verdict.
+7. Compare your values with the point's stated values and give each point one verdict.
 
 ## Verdicts and grades
 
-- Use only the verdicts `supported`, `lowered` and `unsupported`. Their effects are in `../origins-and-grades.md`.
-- Use only the grades in `../origins-and-grades.md`.
-- You may lower a grade. You may never raise one, whatever your recount shows.
-- Derive the lowered grade from the grade table, using your recounted `N`, `M`, `K`, tiers, review status and topic type.
+- Use only the verdicts `supported`, `lowered` and `unsupported`, and the grades of `../origins-and-grades.md`.
+- Lower a grade when the recount says so, deriving it from the grade table with your recounted `N`, `M`, `K`, tiers, review status and topic type. Never raise one, whatever the recount shows, so that the check can only remove overstatement.
 - A point without cluster ids is `unsupported`.
-- Mark a point `lowered` with the reason `paraphrase` when step 4 lowered its `M`.
-- Edit nothing in `distillate.md`. The lead applies your verdicts in place.
+- Mark a point `lowered` with the reason `paraphrase` when step 3 lowered its `M`.
+- Edit nothing in `distillate.md`: the lead applies your verdicts.
 
 ## Output format
 
-One row per point. The columns are: point, verdict, your counts (`N`, `M`, `K`, best tier) and the lowered grade. Then add the source section and quote checked, the correction, and the reason (`paraphrase` or empty).
-
-After the rows give:
-
-- quotes fetched, matched, and failed to fetch;
-- your totals per verdict;
-- the number of points lowered for the reason `paraphrase`.
+One row per point: point, verdict, your counts (`N`, `M`, `K`, best tier), the lowered grade, the source section and quote checked, the correction, and the reason (`paraphrase` or empty). After the rows give the quotes fetched, matched and failed to fetch, your totals per verdict, and the number of points lowered for `paraphrase`.
 
 ## Check before reporting
 
-Confirm every point has one verdict and no row raises a grade. Confirm each theme has up to two sampled clusters, all of them when it has fewer, each with one quote or the note "no quote".
+Confirm every point has one verdict and no row raises a grade. Confirm each theme has up to two sampled clusters, each with one quote or the note "no quote".

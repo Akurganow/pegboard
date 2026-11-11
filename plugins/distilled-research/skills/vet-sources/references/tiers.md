@@ -1,6 +1,6 @@
 # Source tiers
 
-Tiers are ordinal (A above B above C) and uncalibrated. A tier says how a source ranks against the others in the same list. It does not say how likely its claims are to be true. Each tier is a letter. A source with no tier yet reads `none`.
+Tiers are ordinal (A above B above C) and uncalibrated. A tier says how a source ranks against the others in the same list, not how likely its claims are to be true. A source with no tier yet reads `none`.
 
 ## Definitions
 
@@ -26,13 +26,16 @@ A move up needs the evidence column of the destination tier.
 - Up one tier: a record in an open catalogue, or a named author with a checkable record.
 - Down one tier: no named author, or a claim copied from another source.
 - Down one tier: a repository with stars but no forks or history.
-- Down one tier: a catalogue flag on the source, such as low reliability, or a stale update (fast-moving topic).
-- Down one tier: a correction notice that changes the source's results, data or conclusions.
-- A correction of metadata (funding, affiliation, typo) goes in `reason` and moves no tier.
-- A retraction or expression-of-concern notice moves no tier. It sets `keep` = `no`, as the keep rule in `briefs/vetter.md` says.
-- Official authorship says who wrote a source, not that it was audited. A large vendor repository can stay tier B.
-- "No mention found" is recorded as found. It does not move a source up or down.
+- Down one tier: a catalogue flag such as low reliability, or a stale update on a fast-moving topic.
+- Down one tier: a correction notice that changes the source's results, data or conclusions. A correction of metadata (funding, affiliation, typo) goes in `reason` and moves no tier.
+- A retraction or expression-of-concern notice moves no tier. It sets `keep` = `no` by the keep rule in `briefs/vetter.md`.
+- Official authorship says who wrote a source, not that it was audited, so a large vendor repository can stay tier B.
+- "No mention found" moves a source neither way.
 
-## Without reading a page
+## When the page cannot be read
 
-Only host-class rules apply before a page is read. A hostname that is a government, standards-body or regulator domain, or the documentation host of the project the user named, may take tier A. A hostname that is a known listing, aggregator or user-posting host may take tier C. Everything else gets no tier until the vetter reads and checks it after the yes.
+When the fetch failed or the harness refused it, only host-class rules apply. A government, standards-body or regulator domain, or the documentation host of the project the user named, may take tier A. A known listing, aggregator or user-posting host may take tier C. Everything else gets no tier, and the row says why the page was not read.
+
+## Pasted sources
+
+A pasted source that the run could not open is rated from what its excerpt shows: the kind of source, its named venue or author, and whether it states its own method and data. The no-tier rule for an unread page does not apply to it. Its author, date and URL stay "as pasted, not confirmed".

@@ -29,8 +29,7 @@ positive:
       ```
   - id: export-fix-pr-description
     prompt: |
-      can you clean up my notes into the PR description? our template is just Summary and
-      Testing
+      write up the PR for this from my notes, our template is just Summary and Testing
 
       - spent most of yesterday chasing why the nightly export sometimes has duplicate rows
       - turns out the cursor pagination used created_at only, so rows with the same
@@ -43,19 +42,6 @@ positive:
         SELECT COUNT(*)
       - pytest tests/export -q all green
       - had the AI review bot look at it twice, it said LGTM
-  - id: issue-triage-agent
-    prompt: |
-      We are adding an agent to our repository that triages new GitHub issues before a
-      maintainer looks at them. Please write its instructions and reply with them. I will
-      commit them as .github/agents/triage.md myself. The agent should:
-
-      - add exactly one of the labels bug, feature or question
-      - search open and closed issues for a duplicate, and when it finds one, link it and add
-        the label duplicate
-      - ask the reporter for a minimal reproduction when a bug report has none
-      - never close an issue and never assign anyone
-
-      The agent can run the gh CLI and has read access to the code.
   - id: go-comments-before-merge
     prompt: |
       my lead says the comments in this file are noise but i think most of them are fine.
@@ -84,9 +70,8 @@ positive:
       ```
   - id: shorten-incident-update
     prompt: |
-      Nobody reads my incident updates past the first two lines. Can you shorten this one
-      before I post it in #status? Keep every fact, and list what you cut so I can
-      double-check.
+      Nobody reads my incident updates past the first two lines. Make this one much shorter
+      for #status, but keep every fact. Also list what you cut so I can double-check.
 
       "Hi all, just wanted to give everyone a quick update regarding the ongoing situation
       with the checkout service. At approximately 14:05 UTC our monitoring systems detected
@@ -95,8 +80,20 @@ positive:
       have now gone ahead and renewed the certificate, and as of 14:52 UTC error rates have
       returned to normal levels. Some customers may have seen failed payments during this
       window, and we are currently in the process of identifying the affected orders so that
-      we can reach out to them. We will continue to monitor the situation closely and will
-      provide another update as soon as we have more information. Thanks for your patience!"
+      we can reach out to them. Thanks for your patience!"
+  - id: outage-report-and-brief
+    prompt: |
+      Notes from the checkout incident, in the order I wrote them:
+
+      - checkout started returning 500s right after deploy 4812
+      - DNS and the load balancer are fine, ruled out
+      - the api-gateway ran out of connections: the pool is capped at 50 and sat at 50
+      - raised the cap to 200 on staging, 500s went from 9% to 0.2%
+      - haven't tried it in prod, and haven't tested what happens when mobile clients retry
+
+      My director never saw any of this and has to decide today whether we ship the new
+      cap. Write the report I send her. Also write what I paste to another agent that will
+      test the mobile retries on staging with `k6 run retry.js`. It must not touch prod.
 near_miss:
   - id: squash-keep-first-message
     prompt: |
@@ -107,8 +104,7 @@ near_miss:
     prompt: |
       Our support team wants the API's error messages in their spreadsheet. Turn this into
       CSV with the columns code, http_status and message, sorted by code. Copy every message
-      word for word, typos included, because support searches for the exact text customers
-      paste into tickets.
+      word for word, typos included.
 
       ```go
       var apiErrors = map[string]APIError{

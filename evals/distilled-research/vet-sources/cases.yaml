@@ -1,8 +1,9 @@
 positive:
   - id: can-i-cite-wikipedia-and-statista
     prompt: |
-      can I cite these in my undergrad thesis on EV adoption? which are ok as evidence and
-      which arent? rate them for me
+      writing my undergrad thesis on EV adoption and my supervisor told me to check where my
+      numbers come from. which of these are fine as evidence and which arent? tell me for
+      each one
 
       en.wikipedia.org
       statista.com
@@ -10,24 +11,24 @@ positive:
       electrek.co
       a random Medium post by "ev_guru_2021"
 
-      just reply here with a rating for each
+      just reply here
   - id: github-repos-benchmark-evidence
     prompt: |
-      Our team wants to back a claim in an internal memo that Rust web frameworks beat Go
-      ones on latency. Three places we found numbers: the TechEmpower Framework Benchmarks
+      Our team wants to back a memo claim that Rust web frameworks beat Go ones on latency.
+      Three places we found numbers: the TechEmpower Framework Benchmarks
       repo (github.com/TechEmpower/FrameworkBenchmarks), a repo called
       github.com/someuser/rust-vs-go-speedtest with 14 stars and no commits since 2021, and
-      the benchmarks game site at benchmarksgame-team.pages.debian.net. How far can each be
-      relied on as evidence? Give me a tier for each in the reply.
+      the benchmarks game site at benchmarksgame-team.pages.debian.net. How much weight can
+      each carry in the memo? Give me a tier for each in the reply.
   - id: is-this-a-reliable-source-single
     prompt: |
-      is natural-news.com a reliable source for nutrition claims? I keep seeing it get cited
-      in a forum I'm in and I want to know before I repeat anything from it
+      should i trust natural-news.com when it comes to nutrition claims? i keep seeing it
+      get cited in a forum I'm in and I want to know before I repeat anything from it
   - id: econ-papers-trust-ordering
     prompt: |
       Our analytics lead pasted these four items as support for "minimum wage hikes cut
-      teen employment" and I need to know which can carry that weight before I put them in
-      a deck. Order them from most to least dependable and say why:
+      teen employment". Which can carry that weight in a deck? Order them from most to least
+      dependable and say why:
 
       - Card & Krueger (1994), "Minimum Wages and Employment: A Case Study of the Fast-Food
         Industry in New Jersey and Pennsylvania", American Economic Review

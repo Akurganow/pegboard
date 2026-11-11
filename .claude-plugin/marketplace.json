@@ -23,7 +23,7 @@
     {
       "name": "distilled-research",
       "source": "./bundles/distilled-research",
-      "description": "Vets sources, reads them in parallel, collapses copies to independent origins, and grades each claim by how many independent origins support it.",
+      "description": "Vets sources, collapses copies to independent origins, and grades each claim by how many independent origins support it.",
       "homepage": "https://github.com/Akurganow/pegboard/tree/main/plugins/distilled-research",
       "category": "Developer Tools"
     },
@@ -44,7 +44,7 @@
     {
       "name": "triz-thinking",
       "source": "./bundles/triz-thinking",
-      "description": "Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part with the user.",
+      "description": "Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part.",
       "homepage": "https://github.com/Akurganow/pegboard/tree/main/plugins/triz-thinking",
       "category": "Developer Tools"
     }

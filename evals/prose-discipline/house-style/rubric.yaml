@@ -1,56 +1,11 @@
 questions:
-  no_preamble:
+  # The review comment, the first prompt.
+  finds_swallowed_failure:
     instructions: >-
-      The answer has no sentence whose only job is to announce what follows,
-      such as "Here is the commit message:" or "Here's what I'd change."
-    criteria:
-      "true": >-
-        Every sentence states a fact, an instruction or a result. A heading or
-        a short label ending in a colon, such as "Shortened version:" or
-        "Suggested comment:", is not an announcement. An instruction that
-        introduces code is not one either.
-      "false": >-
-        A full sentence only announces what comes next, such as "Here is the
-        changed function:", "Here's a comment you can post:" or "Here's what
-        I'd change."
-  no_offer:
-    instructions: >-
-      The answer never offers the user more help, such as "Let me know if you
-      want..." or "I can also...".
-    criteria:
-      "true": >-
-        No sentence offers the user further work. An offer inside a text the
-        answer drafts for someone else, such as "Happy to pair on this" in a
-        review comment, does not count.
-      "false": >-
-        A sentence offers the user more help, such as "Say so if you want that
-        case handled too" or "If you point me to the repo, I can check it."
-  no_hedging:
-    instructions: >-
-      Outside text it quotes, the answer states its claims without hedges such
-      as "probably", "I think" or "should work".
-    criteria:
-      "true": >-
-        Claims are stated flatly. A condition such as "if X fails", a note that
-        something was not run or not checked, or uncertainty the request itself
-        states is not a hedge.
-      "false": >-
-        The answer softens a claim of its own with a word such as "probably",
-        "likely", "might", "may" or "I think".
-  artifact_alone:
-    instructions: >-
-      The answer is the artifact alone, such as a commit message, a PR
-      description or a page, with no note before or after it.
-    criteria:
-      "true": >-
-        The answer is the artifact and nothing else. Headings and sections
-        inside the artifact are part of it.
-      "false": >-
-        A note sits before or after the artifact, such as what was left out,
-        what was not run, or another version to choose from.
+      The answer says the endpoint still returns a 200 response when
+      apply_payment fails.
     cases:
-      - export-fix-pr-description
-      - issue-triage-agent
+      - webhook-review-comment
   review_label:
     instructions: >-
       The review comment the answer drafts carries a Conventional Comments
@@ -77,6 +32,19 @@ questions:
         propagate?" or "Would something like this work instead?".
     cases:
       - webhook-review-comment
+  # The PR text, the second prompt.
+  states_cursor_cause:
+    instructions: >-
+      The description says rows with the same created_at value could come
+      back on two pages.
+    cases:
+      - export-fix-pr-description
+  states_zero_duplicates:
+    instructions: >-
+      The description says the export on the staging snapshot had no
+      duplicate rows.
+    cases:
+      - export-fix-pr-description
   no_process_narrative:
     instructions: >-
       The PR description tells nothing about how the work went, such as an
@@ -90,33 +58,34 @@ questions:
         OFFSET attempt, the time spent, or a bot's review.
     cases:
       - export-fix-pr-description
-  agent_step_imperative:
+  artifact_alone:
     instructions: >-
-      Each step of the agent's instructions is one imperative sentence.
+      The answer is the PR description alone, with no note before or after it.
+    criteria:
+      "true": >-
+        The answer is the description and nothing else. Headings and sections
+        inside it are part of it.
+      "false": >-
+        A note sits before or after the description, such as what was left
+        out or another version to choose from.
     cases:
-      - issue-triage-agent
+      - export-fix-pr-description
+  # The comments in the Go file, the third prompt.
+  keeps_redis_comment:
+    instructions: >-
+      The answer says the comment about Redis rejecting an EX of 0 stays.
+    cases:
+      - go-comments-before-merge
   findings_not_rewrite:
     instructions: >-
       The answer lists what to change and gives no rewritten version of the
       whole text.
     cases:
       - go-comments-before-merge
-  severity_named:
-    instructions: >-
-      Each finding in the answer carries a severity, such as major, minor or
-      nit.
-    criteria:
-      "true": >-
-        Every finding carries a word such as major, minor or nit.
-      "false": >-
-        Some or all findings carry no severity word such as major, minor or
-        nit.
-    cases:
-      - go-comments-before-merge
   hedge_comment_dropped:
     instructions: >-
-      The answer never suggests keeping the "should work for negative values
-      too" comment in another wording.
+      The answer says to delete the "should work for negative values too"
+      comment, not to reword it.
     criteria:
       "true": >-
         The answer says to delete that comment, and to test or fix the code
@@ -126,15 +95,60 @@ questions:
         words, such as a note that states the behaviour or documents it.
     cases:
       - go-comments-before-merge
+  # The incident update, the fourth prompt. Each question names one fact of the source.
+  cause_kept:
+    instructions: >-
+      The shortened update says an expired TLS certificate on the payments
+      gateway caused the errors.
+    cases:
+      - shorten-incident-update
+  recovery_time_kept:
+    instructions: >-
+      The shortened update says error rates were back to normal at 14:52 UTC.
+    cases:
+      - shorten-incident-update
+  customer_impact_kept:
+    instructions: >-
+      The shortened update says some customers may have seen failed payments.
+    cases:
+      - shorten-incident-update
+  follow_up_kept:
+    instructions: >-
+      The shortened update says the team is identifying the affected orders
+      so that it can contact the customers.
+    cases:
+      - shorten-incident-update
   cuts_quoted:
     instructions: >-
       The answer quotes the words it cut, such as "just wanted to give everyone",
       instead of describing them, such as "the filler phrases".
     cases:
       - shorten-incident-update
-  no_sign_off:
+  # The report and the brief, the fifth prompt.
+  names_pool_cause:
     instructions: >-
-      The shortened update has no greeting or sign-off, such as "Hi all" or
-      "Thanks for your patience".
+      The report says the api-gateway ran out of connections, with its pool
+      capped at 50 and sitting at 50.
     cases:
-      - shorten-incident-update
+      - outage-report-and-brief
+  states_untested_in_prod:
+    instructions: >-
+      The report says the new cap has not been tested in production.
+    cases:
+      - outage-report-and-brief
+  names_decision:
+    instructions: >-
+      The report says the director has to decide today whether to ship the
+      cap of 200.
+    cases:
+      - outage-report-and-brief
+  forbids_production:
+    instructions: >-
+      The brief says the agent must not touch production.
+    cases:
+      - outage-report-and-brief
+  states_done_check:
+    instructions: >-
+      The brief says what shows that the mobile retry test is done.
+    cases:
+      - outage-report-and-brief

@@ -1,56 +1,16 @@
-# Comment Hygiene: Depth
+# Comment hygiene: depth
 
-Extends the Code comments section of the core rule. Default to no
-comments: add one only when the why is non-obvious. The governing test
-for every surviving comment: it must add a reason, a constraint, or
-business context that the code cannot show. Everything else is deleted.
+Extends "Code comments" in the core rules. A comment earns its place by saying what the code cannot. That is a reason, a contract callers rely on, or an outside constraint such as a rate limit.
 
-## Narrator comments
+## Why comments are not banned
 
-Cues: "This function handles", "This class manages", "This module is
-responsible for", "Here we", "The following code".
+Published guidance agrees on which comments are worth having. Google's C++ guide says not to state the obvious and to explain why. Ousterhout and Martin both hold that some information cannot live in code. Git's guidelines warn that comments invariably tend to stale out, so each must carry something the code cannot.
 
-- The name and signature already say what the code does. Narration is
-  duplication that rots when the code changes.
-- Fix: delete. Or rewrite into the *why*: the constraint, the workaround, or
-  the business reason. "// Retry 3 times because the upstream queue
-  de-duplicates within 60s" survives the test. "// Retry the request" does
-  not.
+## What to delete
 
-## Step and trivial markers
+- **Narrator comments** ("This function handles", "Here we"). The name and signature already say it, and the comment rots when the code changes.
+- **Step and trivial markers** (`// Step 1:`, `// Increment the counter`). Order and names speak. A numbered comment inside a non-obvious algorithm may stay when it states the purpose of the step.
+- **Committed doubt** ("should work", "probably", "hopefully"). A reader cannot tell a real doubt from a forgotten one. Check the behavior, delete the comment and pin the behavior with a test.
+- **Section dividers** (`// =====`). A region that needs a banner needs its own file, class or export.
 
-Cues: `// Step 1:`, `// Create the client`, `// Increment the counter`,
-`// Return the result`, `// Loop over items`.
-
-- Fix: delete entirely. Order and names speak.
-- Before: `// Increment the counter`. After: delete. `counter += 1`
-  says it.
-- Exception: a numbered comment inside a genuinely non-obvious algorithm
-  step is acceptable only when it explains the step's purpose, not its
-  mechanics.
-
-## Hedging comments: severity major
-
-Cues: "should work", "might not be", "probably", "hopefully", "I think this
-is correct", "TODO: replace with real implementation".
-
-- Committed uncertainty is a correctness smell, not a style issue.
-- Fix: resolve the uncertainty (verify, test, fix the code) or delete the
-  comment. Never ship doubt.
-- Before: `// should work for most cases`. After: delete the comment
-  and add the missing case to the test.
-
-## ASCII section dividers
-
-Cues: `// =====`, `// --- Helper Functions ---`, `# *** SECTION ***`.
-
-- Fix: delete. If the region genuinely needs separation, it needs a file, a
-  class, or an export, not a text banner.
-- Before: `// ===== Helper Functions =====`. After: delete the banner.
-  Extract a module when the boundary genuinely matters.
-
-## Severity scale
-
-- Hedging: `major`.
-- Narrator, step, divider comments: `minor`.
-- A comment that is accurate but states the obvious: `nit`, delete.
+An accurate comment that states the obvious is deleted too.

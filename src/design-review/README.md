@@ -84,53 +84,51 @@ Review the design of our storage module. Callers must call open, configure
 and start in that order before every read, and three services wrap it.
 ```
 
-The `red-flags` skill first asks who reads the module, who changes it, and
-how often. It judges the module's depth and walks the book's fourteen red
-flags. It ranks the findings by how often each part is touched and what
-touching it costs. Each
-finding names the change, its cost and the chapter it rests on.
+When the session has the repository, the `red-flags` skill reads the callers
+and the change history itself and asks you only for what the code cannot say.
+It answers in one reply: a verdict on your question, then findings ranked by
+how often each part is touched and what touching it costs. Each finding gives
+the place, the flag or principle with its chapter or section, the cause, the
+change and what the change costs. At most three questions come at the end.
 
 ## What's inside
 
 | Path | What it is |
 | :-- | :-- |
-| [`skills/red-flags/SKILL.md`](skills/red-flags/SKILL.md) | the procedure: frame, symptom and cause, depth, red flags, together or apart, errors, rank, report |
-| [`skills/red-flags/references/complexity.md`](skills/red-flags/references/complexity.md) | the book's definition of complexity, its symptoms and causes, and how it differs from Brooks' |
-| [`skills/red-flags/references/red-flags.md`](skills/red-flags/references/red-flags.md) | the fourteen red flags, the book's wording, and what to look for |
-| [`skills/red-flags/references/principles.md`](skills/red-flags/references/principles.md) | the sixteen design principles of the second edition, with a chapter for each |
+| [`skills/red-flags/SKILL.md`](skills/red-flags/SKILL.md) | the procedure, the fourteen red flags and the sixteen principles with their sections |
+| [`skills/red-flags/references/red-flags.md`](skills/red-flags/references/red-flags.md) | what to look for under each red flag |
+| [`skills/red-flags/references/complexity.md`](skills/red-flags/references/complexity.md) | the definition of complexity, its weighting, and the studies on change history |
+| [`skills/red-flags/references/principles.md`](skills/red-flags/references/principles.md) | depth, the limit of general-purpose modules, pulling complexity down |
 | [`skills/red-flags/references/decisions.md`](skills/red-flags/references/decisions.md) | the criteria for together or apart, errors, design it twice, comments and names |
-| [`skills/red-flags/references/positions.md`](skills/red-flags/references/positions.md) | where the book takes a side, the other side where it was read, and the evidence read |
-| [`skills/red-flags/references/sources.md`](skills/red-flags/references/sources.md) | where each reference was read, at which commit, and what was not read |
-| [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
-| [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy of `plugin.json` at the one manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
+| [`skills/red-flags/references/positions.md`](skills/red-flags/references/positions.md) | where the book takes a side, the other side, and the evidence on TDD and method length |
+| [`skills/red-flags/references/sources.md`](skills/red-flags/references/sources.md) | where each text was read, its kind and date, and what was not read |
+| `plugin.json` in `plugins/design-review/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/design-review/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
 The package has no script, hook, rule file or network access.
 
-The book is under copyright, and `sources.md` records no bought copy of
-either edition. It records the sixteen principles from one public copy,
-checked item by item against two more that agree, and the fourteen red
-flags from one. Chapter
-quotations are a few sentences at most, from two public translation
-repositories that carry the English. `sources.md` names each copy by
-commit. The second edition lists sixteen principles and the first lists
-fifteen, and the references say which is which.
+The book is under copyright. `sources.md` records the author's published
+extract of the second edition and two public translation repositories that
+carry the English, each named by commit, and no bought copy of either edition.
+Chapter quotations are a few sentences at most.
 
 ## Boundaries
 
 - The review weighs one quality: complexity in the book's sense.
-- For method length, comments and test-driven development, a finding
-  carries Robert Martin's reply from his written discussion with
-  Ousterhout. The book's other positions carry no reply, because
-  `positions.md` quotes no text of the other side for them.
-- The skill reads the design you give it. It does not read a code base on
-  its own and measures nothing.
-- A trade-off between two measured qualities belongs to the
-  `contradiction` skill of [`triz-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/triz-thinking). Many symptoms with
+- For method length, comments and test-driven development, a finding carries
+  Robert Martin's reply from his written discussion with Ousterhout. The
+  book's other positions carry no reply, because `positions.md` quotes no text
+  of the other side for them.
+- The weights come from version history when the repository is at hand. The
+  skill says this is its proxy for the book's time spent, and `complexity.md`
+  records that no study read tests change frequency times complexity as a
+  ranking.
+- A trade-off between two measured qualities belongs to the `contradiction`
+  skill of [`triz-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/triz-thinking). Many symptoms with
   one unclear cause belong to `root-cause` in
   [`toc-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/toc-thinking). What a reader cannot hold
   in their head belongs to `extraneous` in
-  [`cognitive-load`](https://github.com/Akurganow/pegboard/tree/main/plugins/cognitive-load). The skill hands over
+  [`cognitive-load`](https://github.com/Akurganow/pegboard/tree/main/plugins/cognitive-load). The skill offers a hand-over
   only to a skill that is installed.
 
 ## License

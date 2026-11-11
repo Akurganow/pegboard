@@ -1,43 +1,81 @@
 positive:
-  - id: vector-db-options-comparison
+  - id: pairing-defects-managers-split
     prompt: |
-      We're picking a vector store for a RAG feature in our product: about 20 million
-      embeddings of 768 dimensions, hybrid keyword plus vector search, a team of four with no
-      dedicated database admin, and a budget that rules out anything above roughly 2,000 USD a
-      month. The candidates are pgvector, Qdrant, Weaviate and OpenSearch.
+      Our engineering managers are split on whether pair programming cuts bugs, and the numbers
+      I found don't line up. I need to know why before I write a recommendation. The four items
+      I have:
 
-      Please research this properly across many sources: vendor docs, independent benchmarks,
-      engineering blog posts, conference talks, user reports. Compare the four on recall,
-      latency at our scale, operational burden and cost. Put the comparison in your reply, with
-      the claims that matter most to our choice marked by how well supported they are.
-  - id: creatine-cognition-evidence-review
+      A. Okafor & Lindqvist (2021), meta-analysis of 18 controlled studies, Journal of Software
+         Engineering Research. "Pairing was associated with 15% fewer post-release defects
+         (95% CI 8% to 22%)."
+      B. Brandt, Ruiz & Tan (2023), Empirical Software Engineering Letters. "In a controlled
+         experiment, 52 professional developers worked alone or in pairs. Pairs had 11.2 defects
+         per 1,000 changes, solo developers 9.4 (p = 0.03)."
+      C. Ledgerline engineering blog, M. Osei, March 2024. "Pairing on every change for six
+         months cut production defects 22%, per our issue tracker."
+      D. DevWeekly (trade magazine), "Pairing pays off", 2022. "Studies show that pairing cuts
+         defects by about 15%, according to a recent meta-analysis."
+
+      What should I tell the managers? Reply here.
+  - id: embedded-db-three-times-faster
     prompt: |
-      I'm a 52-year-old vegetarian who has started taking creatine monohydrate for gym
-      performance, and a colleague says it also helps memory and focus. Can you do an evidence
-      review of that across the research literature? I'd like to know which findings hold up
-      across several independent studies and which rest on a single trial. Give me the review
-      in the reply, plain language is fine.
-  - id: fasting-sources-agree
+      We're choosing an embedded analytics database for a dashboard that is 95% reads, with one
+      2 GB bulk load a night. It's down to Fenwick and Tarn. I keep seeing
+      "Fenwick reads are about three times faster". How far can I trust that, and which should
+      we pick? What I collected:
+
+      1. Fenwick's own engineering blog, L. Brandvold, February 2025. "We measured Fenwick at
+         3.1 times the query throughput of Tarn on the same machine. The script and data are
+         in our repository."
+      2. Halden University Systems Lab preprint, Aaltonen and Reyes, March 2025, method and data
+         released. "Fenwick answered read queries 2.7 times faster than Tarn. Bulk loads ran
+         1.8 times slower on Fenwick."
+      3. dbpicks.example listicle, April 2025. "Fenwick: about three times faster reads than
+         Tarn, per Fenwick's benchmark."
+      4. Tarn official documentation, version 4.2. "Tarn is tuned for fast bulk loads."
+
+      Give me the pick and your view on the three-times line, in your reply.
+  - id: meeting-hours-harvard-stat
     prompt: |
-      whats the deal with intermittent fasting for weight loss, like do the sources agree
-      on anything?? i keep reading contradicting stuff. please look at lots of sources not
-      just a couple and tell me what they agre on and what they dont, write it up here in
-      the chat
-  - id: finland-basic-income-viral-claim
+      A stat keeps showing up in our managers' decks: "employees lose 2.5 hours a day to
+      unnecessary meetings, according to a Harvard study." I can't find the study. Can it go in
+      our meeting-reduction proposal? What I collected:
+
+      1. Workday Weekly (blog), K. Ferris, March 2024. "A Harvard study found that the average
+         employee wastes 2.5 hours a day in pointless meetings."
+      2. The Ledger Business Daily, May 2024. "A widely cited Harvard study found workers lose
+         2.5 hours every day to unnecessary meetings."
+      3. FactCheck Desk, September 2024. "We found no Harvard study. The earliest source is a
+         2012 press release from CalSync, a calendar-software vendor, on a survey of its
+         customers. We could not obtain the survey."
+
+      Answer in your reply.
+  - id: magnesium-sleep-shelf-note
     prompt: |
-      A claim keeps coming up in articles about universal basic income: that Finland's
-      2017-2018 trial "cut unemployment" among its participants. I've seen it in dozens of
-      places and I suspect most of them trace back to the same one or two reports. Trace it
-      for me: find what many sources say, work out which ones merely copy an earlier one,
-      and tell me how much independent support the claim has. Answer in your reply.
-  - id: bronze-age-collapse-field-survey
+      I'm a pharmacy technician writing a shelf note on magnesium for sleep, and I only want to
+      say what the research backs. A supplier's leaflet makes it sound settled. What I have:
+
+      1. Haldane et al. (2022), randomized placebo-controlled trial, Journal of Sleep Medicine.
+         120 adults with chronic insomnia. "Time to fall asleep was 11 minutes shorter than with
+         placebo (95% CI 4 to 18)."
+      2. Moreau et al. (2023), randomized placebo-controlled trial, Clinical Nutrition Reports.
+         96 adults aged 65 and over. "Time to fall asleep was 9 minutes shorter than with
+         placebo (95% CI 1 to 17)."
+      3. Ferreira & Duan (2024), systematic review, Sleep Reviews. "We found two randomized
+         trials (Haldane 2022; Moreau 2023). Pooled, magnesium shortened time to fall asleep by
+         10 minutes (95% CI 5 to 15). Certainty: moderate."
+      4. Supplement distributor leaflet, 2024. "A 2024 systematic review proves that magnesium
+         helps you fall asleep faster."
+
+      How strongly does the research back "magnesium helps people fall asleep faster"? Answer in
+      your reply, written so that I can turn it into the note.
+  - id: bronze-age-collapse-broad-look
     prompt: |
-      I'm writing a long essay on the Late Bronze Age collapse around 1200 BCE and I'd like a
-      survey of the field before I choose a thesis. Cover the main explanations scholars give
-      (climate, earthquakes, Sea Peoples, systems collapse, drought), and say where
-      the sources converge and where they split. Read broadly, including older and newer
-      work, and check that the sources are sound before relying on them. Give the survey
-      in your reply.
+      I'm writing a long essay on the Late Bronze Age collapse around 1200 BCE and I want a
+      broad look at what scholars say before I pick a thesis. Please cover the main
+      explanations (climate and drought, earthquakes, the Sea Peoples, systems collapse), say
+      where the scholarship converges and where it splits, and read widely. Check the sources before you rely on them, and split the reading across helpers if
+      that is quicker.
 near_miss:
   - id: who-pandemic-declaration-date
     prompt: |
@@ -45,40 +83,32 @@ near_miss:
       the date in your reply.
   - id: summarise-remote-work-page
     prompt: |
-      Here is the text of one blog post. Give me a four-sentence summary in your reply.
+      Summarise this blog post in three sentences, in your reply.
 
       "Remote work and output: a look at one firm. For nine months, a 1,600-person travel
-      agency in Shanghai let call-centre staff work from home four days a week while a
-      control group stayed in the office. The home group completed 13% more calls, and
-      quit 50% less often. Part of the gain came from fewer breaks and sick days, and part
-      from a quieter working environment. After the experiment, the firm offered home
-      working to everyone. Staff who chose to return to the office after that were more
-      productive than they had been before, which suggests that choice mattered as well as
-      location. The author notes that the study covers one firm and one type of job, and
-      that results for creative or collaborative roles could differ."
+      agency let call-centre staff work from home four days a week while a control group
+      stayed in the office. The home group completed 13% more calls and quit 50% less often.
+      The author notes that the study covers one firm and one type of job."
   - id: find-evidence-grade-definition
     prompt: |
-      I'm grepping a codebase for how a source's evidence grade gets computed, and the
-      matches are below. Which file and line holds the actual definition of
-      `grade_evidence`, as opposed to the calls and mentions? Answer in your reply.
+      I'm grepping a codebase for how a source's evidence grade gets computed. Which file and
+      line holds the actual definition of `grade_evidence`, as opposed to the calls and
+      mentions? Answer in your reply.
 
       report/render.py:41:    label = grade_evidence(claim)
-      report/render.py:88:    # grade_evidence is slow, cache the result
       core/grading.py:12:def grade_evidence(claim, sources=None):
       core/grading.py:57:    return grade_evidence(claim, sources=[])
       docs/grading.md:3:`grade_evidence` returns A, B or C
       tests/test_grading.py:9:    assert grade_evidence(c) == "A"
   - id: sleep-claims-site-ranking
     prompt: |
-      I'm writing a section of a wellness newsletter on sleep and memory. Before I lean on
-      any of these as evidence, tell me how far each can be relied on and give each one a
-      tier from best to worst, with a line of reasoning per site:
+      I'm writing a newsletter section on sleep and memory. Before I lean on any of these as
+      evidence, give each a tier from best to worst, with a line of reasoning per site:
 
       - pubmed.ncbi.nlm.nih.gov
       - sleepfoundation.org
       - mercola.com
       - healthline.com
-      - nature.com/articles (Nature Communications)
       - reddit.com/r/sleep
 
       Put the ranked list in your reply.

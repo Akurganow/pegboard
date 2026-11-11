@@ -1,44 +1,44 @@
 positive:
   - id: autocomplete-lookup-gave-generic-tips
     prompt: |
-      We run a B2B catalogue with 3,000 customers. Each customer sees only its own subset of
-      our 1.4 million products, at its own negotiated price. Search autocomplete has to answer
-      within 50 ms and must never suggest a product the customer cannot buy.
+      We run a B2B catalogue with 3,000 customers. Each customer sees only its own subset
+      of our 1.4 million products, at its own negotiated price. Search autocomplete has to
+      answer within 50 ms and must never suggest a product the customer cannot buy.
 
       - One shared index filtered at query time is correct, but p95 is 420 ms, because the
         per-customer filter is a terms list of up to 200,000 product ids.
       - One index per customer answers in 15 ms, but a catalogue change touches up to 3,000
         indexes, and the rebuild queue runs 6 hours behind on busy days.
 
-      Last week I worked through a structured method from an old engineering book: you name
-      the property you want to improve and the one that gets worse, look the pair up in its
-      table, and it returns a few generic tactics. For "speed" against "adaptability" it gave
-      us "make it dynamic", "do it in advance" and "use a copy instead of the original". We
-      have tried a version of each, and none gets us both numbers.
+      Last week I tried a structured method from an old engineering book: you name the
+      property you want to improve and the one that gets worse, look the pair up in its
+      table, and it returns a few one-line suggestions. For "speed" against "adaptability"
+      it gave us "make it dynamic", "do it in advance" and "use a copy instead of the
+      original". We have tried a version of each, and none gets us both numbers.
 
-      I'd like to go through this more rigorously than a table lookup. Can you take me
-      through it?
+      I want a rigorous analysis, not another table. What would you change?
   - id: token-lifetime-pentest-pingpong
     prompt: |
-      3rd time this year we're going back and forth on the same thing. our mobile app's access
-      token lived 30 days so field technicans could work offline in basements. pentest flagged
-      it, we cut it to 1 hour, technicians got logged out mid-job and couldnt sync their
-      reports, we bumped it to 7 days, next pentest flagged it again. now security wants 1
-      hour again. every fix just moves the problem back. help me break out of this loop
+      3rd time this year we're arguing about the same setting. our mobile app's access
+      token lived 30 days so field technicans could work offline in basements. pentest
+      flagged it, we cut it to 1 hour, technicians got logged out mid-job and couldnt sync
+      their reports, we bumped it to 7 days, next pentest flagged it again. now security
+      wants 1 hour again. each change we make comes back to bite us a few months later.
+      help me get out of this loop
   - id: flag-service-three-tug-of-wars
     prompt: |
-      our feature flag service is basically 3 tug-of-wars tied together:
+      our feature flag service is basically 3 tug-of-wars that pull on each other:
       - sdks evaluate flags locally so checks take microseconds, but then a flag change takes
         up to 60s to reach everyone (polling interval)
       - we tried pushing changes over SSE so they land in ~1s, but 40k open connections cost
         more than the whole rest of the service
       - and compliance now wants every evaluation logged with the user id, which kills local
         eval (we'd ship ~2 billion log events a day from the sdks)
-      whatever we pick for one makes the other two worse. walk me through how to crack this,
-      then write a 5 line summary for my manager
+      each pick hurts the other two. work out what we should do, then
+      write a short summary for my manager
   - id: sponsored-slots-vs-relevance
     prompt: |
-      Our marketplace search has two requirements that every compromise so far has failed:
+      Our marketplace search has two requirements, and three attempts so far all went wrong:
 
       - Product requires results ranked by relevance. The ranking team is measured on
         NDCG@10 and on the share of searches that end in a purchase.
@@ -54,8 +54,8 @@ positive:
       3. A sponsored carousel above the results. Legal says the contracts mean "in the
          results", and the carousel is not.
 
-      I suspect we have been stating the problem wrong. Help me state the conflict more
-      sharply, and find a way out that is not a fourth compromise.
+      I suspect we have framed the problem badly. Help me state the conflict more
+      sharply, and find a different approach.
 near_miss:
   - id: offset-commit-middle-setting
     prompt: |

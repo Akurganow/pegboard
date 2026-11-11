@@ -133,7 +133,7 @@ fi
 
 # 5. prose-discipline: the full rules in the house-style skill, because Hermes
 #    loads nothing else from the package. Then the Hermes auto_load lines, in
-#    the README and in the skill.
+#    the README.
 rules=src/prose-discipline/rules/prose-discipline.md
 full_text "$rules" >"$WORK/full-rules.md"
 strip_front_matter "$WORK/full-rules.md" >"$WORK/rules.md" ||
@@ -145,7 +145,6 @@ namespace=$(hermes_namespace "$pd_name")
 printf '```yaml\nskills:\n  auto_load:\n    - %s:house-style\n```\n' "$namespace" >"$WORK/auto-load.md" ||
   die "cannot write $WORK/auto-load.md"
 replace_region src/prose-discipline/README.md hermes-auto-load "$WORK/auto-load.md"
-replace_region src/prose-discipline/skills/house-style/SKILL.md hermes-auto-load "$WORK/auto-load.md"
 
 # 6. The builds and the catalogues, from the files above.
 bash tools/build.sh

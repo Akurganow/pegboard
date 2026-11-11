@@ -1,139 +1,51 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+# Examples: calibration corpus
 
-- [Examples: Calibration Corpus](#examples-calibration-corpus)
-  - [Review comment](#review-comment)
-  - [Change description](#change-description)
-  - [Error message](#error-message)
-  - [Code comments](#code-comments)
-  - [Sentences](#sentences)
-  - [Noun stack](#noun-stack)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# Examples: Calibration Corpus
-
-Before/after pairs for calibrating audits. When reporting a finding, name
-the closest pattern from this corpus instead of describing the smell in the
-abstract. The "before" specimens quote banned patterns and are exempt by
-the core contract.
+One before and after pair per rule. When you report a finding, name the closest pair. The "before" specimens quote bad patterns, which the core rules exempt. After texts use facts the writer holds. Never invent them.
 
 ## Review comment
 
-Before:
+Before: "I think it might perhaps be slightly better if we didn't perform this database query inside the loop because it could lead to some performance degradation."
 
-> I think it might perhaps be slightly better if we didn't perform this
-> database query inside the loop because it could potentially lead to some
-> performance degradation.
-
-After:
-
-> `issue (blocking):` This query runs inside the loop, causing an N+1 query
-> pattern on a 10k-row page. Fetch all IDs upfront and query once with
-> `WHERE id IN (...)`.
+After: `issue (blocking):` This query runs inside the loop. Fetch the IDs first and query once with `WHERE id IN (...)`.
 
 ## Change description
 
-Specimens quote PR descriptions; the same shape holds for release
-notes, migration notes, and handoff summaries.
+Before: "In this PR, we have spent significant effort replacing the custom OAuth handler with the provider adapter because it deadlocked the refresh timer (#1421). `npm test auth/` passes."
 
-Before:
+After, in the template's own fields. **Summary:** Replaces the custom OAuth handler with the provider adapter, because the handler deadlocked the refresh timer (#1421). **Test plan:** `npm test auth/` passes.
 
-> In this PR, we have spent significant effort revamping the authentication
-> module to seamlessly integrate with our new provider and fix several
-> intermittent bugs that our team noticed.
-
-After:
-
-> **What changed:** Replace the custom OAuth handler with the standard
-> provider adapter. Drop the hand-rolled token refresh.
-> **Why:** the custom handler deadlocks the refresh timer in background
-> jobs, producing the intermittent 401s seen in #1421.
-> **Verification:** `npm test auth/` green. 24h soak on staging with zero
-> refresh failures.
-
-Session-process narrative:
-
-Before:
-
-> **Verification:** an independent verification agent reviewed the
-> full change and returned verdict: PASS after adversarial review.
-
-After:
-
-> **Verification:** `npm test auth/` green.
-
-Template precedence:
-
-Before:
-
-> **What changed**
-> - Replace the OAuth handler with the provider adapter.
-> **Why**
-> - Fixes #1421.
-> **Verification**
-> - `npm test auth/` green.
->
-> Written above the template's own "Summary" and "Test plan" fields,
-> which stay empty.
-
-After:
-
-> **Summary** (template field)
-> Replaces the custom OAuth handler with the standard provider
-> adapter. Fixes the refresh deadlock from #1421.
->
-> **Test plan** (template field)
-> `npm test auth/` green.
->
-> The same content inside the template's fields, nothing added on top.
+Session narrative. Before: "Verification: an independent agent reviewed the change and returned PASS." After: "Verification: `npm test auth/` passes."
 
 ## Error message
 
-Before:
+For a developer. Before: "Oops! Something went wrong while attempting to establish a connection." After: "Connection to Postgres failed: authentication rejected for user `app`. Verify `DB_PASSWORD` in `.env` and retry."
 
-> Oops! Something went wrong while attempting to establish a connection.
-> Please verify your settings or contact support if the issue persists.
-
-After:
-
-> Connection to Postgres failed: authentication rejected for user `app`.
-> Verify `DB_PASSWORD` in `.env` and retry.
+For an end user. Before: "Error E-4012: token validation failed." After: "We could not sign you in because the sign-in link has expired. Request a new link."
 
 ## Code comments
 
-Before:
-
-```ts
-// This function handles the validation of the user payload. It first
-// checks the schema and then returns the result.
-// should work for most cases
-```
-
-After: delete both lines. The name `validateUserPayload` states the what.
-The hedge is a correctness smell.
-
-Before:
-
-```ts
-// --- Helper Functions ---
-```
-
-After: delete. Extract the helpers into a module if the boundary matters.
+Before: `// This function handles the validation of the user payload.` and `// should work for most cases`. After: delete both, and add the missing case to the test.
 
 ## Sentences
 
-Before: "State is maintained by the request handler, and each update is
-validated against the current schema and, if the payload is consistent, the
-write is forwarded to the primary store and the replica is notified."
+Too short. Before: "Certificate expired. Gateway rejected calls. Error rate up." After: "The gateway rejected calls because its TLS certificate expired, and the error rate rose."
 
-After: "The request handler maintains state. It validates each update
-against the current schema. Consistent payloads are written to the primary
-store. The replica is notified after the write."
+Noun stack. Before: "the service cluster event bus message priority handler". After: "the handler that sets event priority on the service cluster's event bus".
 
-## Noun stack
+## Progress update, final report, brief, unverified claim
 
-Before: "the service cluster event bus message priority handler".
+Progress. Before: "Still working on this! Looked at a bunch of stuff in the billing module." After: "The refund step fails for the one sample account with a partial refund, so I am reading the refund handler next."
 
-After: "the handler that sets event priority on the service cluster's event
-bus".
+Final report. Before: "First I looked at the queue and the worker logs. The memory thing turned out to matter." After: "Nightly imports failed because the importer ran out of memory: it needs 2 GB and the container limit was 1.5 GB. Raising the limit to 4 GB on the test cluster let a full import finish. You decide by Friday whether to change the live limit. The change has not run on the live cluster."
+
+Brief. Before: "Look into why test_ledger_close is flaky and fix it." After: "Find the cause of the failure of `test_ledger_close` in billing-core. We ruled out the database fixtures. Do not change production code. You are done when you can state the cause and give a command that makes the test fail."
+
+Unverified. Before: "This should work now." After: "`cargo test -p ledger` passes. I did not run it against the live database."
+
+## Shortening that keeps every fact
+
+Before: "Hi team, a heads-up on the search outage: at about 09:20 UTC alerts fired for slow queries, and we found that a full disk on the index node caused them. We freed the space, and as of 09:41 UTC latency is normal. Thanks for hanging in there!"
+
+After: "A full disk on the index node slowed search queries, which alerts flagged at about 09:20 UTC. We freed the space, and latency has been normal since 09:41 UTC."
+
+Cuts: "Hi team", "a heads-up on the search outage:", "we found that", "Thanks for hanging in there!". Dropping a fact, as in "Search is fixed.", is a `major` finding.

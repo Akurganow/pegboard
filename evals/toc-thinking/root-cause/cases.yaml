@@ -2,8 +2,8 @@ positive:
   - id: checkout-problems-pile-up
     prompt: |
       I lead the backend team of an online furniture store (Django monolith, Postgres 15,
-      Celery on RabbitMQ, Stripe for payments). Over the last six weeks we have collected a
-      list of problems that nobody can tie together:
+      Celery on RabbitMQ, Stripe for payments). Over six weeks we collected a list of problems
+      that look unrelated to us:
 
       - Checkout p95 latency rises from about 800 ms to 6-9 s between 12:00 and 13:30, and
         again after 19:00, on most weekdays.
@@ -14,33 +14,44 @@ positive:
         PaymentIntents in each case.
       - Postgres CPU sits above 90% in the same lunchtime and evening windows.
       - The Celery queue `orders` backs up to 20,000 messages at those times.
+      - The admin CSV export fails on order notes with emoji since the September Django
+        upgrade.
+      - Product images load slowly since we changed CDN in October.
 
-      We fixed each one on its own: a bigger database instance, a dedupe check in the email
-      task, a nightly script that corrects stock. Each fix helped for a week or two. What is
-      actually going on here, and what should we change?
+      Other facts: the checkout problems all started in August. The checkout page's JavaScript
+      resubmits the form if it gets no response within 5 seconds (a contractor added that in
+      2022), and our Stripe call sends no idempotency key.
+
+      We fixed each on its own: a bigger database instance, a dedupe check in the email task, a
+      nightly script that corrects stock. Each fix helped for a week or two. What is actually
+      going on here, and what should we change?
   - id: freeze-vs-checkout-tests
     prompt: |
       every october we have the same fight. platform wants a 3 week code freeze before black
-      friday so prod stays stable (two years ago a deploy on the wednesday before took
-      checkout down for 40 min). growth wants to keep shipping checkout a/b tests right up to
-      the day, because thats when traffic is 6x and the tests finally reach signifcance. it
-      always ends with the vp picking a side and the other side being mad till january.
+      friday so prod stays stable (two years ago a schema migration deployed the wednesday
+      before took checkout down for 40 min). growth wants to keep shipping checkout a/b
+      tests right up to the day, because thats when traffic is 6x and the tests finally
+      reach signifcance. most of those tests are copy and layout changes behind our flag
+      tool, but they go out with the normal release. it always ends with the vp picking a
+      side and the other side being mad till january.
 
-      im running the planning meeting on thursday. help me figure out if theres a way out
-      that isnt just splitting the difference, and give me 3 talking points for the meeting.
+      im running the planning meeting on thursday. is there a way out that isnt just splitting
+      the difference? give me 3 talking points for the meeting.
   - id: retire-python27-cron-box
     prompt: |
       ok so we finally have to kill cron01, the old python 2.7 box. it runs 23 cron scripts.
       some write to the shared nfs mount, two talk to a vendor's SOAP api thru suds, and
       nobody knows who owns about half of them. target is k8s CronJobs on python 3.12 by end
-      of Q1, and the box gets switched off in april no matter what. how do we sequence this
-      so nothing silently stops running? also i need a short slack msg for #eng annoucing it
+      of Q1, and the box gets switched off in april no matter what. what order should we do
+      this in so nothing silently stops running? also i need a short slack msg for #eng
+      annoucing it
   - id: retries-on-every-call
     prompt: |
       lead wants us to add automatic retries (3 attempts, exponential backoff) to every
       outbound http call in our go services, to get rid of the timeout errors we see from
-      the inventory service. we have ~30 services. sounds reasonable to me, but before we
-      roll it out: anything it could make worse?
+      the inventory service. we have ~30 services. a typical request goes web-bff -> checkout
+      -> pricing -> inventory. sounds reasonable to me, but before we roll it out, whats the
+      catch?
 near_miss:
   - id: npe-after-todays-deploy
     prompt: |
@@ -95,8 +106,7 @@ near_miss:
       ```
   - id: estimate-sprint-tickets
     prompt: |
-      Sprint planning is tomorrow and I'd like a first pass at estimates before the meeting.
-      Give each ticket a story-point estimate (1, 2, 3, 5, 8, 13) with a one-line reason. Our
+      Sprint planning is tomorrow and I'd like a first pass at estimates. Give each ticket a story-point estimate (1, 2, 3, 5, 8, 13) with a one-line reason. Our
       constraint is capacity: the team averages 34 points a sprint, and Dana is out for three
       of the ten days. If the total is more than we can take, tell me which tickets to move
       to the next sprint.
@@ -124,27 +134,7 @@ near_miss:
       - first incident on the gateway this year
   - id: five-whys-fishbone-guide
     prompt: |
-      I'm putting together onboarding material for our new SREs. Write a one-page Markdown
-      guide to the two root cause analysis techniques we use in postmortems: the 5 Whys and
+      I'm putting together onboarding material for new SREs. Write a one-page Markdown guide to the two root cause analysis techniques we use in postmortems: the 5 Whys and
       the fishbone (Ishikawa) diagram. For each, explain how to run it in a 30-minute
       meeting and when it works badly, and give one short worked example from a web
       service. 600 words at most.
-  - id: probable-cause-alert-grouping
-    prompt: |
-      Our alert dashboard should mark which firing alerts are the probable root cause and
-      which are only symptoms. The rule we agreed on: a firing service is a probable root
-      cause when none of the services it depends on, directly or through other services, is
-      firing. Write the function in TypeScript, with a few Vitest cases.
-
-      ```ts
-      type ServiceId = string;
-
-      // deps.get("checkout") is ["payments", "inventory"]: checkout calls both.
-      // The graph has no cycles.
-      export function probableRootCauses(
-        deps: Map<ServiceId, ServiceId[]>,
-        firing: Set<ServiceId>,
-      ): ServiceId[] {
-        // TODO
-      }
-      ```

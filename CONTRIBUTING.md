@@ -273,9 +273,9 @@ A skill's folder holds `cases.yaml` and `rubric.yaml`, and may hold
 - `held-out.yaml` is optional. It has a `held_out` map with a `positive` list
   and a `near_miss` list of five entries each, in the same shape. They run
   with the package on the first repeat only and are not graded. Write them
-  once, from the method's own sources, and do not read them while editing
-  a description: their load count checks the description on prompts it was
-  not tuned on.
+  once, from the method's own sources. Do not read them while editing a
+  description, and do not change them in a commit that changes one: their
+  load count checks the description on prompts it was not tuned on.
 - `rubric.yaml` has a `questions` map from a question id to one statement,
   or to an `instructions` statement with optional `criteria` and `cases`.
   `criteria` holds a quoted `"true"` and `"false"`, each saying what that
@@ -287,8 +287,8 @@ The Agent Skills guide sets the shape of a trigger test. Source:
 Agent Skills documentation, read 2026-10-09. These rules follow the guide, add
 this repository's own, and apply to every skill:
 
-- **Positive prompts** cover every "Use when" clause of the skill's
-  `description` at least once. One prompt may cover several clauses.
+- **Positive prompts** cover every situation the skill's `description` lists
+  at least once. One prompt may cover several.
 - **Near-miss prompts** cover every skip clause of the `description` and
   every neighbour skill it names.
 - **No two prompts** test the same clause on the same axis. Every positive
@@ -310,37 +310,34 @@ this repository's own, and apply to every skill:
 - **The result in the reply.** A prompt asks for its result in the reply, never
   in a file, because Jev grades only the final message.
 - **Neutral.** A prompt never names the skill, its package or the text the
-  skill rests on. A user who names them needs no trigger.
+  skill rests on, because a user who names them needs no trigger. It shares
+  no example with the skill's files, because an answer could copy it.
 - **Ids** are short kebab-case names of what the prompt asks. They stay unique
   across both lists.
 
-Jev grades each positive answer on the questions that apply to its prompt. Two
-of the rules below rest on the failure modes that TypeSafe documents for
+Jev grades each positive answer on the questions that apply to its prompt. The
+"One step" rule below rests on the failure modes that TypeSafe documents for
 `jev-1.13`. Source:
 [Jev 1.13 jaggedness](https://docs.typesafe.ai/model-jaggedness/jev-1.13.md),
 TypeSafe documentation, read 2026-10-09. The measurements behind the other
 rules are in
 [About this repository's design](docs/design.md#behavioural-evals-run-after-each-release).
 
-- **One question per rule** of the skill that a reader can check in the answer
-  text. Take the rules from `SKILL.md` and the references it names as required
-  output.
+- **One question per expected finding:** the point a right answer to that
+  prompt must reach, with the prompt in `cases`. Where several answers are
+  right, state a property all of them have. Add at most three questions about
+  form, from `SKILL.md`, unless form is what the skill delivers.
 - **`cases` for a rule of one form.** A question about one artifact form, such
   as a review comment or a PR description, names in `cases` the prompts that
   write it.
 - **No question at the ceiling.** Drop a question that every answer passes in
   both arms, because it measures nothing.
-- **A statement that holds** for an answer which follows the skill, such as
-  "Each finding names the chapter of the book it rests on."
-- **One step.** Each question is answerable from the answer text in one step.
-  Jev answers less reliably when a question needs extra levels of indirection
-  (section "Indirection").
-- **No counting.** `jev-1.13` does not count reliably (section "Counting"). A
-  sentence-length or item-count rule stays out.
-- **No condition, position or bundle.** A question is not conditional ("each
-  finding that rests on X ..."), positional ("before any finding ...", "ends
-  with ...") or a bundle of several facts. Each of those makes Jev find
-  something first and then judge it, which is two steps.
+- **A statement that is true of a right answer**, such as "The answer cites a
+  chapter of the book."
+- **One step.** Jev answers less reliably through extra levels of indirection
+  and does not count reliably (sections "Indirection" and "Counting"). So a
+  question is not conditional ("each finding that rests on X ..."), positional
+  ("ends with ..."), a bundle of several facts, or a count.
 - **Criteria where the boundary is unclear.** TypeSafe documents `criteria`
   for a subtle yes-or-no boundary. Source:
   [Noul](https://docs.typesafe.ai/primitives/noul.md), TypeSafe documentation,
@@ -356,5 +353,5 @@ rules are in
   the request, and never needs knowledge the answer does not contain. When an
   answer may quote the text it checks or cleans, a style question says
   "outside text it quotes".
-- **Three to eight questions** apply to each positive prompt. Each id is a
+- **At most eight questions** apply to each positive prompt. Each id is a
   short snake_case name.

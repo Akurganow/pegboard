@@ -1,68 +1,44 @@
-# Vocabulary: Depth
+# Vocabulary: depth
 
-Extends the Vocabulary section of the core rule with the substitution
-catalog and the domain-term contract.
+Extends "Vocabulary" in the core rules. A row or a signal appears only where a source states it.
 
-## Substitution table
+## Plain words
 
-| Instead of | Write | Reason |
-| --- | --- | --- |
-| leverage, utilize | use | plain verb |
-| utilize, make use of | use | plain verb |
-| facilitate | help, enable | plain verb |
-| in order to | to | shorter |
-| prior to | before | shorter |
-| due to the fact that | because | shorter |
-| in the event that | if | shorter |
-| at this point in time | now, currently | shorter |
-| a plethora of, a myriad of | many | plain quantifier |
-| ensure that, make sure that | verify that, check that | active assertion, where the step checks a condition |
-| delve into, dive into | examine, inspect, review | non-cliché |
-| establish connectivity | connect | plain verb |
-| streamlines, empowers, harnesses | (delete, or state the concrete effect) | marketing |
-| serves as a mechanism to | does | plain copula |
-| game-changer, transformative | (delete, or state the measurable change) | hype |
+| Instead of | Write | Source |
+| :-- | :-- | :-- |
+| in order to | to | Google word list |
+| utilize | use | Google word list |
+| leverage | use, build on | Google word list |
+| at this point in time | now | Digital.gov |
+| perform validation | validate | Digital.gov asks for the strongest, most direct verb. The example is this standard's own. |
 
-`ensure` survives where the instruction requires the actor to *make* a
-condition true. Substituting `verify` there turns a required remediation
-into an observation, which is a worse defect than the weak verb. The test:
-if the reader must change something, keep `ensure` or name the action.
+## One word for one thing
 
-## Weak verbs and split predicates
+STE rule 1.11 forbids two technical nouns for one item. A reader who sees "job", "task" and "run" for one object looks for three.
 
-Use direct action verbs across all languages. Avoid weak verbs coupled with
-verbal nouns (such as "perform validation" -> validate, "carry out execution"
--> execute).
+## Filler and inflated claims
 
-## Significance inflation
+- Delete a sentence with no fact. "It is important to note that" adds none, and the next sentence is the content.
+- Replace a claim of importance with its consequence or number. "A robust, comprehensive solution" cannot be checked, and "The service retries three times and then fails over" can. Google's guide asks for factual statements.
+- State the claim directly. "This isn't about speed, it's about velocity" delays the fact behind a setup.
 
-Delete or quantify: *pivotal*, *crucial*, *vital*, *cornerstone*,
-*testament to*, *powerful*, *comprehensive*, *robust* (outside its
-term-of-art use below), and non-English equivalents. If the thing matters,
-the consequence or number states it.
+## Signals of generated text
 
-## Hollow reassurance and filler: delete on sight
+A signal prompts the question whether the sentence holds a fact. Delete the sentence if not. The lists age, and the Wikipedia field guide calls its list descriptive, not prescriptive.
 
-"Rest assured", "please be advised", "we understand the importance of",
-"it goes without saying", "it is important to note", and their non-English
-equivalents. Each carries zero information.
-## Domain-term contract
+| Signal | Source and measure | Era |
+| :-- | :-- | :-- |
+| "delves", "underscores", "showcasing" | Kobak et al., 15 million PubMed abstracts: excess ratios 28.0, 13.8 and 10.7 | 2024 |
+| "delves": 0.21 to 14.38 per million words | Juzek and Ward | 2020 to 2024 |
+| "commendable", "meticulous", "intricate" | Liang et al., ICLR 2024 reviews: 9.8, 34.7 and 11.2 times likelier | 2024 |
+| "Additionally" opening, "boasts", "tapestry", "testament", "pivotal", "crucial" | Wikipedia field guide | 2023 to mid-2024 |
+| "align with", "enhance", "fostering", "highlighting", "showcasing" | Wikipedia field guide | mid-2024 to mid-2026 |
+| "-ing" tail claiming significance, "Experts argue", "In summary" endings | Wikipedia field guide, which marks its examples as dated | 2023 to 2025 |
+| Em dash where a comma, colon or parenthesis serves | Wikipedia field guide; newer models suppress it | 2022 to 2026 |
+| "delve", "foster", "leverage", "it's worth noting", "genuinely", invented compound labels | OpenAI GPT-6 prompt guide, as words to avoid | 2026 |
 
-These terms are correct engineering vocabulary and are never flagged:
+The guide says "delve" dropped off sharply in 2025. Its mid-2026 row rests on an unresolved footnote and is not used.
 
-- *accessible*: UI and API documentation standard term.
-- *accept*: protocols and tests accept input. "The server accepts the
-  request" is exact.
-- *validate*: schemas, parsers, forms.
-- *rotate*: credentials, logs, keys.
-- *robust*: statistics (robustness checks) and distributed systems (robust
-  consensus) use it as a term of art.
+## Domain terms
 
-The test: if the term names a technical property, keep it. If it decorates a
-claim ("a robust solution"), delete it or state the guarantee it implies.
-
-## Audit severity
-
-- Substitution-table and inflation findings: `minor`.
-- A hollow phrase that replaces a missing fact ("robust handling" instead of
-  naming the failure mode): `major`. The reader cannot act on it.
+An established technical term is never a violation (STE 1.8): accessible, accept, validate, rotate and robust in their fields. A word that only decorates a claim ("a robust solution") goes, or becomes the guarantee it implies.

@@ -1,59 +1,81 @@
 questions:
-  who_changes:
+  split_plan_still_touches_many:
     instructions: >-
-      The answer states or asks who changes the design under review.
-    criteria:
-      "true": >-
-        The answer names who maintains or modifies the design, such as a team,
-        its size or the people who own it, or asks the user who does. Restating
-        the request's own figure counts.
-      "false": >-
-        The answer never mentions who maintains or modifies the design.
-  common_operation: >-
-    The answer states or asks what the most common operation on the design
-    under review is.
-  ranked_by_weight: >-
-    The answer orders its findings by how often each part is touched times what
-    touching it costs.
-  cites_chapter:
+      The answer says the plan still makes adding a user profile field touch
+      several of the new classes.
+    cases:
+      - user-service-split-plan
+  epic_acceptance_criteria:
     instructions: >-
-      Each finding names the chapter or section of John Ousterhout's book A
-      Philosophy of Software Design that it rests on.
-    criteria:
-      "true": >-
-        Every problem the answer reports names a chapter or section of the book,
-        by number or by title.
-      "false": >-
-        At least one reported problem names neither a chapter nor a section of
-        the book.
-  names_cause: >-
-    Each finding says whether its cause is a dependency or obscurity.
-  names_change:
+      The answer includes acceptance criteria for the epic.
+    cases:
+      - user-service-split-plan
+  name_several_jobs:
     instructions: >-
-      Each finding names the change that would remove it.
-    criteria:
-      "true": >-
-        Every problem the answer reports comes with a concrete change to the
-        design, such as a rename, a split, a merged interface or a moved
-        default.
-      "false": >-
-        At least one reported problem has no change named for it.
-  change_cost:
+      The answer says the name is hard to pick because the function does
+      several separate jobs.
+    cases:
+      - name-for-batch-function
+  proposes_name:
     instructions: >-
-      Each finding says what that change would cost.
-    criteria:
-      "true": >-
-        Every proposed change comes with its cost: the effort, the risk, the
-        migration work or what is given up.
-      "false": >-
-        At least one proposed change has no cost stated, or the answer proposes
-        changes with no cost at all.
-  not_covered:
+      The answer proposes at least one specific new name for the function.
+    cases:
+      - name-for-batch-function
+  layers_only_forward:
     instructions: >-
-      The answer says what the review did not cover.
-    criteria:
-      "true": >-
-        The answer names something it did not review or could not see, such as
-        code it was not shown or a quality it left out.
-      "false": >-
-        The answer never says what it left out or could not see.
+      The answer says CustomerFacade and CustomerManager only pass the call on
+      and add nothing.
+    cases:
+      - six-layer-customer-api
+  future_need_not_a_reason:
+    instructions: >-
+      The answer says that a layer kept for a future need is not a reason to
+      keep it.
+    cases:
+      - six-layer-customer-api
+  cart_flag_guards_recursion:
+    instructions: >-
+      The answer says the global discountApplied flag exists only to stop
+      applyDiscount and recalcTotals from calling each other endlessly.
+    cases:
+      - tangled-cart-totals
+  apply_discount_must_not_call_recalc:
+    instructions: >-
+      The answer says that applyDiscount must not call recalcTotals.
+    cases:
+      - tangled-cart-totals
+  delete_defined_away:
+    instructions: >-
+      The answer says delete() should succeed quietly when the session is
+      already gone, so callers need no try/except.
+    cases:
+      - session-delete-try-except
+  cleanup_search_filters_first:
+    instructions: >-
+      The answer recommends starting with catalog/search_filters.py.
+    cases:
+      - cleanup-sprint-priorities
+  sprint_goal:
+    instructions: >-
+      The answer includes a sprint goal for the planning doc.
+    cases:
+      - cleanup-sprint-priorities
+  states_cost:
+    instructions: >-
+      The answer states what its main recommendation costs or gives up, such as
+      effort, risk or migration work.
+    cases:
+      - user-service-split-plan
+      - six-layer-customer-api
+      - tangled-cart-totals
+      - session-delete-try-except
+      - cleanup-sprint-priorities
+  cites_section:
+    instructions: >-
+      The answer gives a chapter or section number of Ousterhout's book.
+    cases:
+      - user-service-split-plan
+      - six-layer-customer-api
+      - tangled-cart-totals
+      - session-delete-try-except
+      - cleanup-sprint-priorities
