@@ -177,7 +177,7 @@ In both, `prose-discipline` loads its skill and nothing else.
 Between `<!-- hook-text:start -->` and `<!-- hook-text:end -->` it holds the short form, which the hooks print.
 The `.mdc` rule and the `rules` region of the `house-style` skill carry the full text, written without that region and its markers.
 `tools/regions.sh` extracts both and stops on a lone, duplicate or reversed marker, so no copy of the full text can still hold the short form.
-The short form covers the thirteen behaviours that `evals/prose-discipline/house-style/rubric.yaml` grades, and its last line points to the skill for the reasons and examples.
+The short form states each rule in a sentence or two, and its last line points to the skill for the reasons.
 It states facts, as Claude Code advises for hook text ([Claude Code](clients.md#claude-code)).
 
 Hermes loads no hooks and no `rules/` from a package ([Hermes](clients.md#hermes)).
@@ -483,8 +483,7 @@ On "never joins two thoughts with a semicolon or a dash", `jev-1.13.0` gave a me
 On "each sentence the answer writes carries one thought", it gave 0.51 to the 3 answers labelled yes and 0.34 to the 17 labelled no.
 Criteria stay only where they lower Jev's error on both halves of a labelled sample.
 `evals/<package>/<skill>/calibration.json` holds each labelled answer with its evidence, its half of the split, and Jev's score with and without the criteria.
-The samples are 144 `house-style` answers and 40 `red-flags` answers from that run, or 20 for `names_cause` and `common_operation`.
-The `red-flags` labels for `cites_chapter` were made against its earlier wording, which named a chapter only, and the scores use the committed wording.
+The samples are 144 `house-style` answers and 40 `red-flags` answers from that run.
 
 The without arm removes a different set in each client.
 Claude Code disables this package alone, with `claude plugin disable` and the package name.
