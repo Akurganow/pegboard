@@ -17,7 +17,7 @@ positive:
     prompt: |
       real estate listing site. agents want their photos sharp at full res, but on mobile the
       gallery takes 9s to load on 4G. the team's answer is "set jpeg quality to 60 for
-      everyone" as a middle ground. agents will hate it and mobile still wont be great.
+      everyone". agents will hate it and mobile still wont be great.
       anythign better?
   - id: reset-code-long-and-short
     prompt: |
@@ -27,28 +27,19 @@ positive:
       have to type it in by hand, and our call centre takes about 300 calls a month from
       people who mistyped it.
 
-      The code has to be long for security and short enough to type from a letter. What can
-      we do? Please also draft the two sentences for the letter that explain how to use the
-      code.
-  - id: paid-order-frozen-yet-editable
+      Security wants a code nobody can guess, and the call centre wants one that people can
+      copy from a letter without mistakes. What can we do? Please also draft the wording for
+      the letter that explains how to use the code.
+  - id: merge-check-vs-full-e2e
     prompt: |
-      In our order service (Kotlin, Spring Boot, Postgres 16), a row in `orders` becomes
-      read-only once it is paid. Finance reconciles against those rows every night and treats
-      any later change as an error, and a trigger rejects UPDATEs on paid orders. Customer
-      support now needs to change the delivery address of a paid order until the parcel leaves
-      the warehouse, which happens on average 26 hours after payment. About 2% of orders need
-      it.
-
-      So a paid order has to be frozen for finance and editable for support. How should we
-      model this?
+      Монорепозиторий на GitHub Actions: 14 сервисов на Go и один фронтенд на React. Полный
+      прогон e2e-тестов (Playwright, 380 сценариев) занимает 46 минут, а в нашем тарифе одновременно
+      работают только два раннера, и бюджет на новые мы не получим. Разработчики жалуются, что
+      pull request ждёт проверки почти час, и хотят уложиться в 10 минут. QA-лид требует, чтобы
+      ни один релиз не выходил без полного прогона всех 380 сценариев: в прошлом квартале два
+      релиза сломались из-за теста, который не запустили, потому что он «не относился к
+      изменению». Мы пока ничего не меняли, только замерили. Как нам удовлетворить обоих?
 near_miss:
-  - id: consistency-availability-explainer
-    prompt: |
-      I'm writing onboarding material for backend engineers joining our payments team. Write
-      a one-page explainer (about 500 words, Markdown) of the consistency versus availability
-      trade-off in distributed databases: what CAP actually says, what PACELC adds about
-      latency, and one worked example of a payment ledger replicated across two regions.
-      Plain language, no proofs.
   - id: dedupe-takes-forty-seconds
     prompt: |
       I need to improve the run time of this. It runs on every import and takes about 40

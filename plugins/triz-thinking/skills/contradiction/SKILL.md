@@ -3,174 +3,180 @@ name: contradiction
 description: >
   Use this skill whenever the user faces a trade-off between two software
   requirements and wants more than a compromise. Phrasings: "improving X
-  makes Y worse", "these two requirements look incompatible", "it must be
-  both short and long". It covers one thing that must be long and short,
-  open and closed, or frozen and editable. It covers a proposal that only
-  sets a middle value, splits the difference or picks one side. Use it even
-  when TRIZ is never named. Use it even when the user also wants a note,
-  comment or message drafted from the answer. Use it instead of a quick list
-  of tips, even when a direct answer looks easy. The contradiction matrix
-  names inventive directions a plain answer misses. Skip it for bugs or
-  tuning with no trade-off, sizing formulas, config precedence and plain
-  refactoring. A problem that keeps coming back after fixes, tied tensions,
-  or a matrix lookup that gave nothing belong to ariz.
+  makes Y worse", "these two requirements look incompatible", "stricter
+  checks without more friction". It covers one thing that must be long and
+  short, open and closed, or frozen and editable. It covers a proposal that
+  only sets a middle value, splits the difference or picks one side. Use it
+  even when TRIZ is never named or the user wants a note or message drafted
+  from the answer, and when a direct answer looks easy: the matrix names
+  directions a plain answer misses. Skip it for
+  bugs or tuning with no trade-off, sizing formulas, config precedence
+  and plain refactoring. A problem that
+  keeps coming back after fixes, tied tensions, or a table lookup that gave
+  only generic tips belong to the ariz skill of this package.
 license: MIT
 ---
 
 # Contradiction
 
-You guide the user through TRIZ on a software problem. The output is a set
-of concrete solution directions, each named after the principle behind it,
-each stated for the user's system. Reply in the user's language. Think
-between steps. The matrix and the principles give directions. The
-adaptation to the system is the work.
+You resolve a trade-off between two software requirements with classic
+TRIZ: a stated contradiction, an ideal final result, the separation of
+opposite properties, and Altshuller's contradiction matrix with its 40
+inventive principles. The result is the strongest solution you can find,
+written as changes to the user's system. The matrix widens your options and
+does not replace your judgement. Reply in the user's language. The user
+asked for the answer, not the procedure: do not say that a skill or method is
+being applied, and do not narrate its steps.
 
-Draft first and ask after. Do not stop at a step to wait for the user. Run
-every step in one reply, state each assumption you made, and end with one
-question (Step 8). Do not invent facts about the problem. When a step needs
-a fact you do not have, name the assumption and ask for the fact in that
-question. Examples: "What gets worse when you improve that?", "Is the cost
-in latency or in throughput?", "What must stay as it is?"
+If a reference file cannot be read, say which and do not quote it from
+memory: a remembered cell can be wrong, and the user acts on the numbers.
 
-Four reference files sit in `references/`. Read each at the point its row
-names, and not before. The `ariz` skill of this package reads
-`principles.md` and `sources.md` too.
+## Work from what is at hand
 
-| File | What it holds | Read when |
-| --- | --- | --- |
-| [`references/parameters.md`](references/parameters.md) | the 39 engineering parameters, with a reading of each for software | Step 5, to map both sides of a technical contradiction |
-| [`references/principles.md`](references/principles.md) | the 40 inventive principles, with a reading of each for software | Step 4, for who defined the four separations; Step 7, for each recommended principle |
-| [`references/matrix.md`](references/matrix.md) | the classic contradiction matrix, one line per cell | Step 6: search it for one line, and never read it whole |
-| [`references/sources.md`](references/sources.md) | where each reference of this skill and of `ariz` was read, and what could not be opened | when the user asks where a cell or a principle comes from |
+Read the code, history, logs, tests and documents the session has before
+you ask, and quote what you read with its path and line. Ask only for what
+only the user knows: intent, priorities, readers, what was observed outside
+the system. Say which facts you read, which the user gave and which you
+assume.
+
+## Give the answer in this reply
+
+- Give the full result in this reply and mark each assumption where it is
+  used. A missing fact is a reason to assume, not to stop, unless the action
+  spends the user's money, sends private data out or cannot be undone.
+- Answer in the form asked: a decision, code, a ticket comment, a letter.
+  Make that text match the design you recommend. When the user fixes a
+  format or a length, deliver exactly that and put any method note after it
+  in one or two sentences.
+- Name the concrete behaviour, defect or change, and where it goes. An answer
+  that leaves the question open has failed.
+- End with at most three questions whose answers would change the result,
+  or with none.
+
+## Reference files
+
+| File | Read when |
+| --- | --- |
+| [`references/parameters.md`](references/parameters.md), the 39 parameters with software readings | Step 5 |
+| [`references/matrix/`](references/matrix/), `01.md` to `39.md`, one file per improving parameter | Step 6, one file per candidate pair |
+| [`references/principles.md`](references/principles.md), the 40 principles with software readings | Step 7, for each principle you consider |
+| [`references/matrix/provenance.md`](references/matrix/provenance.md), how the matrix was built and every reading of its disputed cells | a direction rests on a `(disputed)` cell, or the user asks where a cell comes from |
+| [`references/sources.md`](references/sources.md), where each reference of both skills was read | the user asks where a principle or formula comes from |
 
 ## Step 1: state the contradiction
 
-Restate the user's problem as one of two kinds. Put the restatement in the
-reply, say that you assume it, and go on to Step 2 without waiting.
+Restate the problem in the user's terms as one of two kinds.
 
-- **Technical contradiction.** Improving one parameter worsens another.
-  "A longer cache lifetime unloads the database and serves stale reads."
-- **Physical contradiction.** One element must have a property and its
-  opposite. "The cache entry must exist, for speed, and must not exist,
-  for freshness."
+- **Technical.** Improving one parameter worsens another. "A longer cache
+  lifetime unloads the database and serves stale reads."
+- **Physical.** One element must have a property and its opposite. "The
+  cache entry must exist, for speed, and must not exist, for freshness."
 
-A technical contradiction often hides a physical one. The physical one is
-the sharper statement. Write both when you can.
-
-If no second parameter gets worse and no element needs two opposite
-properties, there is no contradiction. Say so, because this skill has
-nothing to add. Reading and measuring answer an algorithmic question or a
-library limitation.
+A technical contradiction often hides a physical one, the sharper
+statement: write both when you can. When no second parameter worsens and no
+element needs two opposite properties, say so in one sentence and answer
+directly.
 
 ## Step 2: state the ideal final result
 
-Write what the outcome looks like if the contradiction did not exist. The
-element itself provides the useful function without the harmful effect and
-without complicating the system. Write it in the reply as one line that
-starts `Ideal final result:` and has a named element of the user's system
-as its subject. For example: `Ideal final result: the cache entry itself
-is fresh whenever it is read.` The line is a direction, not a solution.
+Write one line whose subject is a named element of the user's system: it
+provides the useful function itself, without the harm and without
+complicating the system. "Ideal final result: the cache entry itself is
+fresh whenever it is read." It is a direction, not a solution.
 
-## Step 3: route
+## Step 3: keep your own best solution
 
-- A physical contradiction goes to Step 4.
-- A technical contradiction goes to Step 5.
-- Do both when Step 1 produced both statements.
+Form the solution you would give if the tables did not exist, and keep it as
+a candidate. The later steps add candidates and never replace it. When it
+beats everything the tables return, give it.
 
 ## Step 4: separate the opposite properties
 
-Four ways to hold both properties. Later TRIZ teaching gives this set, and
-`principles.md` says whose it is and what Altshuller published instead.
+For a physical contradiction, later TRIZ teaching gives four ways to hold
+both properties.
 
-- **In time.** The property holds at one moment and its opposite at
-  another. Lazy and eager phases, a feature flag, a build-time check that
-  is absent at run time.
-- **In space.** The property holds in one place and its opposite in
-  another. Edge and origin, a write primary and a read replica, client
-  and server validation.
-- **On condition.** The property holds under one condition and its
-  opposite under another. A circuit breaker, an adaptive limit, a fast
-  path for the common case.
-- **Between the parts and the whole.** The whole has the property and the
-  parts have its opposite. A distributed system made of simple services,
-  a large store made of small shards.
+- **In time.** A feature flag, a build-time check absent at run time.
+- **In space.** A write primary and a read replica, client and server
+  validation.
+- **On condition.** A circuit breaker, a fast path for the common case.
+- **Between the parts and the whole.** A large store made of small shards.
 
 State each separation that fits as a concrete change to the user's system.
-Then continue to Step 5 with the technical contradiction, when there is
-one. The two routes give different directions.
+Go on to Step 5 when there is also a technical contradiction: the two routes
+give different directions.
 
 ## Step 5: map to parameters
 
-Read `references/parameters.md`. The improving parameter is the one the
-user wants better. The worsening parameter is the one that degrades when
-they get it. Present two or three candidates for each, with a sentence on
-why. Do not wait for the user to choose. Take the first candidate on each
-side, run Steps 6 and 7 in the same reply, and say which pair you took so
-the user can correct it. The parameters describe physical systems. The
-software readings in the reference show which one carries the same role in
-the user's system.
+Read `references/parameters.md`. The improving parameter is the one the user
+wants better, and the worsening parameter is the one that degrades when they
+get it. Choose two or three candidate pairs, with a clause on why each fits;
+the software readings show which parameter plays the role in the user's
+system. Run Steps 6 and 7 for every pair in this reply, and name the pairs so
+the user can correct them.
 
 ## Step 6: read the matrix
 
-Each line of `references/matrix.md` is one cell of the classic matrix. It
-holds the improving parameter's number, a space, the worsening parameter's
-number, a colon, and the recommended principles in the matrix's order.
-Search the file for the line that begins with the two numbers and the
-colon, for example `9 27:`. Do not read the file whole. A line that ends in
-`(disputed)` is a cell the transcriptions disagree on, and the file's last
-section lists every reading of it.
+The matrix has one file per improving parameter, `references/matrix/NN.md`,
+NN being its number with two digits. A file holds a heading and one line per
+non-empty cell, `<worsening number>: <principles in the matrix's order>`. Open
+the file and read the line that starts with the worsening number. Do not
+search. Improving 9 (speed) against worsening 27
+(reliability): `matrix/09.md` holds `27: 11 35 27 28`, so principles 11, 35,
+27 and 28.
 
-A pair with no line has no recommendation in the classic matrix. Then try
-these in turn.
-
-- Try the pair the other way round, which is a different cell.
-- Try a neighbouring parameter for either side.
-- Go back to Step 4 with the physical contradiction.
+- Quote each line with its pair, "9 vs 27: 11 35 27 28", so the user can
+  check it.
+- The matrix is not symmetric: 27 vs 9 is another cell, in `27.md`. No
+  parameter pairs with itself.
+- A worsening number with no line is an empty cell, and the matrix recommends
+  nothing. Use your other pairs, then the physical contradiction of Step 4.
+  Do not read the reverse pair instead: it states a different trade-off.
+- `(disputed)` ends a line on which the sources differ. Use the line. Open
+  `references/matrix/provenance.md` only when a direction rests on a
+  principle of that cell.
 
 ## Step 7: adapt the principles
 
-Read the recommended principles in `references/principles.md`. Write the
-directions as a numbered list, up to four, most direct first. A matrix
-cell can hold one principle, so one direction is a complete list.
+For each principle the lines name, read its entry in `references/principles.md`
+and write what it would mean in this system before you judge it: which part
+changes and how. Keep the directions that remove the contradiction, so that
+both requirements keep their full value. Prefer a principle that recurs
+across the pairs. Drop the rest.
 
-1. Begin each item with the principle's number and name from
-   `principles.md`, for example `10 Preliminary action`.
-2. State the change to a named part of the user's system, such as a
-   table, a service or a config key.
+A direction that gives up part of one requirement is a compromise, and the
+user asked for both: drop it. When no direction keeps both, say which part
+cannot be kept and why, and give the best direction with its loss stated.
+
+## Step 8: write the result
+
+Lead with the recommendation. Follow it with the contradiction, the ideal
+final result and the candidate pairs with the lines you read, assumptions
+marked. Then give up to four directions as a numbered list, most direct
+first.
+
+1. State the change to a named part of the user's system: a table, a
+   service, a config key, with path and line when the code is at hand.
+2. Name a principle, such as "10 Preliminary action", only when it led you to
+   the direction. A direction from your own reasoning or Step 3 carries none.
 3. State the new trade-off the change brings, if any.
 
-With two or more directions, write one sentence after the list saying
-why direction 1 removes the contradiction more directly than direction 2.
-When a principle does not fit, say so and drop it. When none fits, say so
-and hand over (Step 8).
+Say which direction to do first and why. When the matrix and the principles
+added nothing beyond the direct solution, say so in one sentence.
 
-A direction that gives up part of one requirement is a compromise: drop
-it and say why. When every direction gives something up, say so and hand
-over (Step 8).
+## Hand-overs
 
-## Step 8: iterate or hand over
-
-End every reply with one question. It confirms the restatement, chooses a
-direction, or asks for the one fact that would reorder the list. Do this
-when the user asked for a deliverable too, and put the deliverable above
-the question. Repeat from Step 1 when the answer changes the restatement.
-
-Hand over to the `ariz` skill of this package in four cases. The matrix
-gave nothing the user can use. The problem has several contradictions
-that feed each other. A fix in one place breaks another. The problem has
-returned after earlier fixes. Say why you are handing over. Pass on the
-technical contradiction, the ideal final result and that reason. `ariz`
-walks ARIZ-85C and hands a restated technical contradiction back here.
+- **`ariz` skill.** Load it when the problem has outlasted earlier fixes, a
+  fix in one place breaks another, the tensions feed each other, or Steps 4
+  to 7 left nothing usable. Pass on the technical contradiction, the ideal
+  final result and the reason. A problem that came from `ariz` is not handed
+  back in the same reply. Without `ariz`, finish Steps 4 to 8 and say what
+  stays open.
+- **`root-cause` skill of `toc-thinking`.** Offer it when symptoms tangle
+  with no trade-off in sight, and only when it is installed.
 
 ## Boundaries
 
-- The matrix and the principles are directions with a published origin.
-  They are not a guarantee. When a direction contradicts what the user
-  knows about their system, the user's knowledge wins and the direction is
-  dropped.
-- A problem with no trade-off in it is not a TRIZ problem, and Step 1
-  says so before any lookup.
-- A root cause hidden behind many symptoms belongs to the `root-cause`
-  skill of this marketplace's `toc-thinking` package, which builds the
-  cause-and-effect tree. Hand over when the user's problem is a tangle of
-  symptoms rather than a trade-off, and only if that skill is installed.
+The matrix and the principles give directions, not guarantees. The software
+readings are this skill's own, because no published mapping of the parameters
+to software was found. Drop a direction that contradicts what the user knows
+about their system.

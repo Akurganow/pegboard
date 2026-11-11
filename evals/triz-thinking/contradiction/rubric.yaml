@@ -1,22 +1,44 @@
 questions:
-  states_conflict: >-
-    The answer restates the problem as a conflict, either as one property that
-    improves while another gets worse, or as one element that must have a
-    property and its opposite.
-  ideal_result: >-
-    The answer describes an ideal outcome in which an element of the user's
-    system itself provides the benefit without the harm.
-  asks_user: >-
-    The answer asks the user to confirm its reading of the problem, to choose
-    among options it offers, or to supply a missing fact.
-  names_principle: >-
-    Each solution direction names the principle it comes from.
   concrete_change: >-
-    Each solution direction is stated as a concrete change to a named part of
-    the user's system.
-  ranked_by_directness: >-
-    The answer ranks its solution directions by how directly each removes the
-    conflict.
-  no_compromise: >-
-    The answer offers ways to remove the conflict, not a compromise that gives
-    up part of one side to gain the other.
+    The answer recommends a specific change to a named part of the system.
+  matrix_cell_quoted:
+    instructions: >-
+      The answer quotes a line of the contradiction matrix with its two
+      parameter numbers.
+    cases:
+      - photo-quality-middle-setting
+      - merge-check-vs-full-e2e
+  build_time_out_of_binary:
+    instructions: >-
+      The answer says that the clock time at which the build runs must no longer
+      be written into the binary.
+    cases:
+      - reproducible-build-vs-timestamp
+  deliverable_ticket_comment:
+    instructions: >-
+      The answer contains text addressed to a ticket that explains the change.
+    cases:
+      - reproducible-build-vs-timestamp
+  gallery_lighter_than_full_view:
+    instructions: >-
+      The answer keeps the full-resolution photo for the full view and loads
+      less image data in the gallery.
+    cases:
+      - photo-quality-middle-setting
+  mistyped_code_handled:
+    instructions: >-
+      The answer proposes a way to catch or tolerate a mistyped code.
+    cases:
+      - reset-code-long-and-short
+  deliverable_letter_wording:
+    instructions: >-
+      The answer contains wording for the letter that tells the customer how to
+      use the code.
+    cases:
+      - reset-code-long-and-short
+  pr_check_skips_full_run:
+    instructions: >-
+      The answer stops the pull request check from waiting for the full
+      end-to-end run.
+    cases:
+      - merge-check-vs-full-e2e

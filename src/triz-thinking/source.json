@@ -1,7 +1,7 @@
 {
   "name": "triz-thinking",
   "version": "0.3.2",
-  "description": "Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part with the user.",
+  "description": "Resolves software trade-offs with TRIZ: the contradiction matrix and 40 inventive principles, the separation principles, and ARIZ-85C walked part by part.",
   "author": {
     "name": "Alexander Kurganov",
     "url": "https://github.com/Akurganow"
