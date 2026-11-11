@@ -24,8 +24,9 @@ understandability", version 1.7, 29 August 2023
 ([PDF](https://www.sonarsource.com/docs/CognitiveComplexity.pdf)). It counts
 per function: one for each break in linear flow (`if`, `else if`, `else`,
 ternary, `switch`, loops, `catch`, labelled jumps, runs of binary logical
-operators, each method in a recursion cycle), plus one per nesting level of a
-flow-breaking structure. Shorthand adds nothing: "Cognitive Complexity does not
+operators, each method in a recursion cycle), plus one per nesting level of an
+`if`, ternary, `switch`, loop or `catch`. `else if` and `else` get no nesting
+increment (Appendix B3). Shorthand adds nothing: "Cognitive Complexity does not
 increment for methods", so extracting a method lowers the count.
 
 PMD "reports methods with a
@@ -118,8 +119,8 @@ summarization and execution tasks ([2510.03178](https://arxiv.org/abs/2510.03178
 Classical complexity metrics correlate minimally or not at all with model
 success on code benchmarks (AUROC 0.63, against 0.86 for trained shadow models:
 [2601.12951](https://arxiv.org/abs/2601.12951),
-[2602.07882](https://arxiv.org/abs/2602.07882)). Agents resolve up to 13.1%
-fewer tasks on agent-written code than on human code
+[2602.07882](https://arxiv.org/abs/2602.07882)). Agents building on agent code
+resolve fewer tasks than on human code: "task resolve rate drops of up to 13.1%"
 ([2606.21804](https://arxiv.org/abs/2606.21804)). Not found: a controlled study
 that varies one code structure (nesting, indirection, file layout) and measures
 agent success. The searches were not recorded, so this is a gap in them. The

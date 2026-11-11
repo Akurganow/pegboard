@@ -12,7 +12,7 @@ questions:
       - notifications-too-complex
   exit_codes_in_appendix:
     instructions: >-
-      The answer says that the meaning of the release.sh exit codes is explained only in
+      The answer says that the meaning of the release.sh exit codes is explained in
       an appendix.
     cases:
       - release-runbook-first-timers
@@ -24,7 +24,7 @@ questions:
       - ledger-design-doc-risks
   cancelled_flag_not_cleared:
     instructions: >-
-      The answer says that nothing resets isCancelled when a new upload starts.
+      The answer says that the onStart shown does not clear isCancelled.
     cases:
       - upload-form-slow-bugs
   cell_override_chain:

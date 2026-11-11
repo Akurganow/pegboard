@@ -33,14 +33,13 @@ gave. Say which facts you read, which the user gave and which you assume.
 
 Answer in the same reply, with each assumption marked where it is used. Do not
 stop halfway to wait, because half a diagnosis cannot be acted on. Ask at the
-end, only what would change the result, at most three questions. No question is
-fine.
+end, only what would change the result, at most three questions.
 
 Answer in the form the user asked for. When they fix a decision, code or a text
 of set length, deliver exactly that, with the diagnosis shaping its content.
 
 Present the result, not the procedure: do not say that you apply a skill or a
-standard, and do not narrate its steps. An answer that follows every step and
+standard or narrate its steps. An answer that follows every step and
 leaves the question open has failed, and so has one weaker than a direct
 answer. At each place state the concrete behaviour, defect or surprise, and
 where it is.
@@ -111,8 +110,9 @@ Merriënboer and Paas 2019, p. 264, "learner" read as "reader").
   protocol, DSL or interpreter the team designed, or a convention it built, is
   structure, so learning it is extraneous even when the team uses it daily.
   Split such a language: the rules it expresses are intrinsic, its syntax is
-  extraneous. The cost of removing an element belongs in the recommendation and
-  does not change the sort.
+  extraneous, and when the task changes the language itself its grammar is
+  intrinsic. The cost of removing an element belongs in the recommendation, not
+  in the sort.
 
 When both tests seem to answer yes, the extraneous test decides. Do not add a
 third pile: `references/theory.md` says why germane load is not one here.
@@ -160,7 +160,7 @@ intrinsic as fine. For each remaining place, in that order:
 
 1. List the counted elements under "Intrinsic" and "Extraneous". In a form the
    user fixed, the two piles, the cost and who pays go inside it only when they
-   fit, and otherwise follow it as a note of one or two sentences.
+   fit, and otherwise follow it as a note of one or two sentences, only where the format allows one.
 2. For each extraneous element, give the change that removes it: the
    catalogue's move where it names one, otherwise a change you name from the
    counted elements, and the place in the code where it is made.

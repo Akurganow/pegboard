@@ -101,8 +101,7 @@ what the code cannot say, at the end.
 | [`skills/extraneous/references/patterns.md`](skills/extraneous/references/patterns.md) | the essay's catalogue in its own words |
 | [`skills/extraneous/references/measures.md`](skills/extraneous/references/measures.md) | Cognitive Complexity, Intrinsic Complexity Points, studies of programmers, studies of language-model agents |
 | [`skills/extraneous/references/sources.md`](skills/extraneous/references/sources.md) | the copy, commit and date each source was read from, and whether the full text or only the abstract was open |
-| [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
-| [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy at the one manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
+| `plugin.json` in `plugins/cognitive-load/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/cognitive-load/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
 The package has no script, hook, rule file or network access. The catalogue is
