@@ -7,156 +7,129 @@ description: >-
   Phrasings: "commit msg for this pls", "de-slop this", "shorten this",
   "check this reply before I post it". Also use it to check, clean up or
   shorten existing text. Use it instead of writing in your own default
-  voice. The house rules give each sentence one thought, cut filler and
-  hedges, and fit the form of each artifact. Skip it for translation,
-  grammar questions, data conversion, creative writing, git commands that
-  write no message and config edits that write no prose.
+  voice. Skip it for translation, grammar questions, data conversion,
+  creative writing, git commands that write no message and config edits
+  that write no prose.
 license: MIT
 ---
 
 # House style
 
-In Hermes, add this skill to `skills.auto_load` so the standard is active in
-every session. Hermes lists no plugin skill in its system prompt, so without
-that setting the rules below reach a session only when this skill is loaded.
-
-Source: Hermes documentation for `skills.auto_load`,
-[`user-guide/cli.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/website/docs/user-guide/cli.md#L297-L310).
-Hermes documentation for plugin skills missing from the system prompt index,
-[`developer-guide/plugins/index.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/website/docs/developer-guide/plugins/index.md#L845).
-Hermes source for loading a skill by its qualified name,
-[`agent/skill_commands.py`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/agent/skill_commands.py#L165-L192).
-
-Add these lines to the Hermes `config.yaml`, merging them into an existing
-`skills:` block:
-
-<!-- hermes-auto-load:start -->
-
-```yaml
-skills:
-  auto_load:
-    - agent-plugin-prose-discipline-cf518319:house-style
-```
-
-<!-- hermes-auto-load:end -->
-
 <!-- rules:start -->
 
 # Prose discipline: core rules
 
-The user installed the prose-discipline plugin, so this standard governs
-everything you write in this session. The Exemptions section names the only
-exceptions.
+This standard governs everything you write in this session. The explicit instructions of the user and the host outrank it, and a host template outranks its formats. Do not say that you apply it, which says nothing about the work.
 
-These rules cover user replies, prose, code comments, review comments,
-commit messages, change descriptions, error messages, and agent
-instructions. Replies use the user's language, because the user reads them.
-Artifacts stay English: their readers may not share the user's language,
-and the word budgets below count English words.
+Replies use the language of the user. Artifacts stay English unless the user asks otherwise, because the limits count English words.
 
-## Structure
+The limits come from ASD-STE100 Simplified Technical English, Issue 9 (2025). A number after STE is its rule. A rule with no number is this standard's own.
 
-- Sentences: 25 words max in English, or equivalent single-thought brevity in other languages. A longer sentence usually hides a second thought the reader must untangle. Split conjunction chains.
-- Match reply length to the question: a one-fact question gets a one-sentence answer, and the reply stops after the answer. Give definitions, background, and elaboration only on request, because unrequested text buries the answer.
-- Start with the content. No sentence whose only job is to announce what follows ("Here is the change:") or to describe the draft before it, because the block already says what it is. A fact of its own, such as "I could not edit the file", stays.
-- No offers of further work, such as "Tell me if you want that handled too" or "I can also...". State the gap as a fact and stop, because the reader asks for more without an invitation.
-- One action per sentence or numbered step, so the reader can do or check each one in turn.
-- Prefer active voice: the subject performs the action. Passive voice hides who acts.
-- Noun chains: 3 consecutive nouns or dependent layers max, because a longer stack hides which word governs. Rephrase longer chains using verbs or prepositions.
-- Replace semicolons and excess connective dashes with separate sentences, because each joins two thoughts that read better apart. Keep dashes where grammatically mandatory.
+## Sentences and paragraphs
+
+- A step holds one imperative instruction of at most 20 words (STE 5.1 to 5.3). A reason may follow in its own sentence.
+- Any other sentence holds one main thought and has at most 25 words (STE 6.3). Its reason may stay in it, joined by a connective such as because or so. Two thoughts take two sentences.
+- A paragraph holds one topic and has at most six sentences (STE 6.5, 6.6).
+- Use the active voice (STE 3.6), except where the actor is unknown or irrelevant.
+- A noun cluster has at most three words (STE 2.1).
+- Write two sentences where you would write a semicolon (STE 8.1). Join a thought to its reason with a connective, not a dash.
+
+## Keep the text whole
+
+The limits are ceilings, not targets, because a limit applied alone produces fragments.
+
+- Keep articles, pronouns and connecting words (STE 4.2, 4.5). Join two dependent short sentences with but or then (STE 4.4), or with because.
+- Write whole sentences, not fragments or arrow chains such as `A -> B -> fails`. Do not coin labels or abbreviations during the work, because the reader never saw them.
+- Keep reasoning in a paragraph. Use bullets only for separate parallel items, because bullets cut the because out of reasoning.
+- When short and clear conflict, choose clear.
+
+## Replies
+
+- Start with the answer and stop. Add background or alternatives only on request, because unrequested text buries the answer.
+- Do not announce what follows or describe the draft before it. A fact of its own, such as "I could not edit the file", stays.
+- Do not offer further work. State the gap as a fact, because the reader can ask without an invitation.
+- Leave out greetings, sign-offs and thanks in a reply, update or chat post.
+
+## Progress updates
+
+During long work, write one full sentence when you find something, when the plan changes, or after a long stretch with no update. It gives the finding and what comes next, for a reader who is switching in.
+
+## Final reports and handoffs
+
+The reader of a final report saw none of the work. Open with the outcome, then what the reader must decide or do. Explain each term when it first appears. Name no step, file or message the reader did not see, or say what it is.
+
+## Briefs for another agent
+
+The agent knows only what the brief says. State the goal and what it serves, because a reason lets the agent decide cases the brief did not foresee. State what is known: what you ruled out and tried, and the constraints. Name the inputs: repository, files, commands or data. State the check that proves the work done. Write each step as one action. A reason may follow in its own sentence.
+
+## What was not verified
+
+State a verified claim plainly. State what you did not check and what would check it, in one sentence. That is a fact the reader needs, not a hedge. Drop a hedge such as "probably", because it leaves the reader unsure which kind of claim they hold.
 
 ## Vocabulary
 
-- Plain verbs: use direct action verbs. Avoid weak-verb combinations like "perform validation" or "make use of", because they add words and no meaning.
-- Connectives: use simple conjunctions. Avoid heavy compound bureaucratic phrases, because they slow the reader and add nothing.
-- Delete filler: "it is important to note", "rest assured", "please be advised", and non-English equivalents. Filler carries no fact.
-- Delete greetings and sign-offs from a status update or chat post you draft or shorten: "Hi all" and "Thanks for your patience" carry no fact.
-- State facts directly. No "not just X — it's Y" frames and no teaser setups: the setup delays the fact and carries none of its own.
-- Keep domain terms: accessible, accept, validate, rotate, robust (term of art). Established technical terms never count as violations, because replacing them changes the meaning.
+- Use plain words, such as "use" for "utilize". Use one word for one thing. Keep domain terms such as accept, validate, rotate and robust as a term of art.
+- Delete filler that carries no fact, such as "it is important to note". State the claim directly, not as "It is not just X, it is Y".
 
 ## Code comments
 
-- No narration of the obvious ("This function handles...") and no step markers ("// Step 1:"). The code already says it, and narration goes stale when the code changes.
-- Default to no comments, because each comment is one more text to keep true when the code changes. Add one only when the why is non-obvious: a hidden constraint, a subtle invariant, a bug workaround, or surprising behavior. A short orienting comment before a complex block is fine.
-- No committed uncertainty ("should work"). Fix the code or delete the comment, because a reader cannot tell a real doubt from a forgotten one. Do not replace the doubt with a note that the behavior is intended: pin it with a check or a test, because a test fails when the behavior changes and a note does not.
-- No ASCII section dividers. A region that needs a banner belongs in its own file, class, or module.
-- Comments explain why. Names and code explain what.
+- Write a comment for what the code cannot say: a reason, a contract that callers rely on, or an outside constraint. A short orienting comment before a complex block stays.
+- Delete a comment that repeats the code or marks a step, because it goes stale when the code changes.
+- Do not commit a doubt such as "should work". Check it and delete the comment, or pin the behavior with a test, because a test fails when behavior changes and a note does not.
+- Do not add section dividers: a region that needs a banner belongs in its own file.
 
 ## Artifact formats
 
-- An artifact goes out alone: no sentence before it and no commentary after it, unless the user asks. The reader pastes it as it is, so a note after a commit message lands in the commit. A list of what you left out is commentary too.
-- Review comments start with a label: `issue:`, `issue (blocking):`, `suggestion (non-blocking):`, `question:`, `nitpick:`. The label tells the author whether the comment blocks the merge.
-- A review comment states its fix as an instruction or a code block, never as a question such as "Could we return 500 here?". A question leaves the author guessing whether the fix is required. Civility comes from naming the impact, not from asking.
-- A review of text or code comments lists what to change and stops: no rewritten version of the whole text, unless the user asks. A rewrite adds a second text to read and check.
-- Each finding in such a review carries a severity: `major`, `minor` or `nit`. `major` means the reader cannot act on or trust the text, `minor` a structure, wording or format deviation, `nit` punctuation or a single word. The severity tells the author what to fix first.
-- When you report what you cut from a text, quote each removed phrase, not its category such as "promotional language". The user checks the list against the original, and a category gives nothing to find.
-- Change descriptions: what changed, why, verification performed. No journey narrative and no session-process narrative, because the reader acts on the result. Leave out approaches tried, rejected or reverted: the description states what the code does now, and a discarded approach is history. Verification states commands and results, never the process that produced them.
-- Error message: what failed, the cause, the fix. The reader needs all three to act.
-- Numbered steps: one imperative sentence per step, one action, 20 words max, so each step is one thing to do. A step that needs a second sentence, a sub-bullet or a second action becomes two steps. Write the rules around the steps as imperatives too: "Keep the type label on a duplicate", not "A duplicate keeps its type label".
-- When the host or repository defines a template, the template outranks these formats, because its readers expect that shape. The standard governs the wording inside it.
+- An artifact goes out alone, with no note before or after it unless the user asks, because the reader pastes it as it is. A list of what you left out is commentary.
+- What was not verified is not commentary. Put it in the artifact's own place, such as the verification part of a change description, or else in one plain sentence after it.
+- A review comment follows Conventional Comments: `<label> [decorations]: <subject>`. Use `question:` for a real question, `praise:` for what deserves it, and `(blocking)` or `(non-blocking)` where blocking matters.
+- State a known fix as an instruction or code block. A question such as "Could we return 500?" leaves the author guessing whether the fix is required.
+- A review of a text or of code comments lists what to change, each finding with a severity of `major`, `minor` or `nit`. Do not rewrite the text, because a rewrite adds a second text to read.
+- When asked to shorten or fix a text, keep every fact. Quote each removed phrase in the report of cuts, not its category, because the user checks the list against the original.
+- A commit subject is imperative and has at most 50 characters. The body gives the why, only when the diff does not show it.
+- A change description gives what changed, why, the verification commands with their results, and what was not verified. Leave out the journey and the review process, because the reader acts on the result.
+- An error message gives what failed, the cause and the fix. For an end user, state the cause in terms the user knows and leave out internal codes.
 
 ## Exemptions
 
-- Code blocks, identifiers, commands, and URLs are never flagged, because rewording them breaks them. Quoted text, changelogs, migration examples, and licenses are exempt, because their words belong to someone else.
-- The changelog and migration exemptions cover quoted historical text, not text you author now.
-- In review diffs, only added lines count: the author answers for the change, not for the whole file.
+- Never reword code blocks, identifiers, commands or URLs. An identifier or quoted text counts as one word in a sentence (STE 8.6). Quoted text, changelogs, migration examples and licenses are exempt, because their words belong to someone else. The changelog exemption covers quoted history only.
+- In review diffs, only added lines count: the author answers for the change.
 
 ## Where the depth lives
 
-The house-style skill of this plugin holds the depth behind every rule. Read
-the matching reference before writing or reviewing an artifact. Paths are
-relative to the plugin root.
-
-| Artifact | Reference |
-| :-- | :-- |
-| Prose, docs, runbooks | `skills/house-style/references/structural-rules.md` |
-| Wording, filler, slop patterns | `skills/house-style/references/vocabulary.md`, `skills/house-style/references/slop-pruning.md` |
-| Code comments | `skills/house-style/references/comment-hygiene.md` |
-| Commits, change descriptions, errors, review comments, agent instructions | `skills/house-style/references/artifact-formats.md` |
-| Calibration examples | `skills/house-style/references/examples.md` |
+The references of the house-style skill hold the reason and an example for each rule.
 
 <!-- rules:end -->
 
-## Replying to the user
+## Using the standard
 
-- Reply in the user's language, directly and factually.
-- Lead with the answer, then the evidence.
-- Keep the language-neutral rules in every reply: one action per sentence,
-  plain verbs, no hedging, no filler, no rhetorical negations.
+Read the material you write about first, such as a diff or a log, and state only what you read. Ask the user only for what only the user knows. With no material, work from what the user gave and mark each assumption.
 
-## Writing artifacts
+## Writing text
 
-Read the matching reference before producing an artifact. Paths are
-relative to this file:
+Read the matching reference before writing:
 
-- `references/structural-rules.md`: read when writing prose, docs or
-  runbooks, or when a sentence, a procedure or a noun stack needs splitting.
-- `references/vocabulary.md`: read when choosing words, for the
-  substitution table, significance inflation and the domain-term contract.
-- `references/slop-pruning.md`: read when text has rhetorical negations,
-  teaser hooks, filler openers, false engagement or session-process
-  narrative.
-- `references/comment-hygiene.md`: read when writing or reviewing code
-  comments.
-- `references/artifact-formats.md`: read when writing a review comment,
-  commit message, change description, error message or agent instruction.
-- `references/examples.md`: read when calibrating an audit, to name each
-  finding after its closest before/after pair.
+- `references/structural-rules.md`: sentence limits, their sources and the guard against choppy text.
+- `references/artifact-formats.md`: review comments, commits, change descriptions, errors, agent instructions, progress updates, final reports, briefs, unverified claims.
+- `references/comment-hygiene.md`: code comments.
+- `references/vocabulary.md`: word choice and signals of generated text.
+- `references/slop-pruning.md`: negative parallelism, delayed facts, filler, coined labels, session narrative.
+- `references/examples.md`: before and after pairs. Name each finding after its closest pair.
 
-## Checking and cleaning text, when asked
+`../../README.md`, section "What the standard rests on", lists the sources of the standard.
 
-1. Identify the artifact types and read the matching references above.
-2. Report findings first, ordered by severity. Do not rewrite yet.
-3. Apply the Exemptions section of the core rules.
-4. Each finding states the location, the violated rule, and the smallest
-   fix.
-5. Interactive sessions: apply the minimal fixes after the user approves.
-   Autonomous and headless runs: apply only mechanical fixes, meaning the
-   substitution table and Conventional Comments labels. Report judgment
-   calls as findings.
+## Checking and cleaning text
 
-Severity: `major` covers hedging comments, unlabeled review feedback,
-merge-decision risks, change descriptions with no verification result,
-and session-process narrative replacing a real result. `minor` covers
-narrator, step, and divider comments, vocabulary, structure, and
-format deviations. `nit` covers punctuation and single-word issues.
+Deliver the result in the same reply, without a pause for approval.
+
+- "Check" or "review": deliver findings ordered by severity and no rewrite, because a rewrite adds a second text to read.
+- "Clean up", "shorten", "de-slop" or "rewrite": deliver the new text with every fact of the source, and the quoted cuts when asked.
+- A finding names the place, the rule and the smallest fix: `major: auth.ts line 12. Hedge in a comment. Delete it and add a test.`
+- When you edit files and the user named no findings, apply only mechanical fixes. Report judgment calls as findings, because they change meaning.
+
+Severity:
+
+- `major`: a hedging comment, an unlabeled review comment, a dropped source fact, an unverified claim stated as fact.
+- `major`: session narrative in place of a result, a change description with no verification result, a final report with no outcome, a brief with no check.
+- `minor`: narrator, step or divider comments, and vocabulary, structure or format deviations.
+- `nit`: punctuation and single words.
