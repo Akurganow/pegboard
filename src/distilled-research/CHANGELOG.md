@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## distilled-research--v0.3.0 - 2026-11-11
+#### Features
+- (**distilled-research**) choose records by method, not from a list (69773dd)
+#### Bug Fixes
+- (**distilled-research**) close four gaps in the vetter and the output (570c0ad)
+
+- - -
+
+
 ## distilled-research--v0.2.0 - 2026-11-11
 #### Features
 - (**distilled-research**) add a direct mode (69dcbbe)
