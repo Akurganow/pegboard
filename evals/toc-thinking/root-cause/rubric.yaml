@@ -1,19 +1,59 @@
 questions:
-  entry_point: >-
-    The answer states which diagram it chose as its entry point: a current
-    reality tree, an evaporating cloud, a prerequisite tree or a future
-    reality tree.
-  link_form: >-
-    The answer writes the links of its reasoning as "if A, then B" or "to
-    have A, we must have B" sentences.
-  challenges_links: >-
-    The answer raises an objection to at least one link of its own reasoning,
-    such as an insufficient cause, a reversed cause and effect, or an
-    assumption that may not hold.
-  conditions_not_interpretations: >-
-    The answer states each problem as a condition someone can observe, such
-    as "p99 latency exceeds 5 seconds during concurrent writes", not as an
-    interpretation such as "the system is slow".
-  asks_for_facts: >-
-    The answer asks the user to confirm, correct or supply a fact about their
-    system.
+  checkout_resubmit_cause:
+    cases: [checkout-problems-pile-up]
+    instructions: >-
+      The answer says that the checkout page's resubmit after 5 seconds, together
+      with the missing idempotency key, produces the double charges.
+  csv_export_separate:
+    cases: [checkout-problems-pile-up]
+    instructions: >-
+      The answer says that the CSV export failure does not share a cause with
+      the checkout problems.
+  freeze_by_risk:
+    cases: [freeze-vs-checkout-tests]
+    instructions: >-
+      The answer says that the freeze can cover migrations and other
+      high-risk changes while low-risk test changes keep shipping.
+  talking_points_to_say:
+    cases: [freeze-vs-checkout-tests]
+    instructions: >-
+      The answer gives talking points that the user can say aloud in the
+      meeting.
+  unowned_scripts_first:
+    cases: [retire-python27-cron-box]
+    instructions: >-
+      The answer says that the scripts nobody owns need an owner or a purpose
+      found before they are moved.
+  notices_silent_stop:
+    cases: [retire-python27-cron-box]
+    instructions: >-
+      The answer says how a job that silently stops running would be noticed.
+  announcement_message:
+    cases: [retire-python27-cron-box]
+    instructions: >-
+      The answer includes a message for the engineering channel that announces
+      the shutdown of the old box.
+  retries_multiply_load:
+    cases: [retries-on-every-call]
+    instructions: >-
+      The answer says that retries at every hop of a call chain multiply the
+      load on the inventory service.
+  retries_safeguard:
+    cases: [retries-on-every-call]
+    instructions: >-
+      The answer names a safeguard against retries piling up load, such as a retry
+      budget, retrying at one layer only or a circuit breaker.
+  names_refuting_observation:
+    cases: [checkout-problems-pile-up, retries-on-every-call]
+    instructions: >-
+      The answer names an observation, such as a metric, a log line or a query
+      result, that would show one of its own claims to be wrong.
+  concrete_places:
+    cases: [checkout-problems-pile-up, retries-on-every-call]
+    instructions: >-
+      Each change the answer recommends names the place where it is made, such
+      as a service, a queue, a setting or a script.
+  link_form:
+    cases: [checkout-problems-pile-up, retries-on-every-call]
+    instructions: >-
+      The answer writes causal links as "if ..., then ..." sentences.

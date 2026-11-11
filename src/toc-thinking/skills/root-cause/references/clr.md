@@ -14,147 +14,113 @@
     - [6. Cause-effect reversal](#6-cause-effect-reversal)
     - [7. Predicted effect existence](#7-predicted-effect-existence)
     - [8. Tautology](#8-tautology)
+  - [Running a check](#running-a-check)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Categories of Legitimate Reservation
 
-The rules for scrutinising a sufficiency tree. `sources.md` says where each
-source was read. Quotations marked TOCICO are from the *TOCICO Dictionary*,
-second edition. Quotations marked Dettmer are from *The Logical Thinking
-Process* (2007).
+The rules for scrutinising a sufficiency tree. `sources.md` says where each source was read.
+Quotations marked TOCICO are from the *TOCICO Dictionary*, second edition, and those marked Dettmer
+from *The Logical Thinking Process* (2007).
 
 ## Seven or eight
 
-TOCICO counts seven, in three levels: "Level I: clarity reservation. Level
-II: causality existence and entity existence reservations. Level III: cause
-insufficiency, additional cause, predicted effect existence, cause-effect
-reversal or tautology reservations." Dettmer counts eight by listing
-tautology on its own. This file follows Dettmer's eight and keeps TOCICO's
-levels.
-
-Order matters. TOCICO: "Scrutinizers should proceed from level I to level II
-to level III reservations". And the reservations are offers, not verdicts:
-"the tree builder is free to accept or reject any reservation at any level."
-
-Scope. Dettmer, chapter 2: the categories "were designed to apply primarily
-to sufficiency trees, but they do have some applicability to necessity trees
-as well." A cloud's arrows and a prerequisite tree's arrows are checked by
-questioning their assumptions (`tools.md`, two logics).
+TOCICO counts seven in three levels and treats tautology as a synonym of cause-effect reversal.
+Dettmer lists tautology on its own and counts eight. This file follows Dettmer's eight with TOCICO's
+levels. Scrutinise from level I to level III (TOCICO). Reservations are offers: "the tree builder is
+free to accept or reject any reservation at any level." The categories apply primarily to sufficiency
+trees (Dettmer, chapter 2).
 
 ## Level I
 
 ### 1. Clarity
 
-TOCICO: raised when the scrutiniser "is concerned about the meaning of an
-individual word, the complete statement contained in an entity, or a section
-of the diagram, or ... does not recognize a reasonable connection between
-the stated cause and the stated effect." Dettmer: "Clarity is not, strictly
-speaking, a logic-based reservation. Its roots are in communication." A link
-that skips several steps is a clarity problem.
+The meaning of a word, an entity or a connection is in doubt. A link that skips several steps is a
+clarity problem.
 
-Software example. Fails: "The service is slow." Passes: "The API's p95
-response time exceeds 2 seconds at 10 requests per second."
+Fails: "The service is slow." Passes: "The API's p95 response time exceeds 2 seconds at 10 requests
+per second."
 
 ## Level II
 
 ### 2. Entity existence
 
-TOCICO: "used to challenge the validity of a proposed statement of fact".
-The question: "Does this entity really exist in your world as you have
-stated it?" Dettmer tests each entity for completeness (a full sentence),
-structure (one idea, no *if-then* inside it) and validity (it exists and can
-be evidenced).
+TOCICO: it challenges "the validity of a proposed statement of fact". The question: "Does this entity
+really exist in your world as you have stated it?" Dettmer tests each entity for completeness (a full sentence), structure (one idea) and validity (it exists and can be
+evidenced).
 
-Software example. Fails: "Tight coupling exists." Passes: "OrderService
-imports five internal classes of ShippingService." One idea per entity: the
-shared table is a second entity.
+Fails: "Tight coupling exists." Passes: "OrderService imports five internal classes of
+ShippingService." The shared table is a second entity.
 
 ### 3. Causality existence
 
-TOCICO: "used to question whether or not the proposed causal relationship
-between two entities really exists." Causation is separated from
-correlation "by the verifiability of a causal relationship." Dettmer reads
-the link aloud in *if-then* form and asks how the cause produces the
-effect.
+Dettmer reads the link aloud in *if-then* form and asks how the cause produces the effect.
 
-Software example. Fails: "If we added caching then users see stale data."
-The mechanism is missing. Passes: "If the status cache keeps an entry for
-five minutes without invalidation on write, then a status read within five
-minutes of a write returns the old value."
+Fails: "If we added caching then users see stale data." Passes: "If the status cache keeps an entry
+for five minutes without invalidation on write, then a status read within five minutes of a write
+returns the old value."
 
 ## Level III
 
 ### 4. Cause insufficiency
 
-TOCICO: "used when the scrutinizer believes the proposed cause alone is
-inadequate to explain the effect." The missing cause is a co-cause joined
-with *and*. Dettmer uses "cause sufficiency" and "cause insufficiency" for
-the same reservation, and advises keeping the co-causes to three, four at
-most.
+The proposed cause alone cannot explain the effect, so a co-cause joined with *and* is missing.
 
-Software example. Fails: "If there are no tests then deployments fail."
-Passes: "If there are no tests and no staging environment and deployments
-run unattended, then a defect reaches production undetected."
+Fails: "If there are no tests then deployments fail." Passes: "If there are no tests and no staging
+environment and deployments run unattended, then a defect reaches production undetected."
 
 ### 5. Additional cause
 
-TOCICO: "used ... to question whether the stated cause(s) is(are) sufficient
-to fully account for the stated effect." The addition is a second,
-independent cause of the same effect: "eliminating only one of multiple
-independent causes will not overcome the effect entirely." The two sources
-draw it differently. TOCICO draws the two causes as "a magnitudinal 'and'
-connector", each adding to the size of the effect. Dettmer draws them as
-alternatives, and his test reads: "If I eliminate the stated cause, is there
-any other circumstance under which the same degree of effect would occur?"
-Dettmer also sets this reservation aside when scrutinising a Future Reality
-Tree, where only the injection's own effect matters.
+A second, independent cause of the same effect exists. Dettmer describes two forms. In the basic form
+the reservation "signifies a missing 'or' condition", and his test is: "If I eliminate the stated
+cause, is there any other circumstance under which the same degree of effect would occur?" In the
+magnitudinal form, drawn as a bow-tie, each cause accounts for part of the effect. TOCICO's entry
+shows only the magnitudinal form.
 
-Software example. "If the connection pool is exhausted then p95 exceeds 2
-seconds" may be true and still not the whole story. An N+1 query pattern
-also raises p95. Under TOCICO's reading the two add up, and removing the
-pool problem alone leaves part of the latency. Under Dettmer's, either
-alone produces the effect.
+Example. "If the connection pool is exhausted then p95 exceeds 2 seconds" may be true, yet an N+1
+query pattern also raises p95. In the basic form either cause alone produces the effect. In the
+magnitudinal form the two add up, and removing the pool problem alone leaves part of the latency.
 
 ### 6. Cause-effect reversal
 
-TOCICO: "used to question whether the cause and effect have been switched."
-Dettmer: "Is the stated cause really a reason why, or just how we know the
-effect exists?" An indicator of the effect is not its cause.
+Dettmer: "Is the stated cause really a reason why, or just how we know the effect exists?"
 
-Software example. Fails: "If the error rate dashboard is red then the
-service is failing." The red dashboard is how the failure is known, not why
-it happens. A loop, where an effect feeds a cause below it, is a different
-structure and a legitimate part of a tree (`tools.md`, Current Reality
-Tree).
+Fails: "If the error rate dashboard is red then the service is failing." The red dashboard is how the
+failure is known, not why it happens. A loop, where an effect feeds a cause below it, is a different
+structure and a legitimate part of a tree (`tools.md`, Current Reality Tree).
 
 ### 7. Predicted effect existence
 
-TOCICO: "used to challenge either an entity's existence or the existence of
-a causal relationship on the basis of the absence of an inevitable effect
-that would have to exist if the entity or the proposed causal relationship
-really existed." Dettmer: "Predicted effect existence means that if a
-proposed cause-effect relationship is valid, some other unstated effect
-would also be expected." His example is appendicitis offered as the cause
-of abdominal pain: a fever and a raised white cell count would also be
-expected, and their absence refutes the cause. Name such an effect and
-check for it.
+Defined under "Running a check", below.
 
-Software example. Claimed cause: "a memory leak in the image handler." If
-so, heap use must rise with the number of images processed and fall after a
-restart. If heap use is flat across a day of image traffic, the claimed
-cause is refuted.
+Example. Claimed cause: "a memory leak in the image handler." Then heap use must rise with the
+number of images processed and fall after a restart. Flat heap use across a day of image traffic
+refutes the cause.
 
 ### 8. Tautology
 
-Dettmer: "The effect is offered as a rationale for the existence of the
-cause." His example statement is "The Dodgers lost the game because they
-played poorly", and the tautology is asking how the poor play is known and
-answering that they lost. TOCICO treats this as the same reservation as
-cause-effect reversal.
+Dettmer: "The effect is offered as a rationale for the existence of the cause." Example: "The deploy
+failed because the team was careless." How is the carelessness known? Only from "The deploy failed."
+Ask for a predicted effect that shows on its own: skipped checks in the log, a missing review.
 
-Software example. "The deploy failed because the team was careless." How
-is the carelessness known? "The deploy failed." The effect is the only
-evidence offered for the cause. Ask for a predicted effect of carelessness
-that can be observed on its own: skipped checks in the log, a missing
-review.
+## Running a check
+
+A link is a hypothesis, and its predicted effect is the test. `SKILL.md`, "Scrutiny becomes checks",
+gives the procedure. Three published statements shape it.
+
+- Zeller, *The Debugging Book*, "Introduction to Debugging", "The Scientific Method" (online text, read
+  2026-11-11): from a hypothesis, "formulate a *prediction* that can *support* or *refute* the
+  hypothesis. Ideally, the prediction would distinguish the hypothesis from likely alternatives." Then
+  test it: "If the prediction holds, confidence in the hypothesis increases; otherwise, it decreases."
+- TOCICO, *predicted effect reservation*: it can prove or disprove an entity or relationship "very
+  difficult, perhaps even impossible to prove by direct observation". Its example: if a car's battery
+  charge is low, the lights must be very dim, and bright lights show the charge is not low.
+- Dettmer, chapter 2: a predicted effect is judged on three tests: expectation ("Is it there?"),
+  coexistence ("Is it there at the same time?") and magnitude ("Is it all there?"). The reservation
+  "is always invoked to substantiate a reservation for causality existence." In chapter 6, a negative
+  branch of a Future Reality Tree is "a kind of predicted effect existence reservation".
+
+Check facts, not the story of the incident: an account written after a failure selects the facts that
+fit it. Cook calls hindsight bias "the primary obstacle to accident investigation" (*How Complex
+Systems Fail*, point 8, read 2026-11-11). Read the log of the time, not the memory of it.

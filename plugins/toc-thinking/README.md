@@ -84,42 +84,38 @@ Deploys fail about once a week, the nightly build is flaky, and on-call
 pages keep coming back after every fix. Find the core problem.
 ```
 
-The `root-cause` skill states each symptom as an undesirable effect. It
-builds a Current Reality Tree down to the root causes, and checks every
-link with the Categories of Legitimate Reservation. It asks you to confirm
-the core problem before going on. It then builds the Evaporating Cloud for
-the conflict that keeps the problem in place. A Future Reality Tree checks
-the injection for new undesirable effects. The skill plans the change with
-a Prerequisite Tree and a Transition Tree.
+The `root-cause` skill reads the code, history and logs first when the session has them. It builds a
+Current Reality Tree from the symptoms down to the root causes, and checks each link that carries the
+conclusion by naming an effect that must also exist if the link is true. It then resolves the conflict
+that keeps the problem in place with an Evaporating Cloud, tests the fix with a Future Reality Tree and
+plans the change with a Prerequisite Tree and a Transition Tree. It answers in one reply, as a draft
+with its assumptions marked.
 
 ## What's inside
 
 | Path | What it is |
 | :-- | :-- |
-| [`skills/root-cause/SKILL.md`](skills/root-cause/SKILL.md) | the procedure: classify, Current Reality Tree, Evaporating Cloud, Future Reality Tree, Prerequisite Tree, Transition Tree |
-| [`skills/root-cause/references/tools.md`](skills/root-cause/references/tools.md) | the structure of each tree and of the cloud, with its logic |
-| [`skills/root-cause/references/clr.md`](skills/root-cause/references/clr.md) | the eight Categories of Legitimate Reservation, each with a software example |
-| [`skills/root-cause/references/sources.md`](skills/root-cause/references/sources.md) | the books and dictionary entries the references rest on, and what stays unread |
+| [`skills/root-cause/SKILL.md`](skills/root-cause/SKILL.md) | the procedure |
+| [`skills/root-cause/references/tools.md`](skills/root-cause/references/tools.md) | the structure of each tree and of the cloud, and what a root cause is |
+| [`skills/root-cause/references/clr.md`](skills/root-cause/references/clr.md) | the eight Categories of Legitimate Reservation, with software examples |
+| [`skills/root-cause/references/sources.md`](skills/root-cause/references/sources.md) | the sources and what stays unread |
 | [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
 | [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy of `plugin.json` at the one manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
 | [`LICENSE`](LICENSE) | the MIT license |
 
 The package has no script, hook, rule file or network access.
 
-The references rest on the TOCICO Dictionary and on Dettmer's *The
-Logical Thinking Process*. `sources.md` names the public copy of each by
-commit. The Categories of Legitimate Reservation are Dettmer's eight, and
-`clr.md` notes TOCICO's count of seven.
+The references rest on the TOCICO Dictionary and on Dettmer's *The Logical Thinking Process*, and
+`sources.md` names the public copy of each by commit.
 
 ## Boundaries
 
-- The procedure works on facts you can observe. It asks you for a fact
-  it lacks rather than guessing the system's structure. It does not
-  replace a profiler, a debugger or a test.
-- The skill attributes nothing to Goldratt or Dettmer without a chapter or
-  a dictionary entry that `sources.md` names.
-- A cloud that reduces to a trade-off between two measurable parameters
-  belongs to the `contradiction` skill of [`triz-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/triz-thinking).
+- The skill says which facts it read, which you gave and which it assumed. It does not replace a
+  profiler, a debugger or a test.
+- A failure often has several root causes, and the skill reports them separately when the branches do
+  not meet.
+- A cloud that reduces to a trade-off between two measurable parameters belongs to the `contradiction`
+  skill of [`triz-thinking`](https://github.com/Akurganow/pegboard/tree/main/plugins/triz-thinking).
   `root-cause` hands over only when `contradiction` is installed.
 
 ## License
