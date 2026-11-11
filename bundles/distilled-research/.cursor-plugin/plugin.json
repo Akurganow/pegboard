@@ -1,7 +1,7 @@
 {
   "name": "distilled-research",
   "description": "Vets sources, collapses copies to independent origins, and grades each claim by how many independent origins support it.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": {
     "name": "Alexander Kurganov"
   },

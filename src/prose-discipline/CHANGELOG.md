@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## prose-discipline--v2.3.0 - 2026-11-11
+#### Features
+- (**prose-discipline**) cover reports and briefs (1ba4803)
+#### Bug Fixes
+- (**prose-discipline**) name STE for its limits (ba6cbc7)
+#### Documentation
+- link the marketplace from every package README (e4257fb)
+
+- - -
+
+
 ## prose-discipline--v2.2.1 - 2026-11-06
 #### Bug Fixes
 - (**prose-discipline**) narrow the skip lines of the description (fbfbe27)

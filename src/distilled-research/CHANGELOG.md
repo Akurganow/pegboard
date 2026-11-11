@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## distilled-research--v0.2.0 - 2026-11-11
+#### Features
+- (**distilled-research**) add a direct mode (69dcbbe)
+#### Bug Fixes
+- (**distilled-research**) close three survey gaps (d7f86fd)
+
+- - -
+
+
 ## distilled-research--v0.1.1 - 2026-11-06
 #### Bug Fixes
 - (**distilled-research**) let a requested form replace the reply format (bd80d0d)

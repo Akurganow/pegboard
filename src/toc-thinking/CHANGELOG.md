@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## toc-thinking--v0.4.0 - 2026-11-11
+#### Features
+- (**toc-thinking**) check each link by its effect (7dfed87)
+#### Bug Fixes
+- (**toc-thinking**) use an effect that must occur (fa804c5)
+#### Documentation
+- link the marketplace from every package README (e4257fb)
+
+- - -
+
+
 ## toc-thinking--v0.3.3 - 2026-11-06
 #### Bug Fixes
 - (**toc-thinking**) describe when to use the skill in the user's words (75b4ce0)

@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## design-review--v0.4.0 - 2026-11-11
+#### Features
+- (**design-review**) read the code before asking (2e56506)
+#### Bug Fixes
+- (**design-review**) fit the note to the format (96a2de6)
+#### Documentation
+- link the marketplace from every package README (e4257fb)
+
+- - -
+
+
 ## design-review--v0.3.3 - 2026-11-06
 #### Bug Fixes
 - (**design-review**) narrow the skip lines of the description (9e51927)

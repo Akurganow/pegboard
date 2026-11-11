@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## triz-thinking--v0.4.0 - 2026-11-11
+#### Features
+- (**triz-thinking**) answer in one reply (3eafd0c)
+#### Bug Fixes
+- (**triz-thinking**) tighten two rubric questions (033e20f)
+#### Documentation
+- link the marketplace from every package README (e4257fb)
+
+- - -
+
+
 ## triz-thinking--v0.3.2 - 2026-11-06
 #### Bug Fixes
 - (**triz-thinking**) narrow the skip lines of the description (facdc50)

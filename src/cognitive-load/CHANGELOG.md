@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## cognitive-load--v0.4.0 - 2026-11-11
+#### Features
+- (**cognitive-load**) read the code before asking (95887dd)
+#### Bug Fixes
+- (**cognitive-load**) correct two measures (bcd7f65)
+#### Documentation
+- link the marketplace from every package README (e4257fb)
+
+- - -
+
+
 ## cognitive-load--v0.3.3 - 2026-11-06
 #### Bug Fixes
 - (**cognitive-load**) narrow the skip lines of the description (ea5621c)
