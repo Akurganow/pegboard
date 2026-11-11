@@ -38,7 +38,7 @@ questions:
       - reset-code-long-and-short
   pr_check_skips_full_run:
     instructions: >-
-      The answer stops the pull request check from waiting for the full
-      end-to-end run.
+      The answer moves the full end-to-end run out of the pull request check
+      and keeps it as a gate before release.
     cases:
       - merge-check-vs-full-e2e

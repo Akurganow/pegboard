@@ -107,8 +107,7 @@ marked. A restated technical contradiction goes back to `contradiction`.
 | [`skills/contradiction/references/sources.md`](skills/contradiction/references/sources.md) | where each reference of both skills was read, and what was not read |
 | [`skills/ariz/SKILL.md`](skills/ariz/SKILL.md) | the ARIZ-85C walk, for a problem that has outlasted earlier fixes |
 | [`skills/ariz/references/ariz-85c.md`](skills/ariz/references/ariz-85c.md) | the nine parts and forty steps of ARIZ-85C, with the formulas quoted and a software gloss |
-| [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
-| [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy of `plugin.json` at the one manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
+| `plugin.json` in `plugins/triz-thinking/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/triz-thinking/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
 The package has no script, hook, rule file or network access. A lookup is

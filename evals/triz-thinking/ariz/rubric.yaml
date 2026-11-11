@@ -42,7 +42,7 @@ questions:
       - flag-service-three-tug-of-wars
   placement_without_fixed_slot:
     instructions: >-
-      The answer keeps a guaranteed placement for sponsored listings without a
-      fixed slot.
+      The answer lets sponsored listings keep a guaranteed place in the top
+      three results, without a fixed slot.
     cases:
       - sponsored-slots-vs-relevance
