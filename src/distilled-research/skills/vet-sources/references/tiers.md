@@ -1,6 +1,6 @@
 # Source tiers
 
-Tiers are ordinal (A above B above C) and uncalibrated. A tier says how a source ranks against the others in the same list, not how likely its claims are to be true. A source with no tier yet reads `none`.
+Tiers are ordinal (A above B above C) and uncalibrated. A tier ranks a source against the others in the same list and says nothing of how likely its claims are to be true. A source with no tier yet reads `none`.
 
 ## Definitions
 
@@ -23,14 +23,14 @@ Name who wrote the source and who stands behind it. Check whether it makes the c
 A move up needs the evidence column of the destination tier.
 
 - Up one tier: an independent mention by a higher-tier source.
-- Up one tier: a record in an open catalogue, or a named author with a checkable record.
+- Up one tier: a fitting record that rates it well, or a named author with a checkable record.
 - Down one tier: no named author, or a claim copied from another source.
 - Down one tier: a repository with stars but no forks or history.
-- Down one tier: a catalogue flag such as low reliability, or a stale update on a fast-moving topic.
+- Down one tier: a fitting record that flags it, such as for low reliability, or a stale update on a fast-moving topic.
 - Down one tier: a correction notice that changes the source's results, data or conclusions. A correction of metadata (funding, affiliation, typo) goes in `reason` and moves no tier.
 - A retraction or expression-of-concern notice moves no tier. It sets `keep` = `no` by the keep rule in `briefs/vetter.md`.
-- Official authorship says who wrote a source, not that it was audited, so a large vendor repository can stay tier B.
-- "No mention found" moves a source neither way.
+- Official authorship says who wrote a source and not that it was audited, so a large vendor repository can stay tier B.
+- "No mention found" and `not checked` move a source neither way.
 
 ## When the page cannot be read
 

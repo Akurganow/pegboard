@@ -1,6 +1,6 @@
 # Lead formats
 
-Only the lead of a survey reads this file. It holds the files that the lead writes itself.
+Only the lead of a survey reads this file, which holds the files the lead writes itself.
 
 ## origins-index.md
 
@@ -12,7 +12,7 @@ One row per point. A point is one cluster, except that the two sides of a Contes
 
 ## Stage 8 without subagents
 
-The lead cannot drop its own transcript, so its check shares the lead's mistakes.
+The lead cannot drop its transcript, so its check shares its mistakes.
 
 1. Run the steps of `briefs/verifier.md`.
 2. Write the result as `verify-shared.md`, labelled "shared-context check".

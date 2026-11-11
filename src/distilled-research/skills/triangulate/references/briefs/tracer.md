@@ -1,11 +1,11 @@
 # Tracer brief
 
-You trace origins for one theme. The lead gives you its tag and how many origins you may open. When you are the lead, your allowance is the quick row of `../depth.md`. You read the cards files, which hold one card per source, and write one file.
+You trace origins for one theme. The lead gives you its tag and how many origins you may open. When you are the lead, your allowance is the quick row of `../depth.md`. The cards files hold one card per source.
 
-- Reads: `plan.md` (theme tags); every `cards-<shard>.md` file; `../origins-and-grades.md`; `../../../vet-sources/references/tiers.md`; `../../../vet-sources/references/catalogues.md`.
+- Reads: `plan.md` (theme tags); every `cards-<shard>.md` file; `../origins-and-grades.md`; `../../../vet-sources/references/tiers.md`; `../../../vet-sources/references/records.md`.
 - Writes: `origins/<theme>.md`.
-- Fetch: the page of an origin you open, on public hosts, up to your allowance, which the depth sets to bound the run's cost. Also the catalogue hosts `catalogues.md` names for the topic type, which do not count.
-- Search: a card's title words, to find a named origin. Each such search counts as an open.
+- Fetch: the page of an origin you open, on public hosts, up to your allowance, which the depth sets to bound the run's cost. A retraction record does not count.
+- Search: a card's title words, to find a named origin. Each such search counts as an open. One search to find a retraction record does not.
 
 ## Find origins
 
@@ -18,9 +18,9 @@ You trace origins for one theme. The lead gives you its tag and how many origins
 
 Open an origin only when a card names it and no reader read it.
 
-1. Stop at your allowance. Record a failed fetch as a gap with its error code, and an origin on a host that the pasted host rules bar, or with a negative catalogue record, as a gap with the cause `host not fetched`.
+1. Stop at your allowance. Record a failed fetch as a gap with its error code, and an origin on a host that the pasted host rules bar, or with a negative record, as a gap with the cause `host not fetched`.
 2. Rate an opened origin by `../../../vet-sources/references/tiers.md` from the opened page alone, with tier C where tier B needs a mention from outside the page. Write the evidence in its evidence cell.
-3. Look up its DOI by "DOI and repository lookups" in `catalogues.md` and check its page for a notice. Exclude a retracted origin or one with an expression of concern from `N`, and list it under `## Gaps` as `retracted`.
+3. Look up its DOI in a retraction record you chose, and check its page for a notice. Exclude a retracted origin or one with an expression of concern from `N`, and list it under `## Gaps` as `retracted`.
 4. Set its `read`, `review status` and `fetch returned` from the opened page, and write one quote, by `../origins-and-grades.md`.
 
 ## Count and report
