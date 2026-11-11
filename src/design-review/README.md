@@ -102,8 +102,7 @@ change and what the change costs. At most three questions come at the end.
 | [`skills/red-flags/references/decisions.md`](skills/red-flags/references/decisions.md) | the criteria for together or apart, errors, design it twice, comments and names |
 | [`skills/red-flags/references/positions.md`](skills/red-flags/references/positions.md) | where the book takes a side, the other side, and the evidence on TDD and method length |
 | [`skills/red-flags/references/sources.md`](skills/red-flags/references/sources.md) | where each text was read, its kind and date, and what was not read |
-| [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
-| [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy at the manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
+| `plugin.json` in `plugins/design-review/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/design-review/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
 The package has no script, hook, rule file or network access.

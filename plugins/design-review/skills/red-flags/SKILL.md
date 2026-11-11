@@ -40,7 +40,7 @@ a skill or standard is being applied or narrate its steps.
 Answer the question asked, in the form asked: a name for a name, a decision
 for a decision, code for code. When the user fixes a format or a length,
 deliver exactly that, then add one or two sentences on what the method left
-out. Name the concrete behaviour, defect or change, with its place: a review
+out, only where the format allows it. Name the concrete behaviour, defect or change, with its place: a review
 that says less about the code than a direct answer would has failed. Cite the
 book only from this file or an opened reference, because a recalled chapter
 number is often wrong.

@@ -27,8 +27,8 @@ Every "Look for" is this skill's, not the book's. "1e" or "2e" after a quotation
 names the edition whose wording is quoted.
 
 The book's list is its selection, and its chapters name other flags. A flag is
-a symptom, and a symptom can have a reason, so ask for the reason before filing
-the finding. The book does not number the flags.
+a symptom, and a symptom can have a reason, so weigh a reason for the structure
+before filing the finding. The book does not number the flags.
 
 ## Shallow Module
 
