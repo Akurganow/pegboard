@@ -23,7 +23,7 @@
     {
       "name": "distilled-research",
       "source": "./bundles/distilled-research",
-      "description": "Vets sources, reads them in parallel, collapses copies to independent origins, and grades each claim by how many independent origins support it.",
+      "description": "Vets sources, collapses copies to independent origins, and grades each claim by how many independent origins support it.",
       "homepage": "https://github.com/Akurganow/pegboard/tree/main/plugins/distilled-research",
       "category": "Developer Tools"
     },
