@@ -177,7 +177,7 @@ In both, `prose-discipline` loads its skill and nothing else.
 Between `<!-- hook-text:start -->` and `<!-- hook-text:end -->` it holds the short form, which the hooks print.
 The `.mdc` rule and the `rules` region of the `house-style` skill carry the full text, written without that region and its markers.
 `tools/regions.sh` extracts both and stops on a lone, duplicate or reversed marker, so no copy of the full text can still hold the short form.
-The short form states each rule in a sentence or two, and its last line points to the skill for the reasons.
+The short form is a subset of the rules, and its last line points to the skill for the reasons.
 It states facts, as Claude Code advises for hook text ([Claude Code](clients.md#claude-code)).
 
 Hermes loads no hooks and no `rules/` from a package ([Hermes](clients.md#hermes)).
