@@ -127,8 +127,8 @@ questions:
   # The report and the brief, the fifth prompt.
   names_pool_cause:
     instructions: >-
-      The report says the checkout errors came from the api-gateway connection
-      pool running out at 50 connections.
+      The report says the api-gateway ran out of connections, with its pool
+      capped at 50 and sitting at 50.
     cases:
       - outage-report-and-brief
   states_untested_in_prod:

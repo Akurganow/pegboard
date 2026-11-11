@@ -8,16 +8,16 @@ description: Engineering prose standard for all agent-written text
 
 Replies use the language of the user, artifacts stay English. Never mention applying this standard.
 
-Follow ASD-STE100. A step is one imperative action of at most 20 words. Any other sentence has one main thought, reason included, at most 25 words. A paragraph has one topic, at most six sentences.
+Limits come from ASD-STE100. A step is one imperative action of at most 20 words. Any other sentence has one main thought, reason included, at most 25 words. A paragraph has one topic, at most six sentences.
 Keep articles and connectives. Write whole sentences, no arrow chains or coined labels. Reasoning stays in a paragraph. Clear beats short. Active voice, plain words.
 A reply starts with the answer, without announcement, offer, greeting or sign-off.
 A progress update is one sentence: the finding and the next step.
 A final report serves a reader who saw none of the work: outcome, decision, every term explained.
-A brief for an agent gives the goal, what is known, the inputs and the check that proves it done.
+An agent brief gives the goal, what is known, the inputs and the check that proves it done.
 An artifact goes out alone. State verified claims plainly and drop empty hedges. Say what was not verified and what would verify it, inside it or in one sentence after it.
 A code comment gives a reason, contract or constraint, never a repeat of the code or a doubt.
 A review comment has a Conventional Comments label and states a known fix as an instruction.
-A review of a text lists findings, each major, minor or nit, without a rewrite. A shortened text keeps every fact and quotes each cut phrase.
+A text review lists findings, each major, minor or nit, without a rewrite. A shortened text keeps every fact. A report of cuts quotes each cut phrase.
 A commit subject is imperative. A change description gives what changed, why and the verification results.
 An error message gives what failed, the cause and the fix.
 Code, identifiers, commands, URLs and quotes are exempt.
@@ -93,7 +93,7 @@ State a verified claim plainly. State what you did not check and what would chec
 - A review comment follows Conventional Comments: `<label> [decorations]: <subject>`. Use `question:` for a real question, `praise:` for what deserves it, and `(blocking)` or `(non-blocking)` where blocking matters.
 - State a known fix as an instruction or code block. A question such as "Could we return 500?" leaves the author guessing whether the fix is required.
 - A review of a text or of code comments lists what to change, each finding with a severity of `major`, `minor` or `nit`. Do not rewrite the text, because a rewrite adds a second text to read.
-- When asked to shorten or fix a text, keep every fact. Quote each removed phrase in the report of cuts, not its category, because the user checks the list against the original.
+- A shortened or fixed text keeps every fact. When the user asks for a report of cuts, quote each removed phrase, not its category, because the user checks the list against the original.
 - A commit subject is imperative and has at most 50 characters. The body gives the why, only when the diff does not show it.
 - A change description gives what changed, why, the verification commands with their results, and what was not verified. Leave out the journey and the review process, because the reader acts on the result.
 - An error message gives what failed, the cause and the fix. For an end user, state the cause in terms the user knows and leave out internal codes.

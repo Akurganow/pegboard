@@ -1,16 +1,16 @@
 # Examples: calibration corpus
 
-One before and after pair per rule. When you report a finding, name the closest pair. The "before" specimens quote bad patterns, which the core rules exempt.
+One before and after pair per rule. When you report a finding, name the closest pair. The "before" specimens quote bad patterns, which the core rules exempt. After texts use facts the writer holds. Never invent them.
 
 ## Review comment
 
 Before: "I think it might perhaps be slightly better if we didn't perform this database query inside the loop because it could lead to some performance degradation."
 
-After: `issue (blocking):` This query runs inside the loop and issues one query per row on a 10k-row page. Fetch the IDs first and query once with `WHERE id IN (...)`.
+After: `issue (blocking):` This query runs inside the loop. Fetch the IDs first and query once with `WHERE id IN (...)`.
 
 ## Change description
 
-Before: "In this PR, we have spent significant effort revamping the authentication module."
+Before: "In this PR, we have spent significant effort replacing the custom OAuth handler with the provider adapter because it deadlocked the refresh timer (#1421). `npm test auth/` passes."
 
 After, in the template's own fields. **Summary:** Replaces the custom OAuth handler with the provider adapter, because the handler deadlocked the refresh timer (#1421). **Test plan:** `npm test auth/` passes.
 

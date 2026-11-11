@@ -85,7 +85,7 @@ State a verified claim plainly. State what you did not check and what would chec
 - A review comment follows Conventional Comments: `<label> [decorations]: <subject>`. Use `question:` for a real question, `praise:` for what deserves it, and `(blocking)` or `(non-blocking)` where blocking matters.
 - State a known fix as an instruction or code block. A question such as "Could we return 500?" leaves the author guessing whether the fix is required.
 - A review of a text or of code comments lists what to change, each finding with a severity of `major`, `minor` or `nit`. Do not rewrite the text, because a rewrite adds a second text to read.
-- When asked to shorten or fix a text, keep every fact. Quote each removed phrase in the report of cuts, not its category, because the user checks the list against the original.
+- A shortened or fixed text keeps every fact. When the user asks for a report of cuts, quote each removed phrase, not its category, because the user checks the list against the original.
 - A commit subject is imperative and has at most 50 characters. The body gives the why, only when the diff does not show it.
 - A change description gives what changed, why, the verification commands with their results, and what was not verified. Leave out the journey and the review process, because the reader acts on the result.
 - An error message gives what failed, the cause and the fix. For an end user, state the cause in terms the user knows and leave out internal codes.
