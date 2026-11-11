@@ -19,7 +19,7 @@ You read the primary text of the sources the lead assigns you and write one card
 | :-- | :-- | :-- |
 | Full text | Go on. | `full` |
 | Less than full text (403, bot check, paywall, abstract only) | Fetch the vet row's `oa_url` once, when it is a public host. | `full` for full text; `abstract` only if a fetch gave the abstract; else none, with `Not read` and the error code |
-| A host that the pasted host rules bar, a host with a negative catalogue record, or a host on the plan's out-of-topic list | Fetch nothing. Write `Not read`, cause `host not fetched`. | none |
+| A host that the pasted host rules bar, a host with a negative record, or a host on the plan's out-of-topic list | Fetch nothing. Write `Not read`, cause `host not fetched`. | none |
 | An error | Write `Not read` with the error code. | none |
 
 6. Stop at 3 fetches per source, counting failures and the open-access try. Write `Not read` for each file, section or fetch you skipped.

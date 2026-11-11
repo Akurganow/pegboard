@@ -1,88 +1,55 @@
 questions:
-  pairing_magazine_repeats_meta_analysis:
+  finland_small_employment_effect:
     instructions: >-
-      The answer says the DevWeekly article repeats the meta-analysis and is not a separate study.
+      The answer says the Finnish trial found at most a small effect on employment.
     cases:
-      - pairing-defects-managers-split
-  pairing_claim_contested:
+      - finland-income-trial-unemployment
+  pairing_names_why_studies_differ:
     instructions: >-
-      The answer rates the claim that pairing reduces defects as Contested.
+      The answer names a difference between the studies, such as their tasks or participants, as a reason the results differ.
     cases:
-      - pairing-defects-managers-split
-  pairing_experiment_contradicts_meta_analysis:
+      - pairing-bugs-and-time
+  pairing_costs_more_effort:
     instructions: >-
-      The answer says the experiment on professional developers contradicts the meta-analysis on post-release defects.
+      The answer says pairing takes more total developer effort than working alone.
     cases:
-      - pairing-defects-managers-split
-  db_listicle_repeats_vendor:
+      - pairing-bugs-and-time
+  vitamin_c_no_fewer_colds:
     instructions: >-
-      The answer says the Top 10 listicle repeats Fenwick's own benchmark instead of measuring anything.
+      The answer says regular vitamin C tablets did not reduce how many colds ordinary people catch.
     cases:
-      - embedded-db-three-times-faster
-  db_three_times_probable:
+      - vitamin-c-colds
+  habit_21_from_maltz:
     instructions: >-
-      The answer rates the claim that Fenwick reads are about three times faster as Probable.
+      The answer says the 21-day figure traces to Maxwell Maltz.
     cases:
-      - embedded-db-three-times-faster
-  db_gives_a_pick:
+      - habit-21-days
+  habit_takes_longer_than_21_days:
     instructions: >-
-      The answer gives a pick between Fenwick and Tarn.
+      The answer says research found that forming a habit usually takes longer than 21 days.
     cases:
-      - embedded-db-three-times-faster
-  db_load_tradeoff:
+      - habit-21-days
+  repeats_add_no_evidence:
     instructions: >-
-      The answer says that bulk loads ran slower on Fenwick than on Tarn in the university benchmark.
+      The answer says which sources repeat an earlier source and add no separate evidence.
     cases:
-      - embedded-db-three-times-faster
-  meeting_no_harvard_study_shown:
+      - finland-income-trial-unemployment
+      - habit-21-days
+  grade_word_used:
     instructions: >-
-      The answer says that none of the sources shows a Harvard study behind the 2.5-hour figure.
+      The answer rates a claim with one of the words Established, Probable, Tentative, Not established or Contested.
     cases:
-      - meeting-hours-harvard-stat
-  meeting_factcheck_lead_unconfirmed:
-    instructions: >-
-      The answer treats the fact-checker's account of a 2012 vendor survey as a lead that it has not confirmed.
-    cases:
-      - meeting-hours-harvard-stat
-  meeting_not_established:
-    instructions: >-
-      The answer rates the 2.5-hour claim as Not established.
-    cases:
-      - meeting-hours-harvard-stat
-  magnesium_review_pools_same_trials:
-    instructions: >-
-      The answer says the systematic review pools the same two trials and so is not additional independent evidence.
-    cases:
-      - magnesium-sleep-shelf-note
-  magnesium_claim_probable:
-    instructions: >-
-      The answer rates the claim that magnesium helps people fall asleep faster as Probable.
-    cases:
-      - magnesium-sleep-shelf-note
-  magnesium_trials_differ_in_people:
-    instructions: >-
-      The answer says the two trials studied different groups of people: adults with insomnia and adults aged 65 and over.
-    cases:
-      - magnesium-sleep-shelf-note
-  magnesium_leaflet_overstates:
-    instructions: >-
-      The answer says the distributor's leaflet claims more than the research shows.
-    cases:
-      - magnesium-sleep-shelf-note
-  rests_on_pasted_text:
-    instructions: >-
-      The answer says its grades rest on the pasted excerpts, which it could not confirm at their sources.
-    cases:
-      - pairing-defects-managers-split
-      - embedded-db-three-times-faster
-      - magnesium-sleep-shelf-note
-  survey_names_sub_questions:
-    instructions: >-
-      The answer names the sub-questions or explanations it covers.
-    cases:
-      - bronze-age-collapse-broad-look
+      - finland-income-trial-unemployment
+      - pairing-bugs-and-time
+      - vitamin-c-colds
+      - habit-21-days
   survey_waits_for_go_ahead:
     instructions: >-
       The answer asks for the user's go-ahead before the research starts.
+    cases:
+      - bronze-age-collapse-broad-look
+  survey_states_helper_limit:
+    instructions: >-
+      The answer states the most helper tasks it will start.
     cases:
       - bronze-age-collapse-broad-look

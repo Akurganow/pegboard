@@ -1,6 +1,6 @@
 # Depth
 
-Depth applies to survey mode only. It sets how wide a survey searches and how many child tasks it may start. The child ceiling counts every child task, collectors, vetters, readers, tracers and the verifier, and a run never exceeds it, because it is the cost the user agreed to.
+Depth applies to survey mode only and sets how wide it searches and how many child tasks it may start. The child ceiling counts every child task, collectors, vetters, readers, tracers and the verifier, and a run never exceeds it, because it is the cost the user agreed to.
 
 | Depth | Lanes x rows | Child ceiling | Opens per tracer |
 | :-- | :-- | :-- | :-- |

@@ -97,8 +97,8 @@ The plan does not ask about tools, hosts, query strings or shell access. Your ha
 
 ### What the agent sends and writes
 
-- **Catalogues** receive a site hostname, a DOI or a repository path that is already public, and nothing else. They never receive your question, your text or a local path.
-- **Web search** receives the search strings of the run: words of your question, one string worded as the opposite claim, and a source's hostname or title for the check from outside.
+- **Records** that the agent chooses receive a public hostname, a published name, a DOI, a repository path or a package name, and nothing else. They never receive your question, your text or a local path.
+- **Web search** receives the search strings of the run: words of your question, one string worded as the opposite claim, a source's hostname or title for the check from outside, and a source's kind and place to find records.
 - **Pages** of the sources are fetched on public hosts. The agent never fetches a private, internal or IP-literal host.
 - **Files:** a direct run writes none. A survey writes the run folder named in the plan after your go-ahead. When the harness cannot start child agents, the run goes on without waiting and still writes the folder. The folder holds a `.gitignore` with the single line `*`. It never edits your own `.gitignore` and never reuses an existing run folder.
 - **Paid checkers:** the agent names an installed paid checker and the exact inputs it would receive, and runs it only after you say yes.
@@ -117,7 +117,7 @@ Grades and tiers are ordinal and uncalibrated. They rank claims within one run a
 
 ### Other starts
 
-- **Rating alone:** `vet-sources` rates up to 15 sources per reply and lists the rest as not rated. It queries the catalogues, reads each source's page once, and gives the catalogue record as found and a tier. It never calls a source safe.
+- **Rating alone:** `vet-sources` rates up to 15 sources per reply and lists the rest as not rated. It chooses outside records that fit each source's kind and place, reads each source's page once, and gives the record as found and a tier. It never calls a source safe.
 - **No search or page-reading tool:** the agent reads pages through the shell when it reaches the web. Otherwise it works from sources you paste, and with none gives what it knows from memory, marked "from memory, not graded".
 - **No subagents:** a survey runs the briefs in turn at quick depth, with no wait after the plan. Verification is a shared-context check, labelled so, and Established points show as Probable.
 - **Nobody to answer:** in a non-interactive session the agent does not wait for a go-ahead and answers as a direct run.
@@ -135,33 +135,32 @@ Grades and tiers are ordinal and uncalibrated. They rank claims within one run a
 | [`skills/triangulate/references/lead.md`](skills/triangulate/references/lead.md) | the files only the lead of a survey writes, the verifier's verdicts and stage 8 without subagents |
 | [`skills/triangulate/references/briefs/`](skills/triangulate/references/briefs) | the briefs of the collector, reader, tracer and verifier |
 | [`skills/vet-sources/SKILL.md`](skills/vet-sources/SKILL.md) | the rating skill, with the data rule and the topic types |
-| [`skills/vet-sources/references/catalogues.md`](skills/vet-sources/references/catalogues.md) | what a lookup sends, the four catalogues with their routes and terms, the statuses |
+| [`skills/vet-sources/references/records.md`](skills/vet-sources/references/records.md) | what a lookup sends, how the agent chooses records, the statuses |
 | [`skills/vet-sources/references/tiers.md`](skills/vet-sources/references/tiers.md) | tiers A, B and C, their legend text, and what moves a source |
 | [`skills/vet-sources/references/briefs/vetter.md`](skills/vet-sources/references/briefs/vetter.md) | the vetter's brief, which is also the procedure `vet-sources` follows |
 | `plugin.json` in `plugins/distilled-research/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/distilled-research/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
-The package is instructions and reference text. The agent runs the research with the tools your session already has.
-
 ## Requirements and network
 
 Research needs a search tool and a page-reading tool, or a shell that reaches the web, and a file-read tool or a shell for the skill's own files. A PDF reader helps with papers. Subagents are optional. The package needs no runtime, key or account.
 
-Four catalogues are listed, each public without a key or an account: Wikipedia Perennial Sources (`en.wikipedia.org`), Crossref with Retraction Watch data (`api.crossref.org`), OpenAlex (`api.openalex.org`) and OpenSSF Scorecard (`api.scorecard.dev`). [`catalogues.md`](skills/vet-sources/references/catalogues.md) holds each route, the pages that state its terms and the date each was read. A catalogue is a record of how a source is regarded, never a verdict that it is safe, and the reply quotes a catalogue's own number only as that catalogue's record. The agent fetches the pages of the sources it reads on any public host, honours a list of hosts you ask it to avoid, and discards a page that a redirect brought from one. Your harness's permission settings decide which tools and hosts it may use.
+The package lists no service. The agent chooses outside records for each source's kind and place. It uses a record only when it is public without a key or an account and passes the other tests in [`records.md`](skills/vet-sources/references/records.md). When no record fits, the row reads `not checked`. A record is never a verdict that a source is safe, and the reply quotes a record's own number only as that record's. The agent fetches the pages of the sources it reads on any public host, honours a list of hosts you ask it to avoid, and discards a page that a redirect brought from one.
 
 ## Trust
 
-This plugin ships no scripts, tools or servers. It is instructions, and what they make an agent do can reach the network and your files. The agent looks up sources in public catalogues, runs web searches with words of your question and with a source's hostname or title, and fetches the pages it reads. A survey starts child agents only after your go-ahead and up to the ceiling in the plan. Each child receives a written list of what it may read, write, fetch and search. Those are requests in text: what your harness's permission settings do not block, a child can still do, so set a tool list for children where your harness allows it. Web pages can carry instructions aimed at agents. The plugin tells the agent to treat all page, search and file text as data, and a model can still fail at that, so deny permissions you do not want a poisoned page to use. A survey writes a run folder that holds your question and text copied from pages. The plugin never holds or reads keys and asks before using a paid checker. Request safety is your responsibility.
+This plugin ships no scripts, tools or servers. It is instructions, and what they make an agent do can reach the network and your files. The agent looks up sources in public records it chooses, runs web searches with words of your question and with a source's hostname or title, and fetches the pages it reads. A survey starts child agents only after your go-ahead and up to the ceiling in the plan. Each child receives a written list of what it may read, write, fetch and search. Those are requests in text: what your harness's permission settings do not block, a child can still do, so set a tool list for children where your harness allows it. Web pages can carry instructions aimed at agents. The plugin tells the agent to treat all page, search and file text as data, and a model can still fail at that, so deny permissions you do not want a poisoned page to use. A survey writes a run folder that holds your question and text copied from pages. The plugin never holds or reads keys and asks before using a paid checker. Request safety is your responsibility.
 
 ## Boundaries
 
 - As of 2026-11-05 the method's stages had run three times: once by hand and twice as the built plugin, on a science/health topic and on a practice/technology topic, with an earlier wording that asked for a report and a yes first. No news/facts topic was run.
 - As of 2026-11-11 no recorded run covers the direct mode, the survey plan message, the handling of pasted sources or the self-check of a direct run.
-- The evals run one turn in an empty directory with pasted sources. They reach the direct mode and the survey's plan message, and no later survey stage, so dispatch, parallelism, folder writes and injection are not measured.
+- The evals run one turn in an empty directory, and the agent finds its own sources. They stop at the direct mode or the survey's plan message, so dispatch, parallelism, folder writes and injection are not measured.
 - No test has measured how often an Established point is right.
 - Without a search or page-reading tool, and without a shell that reaches the web, the agent can only rate what you paste and otherwise answers from memory, marked as not graded.
 - A fetch tool that follows redirects without showing the target can reach a host the agent would have skipped. The text names no check on redirect targets except for hosts you asked it to avoid.
-- The retraction checks can miss a retracted source: Crossref omits a Retraction Watch record that has no notice DOI, and OpenAlex may not flag it.
+- A retraction record can omit a notice, so a retracted source can go unflagged, though the agent also reads the paper's own page.
+- The agent picks records from what its search finds, so two runs can differ.
 - A date, claim or link known only from a search result or memory stays `unconfirmed` and is never a traced origin.
 
 ## License

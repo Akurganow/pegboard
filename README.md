@@ -137,14 +137,14 @@ clients that run plugin hooks. The command is a literal `echo` or `printf` of
 the rules' short form. It reads no file and runs no script, and
 `bundles/prose-discipline/hooks/` holds both hooks files. The other plugins
 carry instructions and reference text only. The instructions of
-`distilled-research` direct an agent to read public web pages, run web
-searches (words of your question, or a source's hostname or title) and
-query open catalogues with a site hostname, a DOI or a repository path. A
-survey writes a run folder, and it starts child agents only after you
+`distilled-research` direct an agent to read public pages, run web
+searches (words of your question, a source's hostname or title, or its kind
+and place) and query public records it chooses, by hostname, name, DOI,
+repository path or package name. A
+survey writes a run folder, and starts child agents only after you
 approve its plan. A fetch tool that follows redirects without showing the target can
-reach a host the agent would have skipped. Its
-[README](plugins/distilled-research/README.md) lists the catalogues and what
-each receives.
+reach a host the agent would skip. Its
+[README](plugins/distilled-research/README.md) says what a lookup sends.
 
 
 ## Documentation

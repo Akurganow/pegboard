@@ -1,43 +1,43 @@
 questions:
-  names_catalogue:
+  names_record:
     instructions: >-
-      The answer names a catalogue or record that a rating comes from.
+      The answer names an outside record that a rating rests on.
     cases:
       - can-i-cite-wikipedia-and-statista
-      - github-repos-benchmark-evidence
+      - framework-benchmark-sources
       - is-this-a-reliable-source-single
-      - econ-papers-trust-ordering
+      - mmr-papers-which-hold-up
   calls_no_source_safe:
     instructions: >-
       The answer does not describe any source as safe.
     cases:
       - can-i-cite-wikipedia-and-statista
-      - github-repos-benchmark-evidence
+      - framework-benchmark-sources
       - is-this-a-reliable-source-single
-      - econ-papers-trust-ordering
+      - mmr-papers-which-hold-up
   gives_a_tier_each:
     instructions: >-
       The answer gives each source a tier.
     cases:
-      - github-repos-benchmark-evidence
-      - econ-papers-trust-ordering
-  rejects_medium_post:
+      - framework-benchmark-sources
+      - mmr-papers-which-hold-up
+  iea_most_reliable:
     instructions: >-
-      The answer advises against citing the Medium post by ev_guru_2021 as evidence.
+      The answer ranks iea.org as the most reliable of the sources.
     cases:
       - can-i-cite-wikipedia-and-statista
-  warns_off_weak_repo:
+  benchmarks_game_not_frameworks:
     instructions: >-
-      The answer says the repository with 14 stars and no commits since 2021 is weak evidence.
+      The answer says the benchmarks game measures small programs across programming languages and not web framework latency.
     cases:
-      - github-repos-benchmark-evidence
+      - framework-benchmark-sources
   flags_unreliable_site:
     instructions: >-
-      The answer says natural-news.com is not reliable for nutrition claims.
+      The answer says naturalnews.com is not reliable for nutrition claims.
     cases:
       - is-this-a-reliable-source-single
-  substack_below_journal_papers:
+  wakefield_retracted:
     instructions: >-
-      The answer rates the Substack post below the two American Economic Review papers.
+      The answer says the 1998 Wakefield paper in The Lancet was retracted.
     cases:
-      - econ-papers-trust-ordering
+      - mmr-papers-which-hold-up
