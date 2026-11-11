@@ -41,7 +41,7 @@ Read each file at the stage that names it. Start the children of one stage toget
 2. Dispatch one collector per lane with `briefs/collector.md`.
 3. Merge the `candidates-<lane>.md` rows by canonical id into `merged.tsv`.
 4. Cut `merged.tsv` into the shards of `depth.md` and dispatch a vetter per shard with `../../vet-sources/references/briefs/vetter.md`. Run the id check.
-5. Size the reader set by `depth.md` from the kept tier A or B sources, or from every pasted source, and record the sources left out in `plan.md`. Dispatch readers with `briefs/reader.md`, one `cards-<shard>.md` each. Run the id check.
+5. Size the reader set by `depth.md` from the kept tier A or B sources, or from the pasted sources the vetter kept, and record the sources left out in `plan.md`. Dispatch readers with `briefs/reader.md`, one `cards-<shard>.md` each. Run the id check.
 6. Dispatch one tracer per theme with `briefs/tracer.md`. At quick depth start none and trace origins yourself, as `depth.md` says.
 7. Write `origins-index.md` and `distillate.md` by `lead.md`, grading each point by `origins-and-grades.md`.
 8. Dispatch a fresh verifier with `briefs/verifier.md`, which starts with no context from the run and so does not share your mistakes. Edit its verdicts into `distillate.md` in place.

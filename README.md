@@ -140,8 +140,8 @@ carry instructions and reference text only. The instructions of
 `distilled-research` direct an agent to read public web pages, run web
 searches (words of your question, or a source's hostname or title) and
 query open catalogues with a site hostname, a DOI or a repository path. A
-survey writes a run folder and starts child agents only after you approve
-its plan. A fetch tool that follows redirects without showing the target can
+survey writes a run folder, and it starts child agents only after you
+approve its plan. A fetch tool that follows redirects without showing the target can
 reach a host the agent would have skipped. Its
 [README](plugins/distilled-research/README.md) lists the catalogues and what
 each receives.

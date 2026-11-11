@@ -100,7 +100,7 @@ The plan does not ask about tools, hosts, query strings or shell access. Your ha
 - **Catalogues** receive a site hostname, a DOI or a repository path that is already public, and nothing else. They never receive your question, your text or a local path.
 - **Web search** receives the search strings of the run: words of your question, one string worded as the opposite claim, and a source's hostname or title for the check from outside.
 - **Pages** of the sources are fetched on public hosts. The agent never fetches a private, internal or IP-literal host.
-- **Files:** a direct run writes none. A survey writes the run folder you approved in the plan, with a `.gitignore` holding the single line `*`. It never edits your own `.gitignore` and never reuses an existing run folder.
+- **Files:** a direct run writes none. A survey writes the run folder named in the plan after your go-ahead. When the harness cannot start child agents, the run goes on without waiting and still writes the folder. The folder holds a `.gitignore` with the single line `*`. It never edits your own `.gitignore` and never reuses an existing run folder.
 - **Paid checkers:** the agent names an installed paid checker and the exact inputs it would receive, and runs it only after you say yes.
 - **Child agents:** a survey only, up to the ceiling in the plan. A child writes only the file its brief names, starts no further child, and reads no environment variables, credential files, key files or dot-files.
 

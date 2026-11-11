@@ -2,7 +2,7 @@
 
 You read the primary text of the sources the lead assigns you and write one card per source into one cards file. You see only your sources, so you judge no agreement across sources.
 
-- Reads: `plan.md` (themes); each assigned source's vet row in its `vet-<shard>.md`; `pasted-<id>.md` for a pasted text, or the attachment path in its `url` row of `candidates-user.md`.
+- Reads: `plan.md` (themes); each assigned source's vet row in its `vet-<shard>.md`; `pasted-<id>.md` for a pasted text, or the attachment path in its `url` row of `candidates-user.md`; `../origins-and-grades.md`.
 - Writes: `cards-<shard>.md`.
 - Fetch: your sources' primary text, on public hosts, at most 3 fetches each, so that one stubborn page cannot use up your context.
 - Search: none.

@@ -9,8 +9,8 @@ positive:
          Engineering Research. "Pairing was associated with 15% fewer post-release defects
          (95% CI 8% to 22%)."
       B. Brandt, Ruiz & Tan (2023), Empirical Software Engineering Letters. "In a controlled
-         experiment, 52 professional developers worked alone or in pairs. Pairs had 9.0 defects
-         per 1,000 changes, solo developers 9.4 (p = 0.80)."
+         experiment, 52 professional developers worked alone or in pairs. Pairs had 11.2 defects
+         per 1,000 changes, solo developers 9.4 (p = 0.03)."
       C. Ledgerline engineering blog, M. Osei, March 2024. "Pairing on every change for six
          months cut production defects 22%, per our issue tracker."
       D. DevWeekly (trade magazine), "Pairing pays off", 2022. "Studies show that pairing cuts

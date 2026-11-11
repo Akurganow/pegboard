@@ -1,6 +1,6 @@
 # Run folder
 
-A survey writes every file into one folder, by these rules. Each role's row format sits in its brief.
+A survey writes every file into one folder, by these rules.
 
 ## Folder
 
@@ -27,6 +27,7 @@ The lead writes it from the go-ahead. It holds:
 - Out-of-topic list: the subjects and hosts that make a source off topic, or that the user asked to avoid, written from the user's request.
 - Canonical-id rule: the form two finds of one source share, such as a DOI, `owner/repo`, or a URL without scheme, `www.`, fragment and trailing slash. Keep query parameters except tracking ones such as `utm_source`.
 - Not read, over the child limit: the kept ids no reader gets, written before readers dispatch.
+- Dispatch log: one line appended for each child the lead starts. On resume the lead counts those lines against the ceiling, and stops when it cannot read the count.
 
 ## Files
 
@@ -49,7 +50,7 @@ One tab-separated row per canonical id: `canonical_id`, `source`. Line 1 is the 
 
 ## Id check
 
-So that no source drops out of the run unseen, every `source` value in `merged.tsv` must end with exactly one outcome. The lead checks after stage 4 that each id has one vet row, and after stage 5 that each `keep` = `yes` id and each pasted source outside the plan's not-read list has one card. On a missing or doubled id, redispatch that shard once and check again. A redispatch counts toward the ceiling. With none left, list the source as not read. If it still fails, list the source as not read with the cause "lost in the run" and go on. The reply's Skipped section names it.
+Every `source` value in `merged.tsv` must end with exactly one outcome. The lead checks after stage 4 that each id has one vet row, and after stage 5 that each `keep` = `yes` id and each pasted source outside the plan's not-read list has one card. On a missing or doubled id, redispatch that shard once and check again. A redispatch counts toward the ceiling. With none left, list the source as not read. If it still fails, list the source as not read with the cause "lost in the run" and go on. The reply's Skipped section names it.
 
 ## Resume
 
