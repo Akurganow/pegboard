@@ -1,81 +1,32 @@
 positive:
-  - id: pairing-defects-managers-split
+  - id: finland-income-trial-unemployment
     prompt: |
-      Our engineering managers are split on whether pair programming cuts bugs, and the numbers
-      I found don't line up. I need to know why before I write a recommendation. The four items
-      I have:
-
-      A. Okafor & Lindqvist (2021), meta-analysis of 18 controlled studies, Journal of Software
-         Engineering Research. "Pairing was associated with 15% fewer post-release defects
-         (95% CI 8% to 22%)."
-      B. Brandt, Ruiz & Tan (2023), Empirical Software Engineering Letters. "In a controlled
-         experiment, 52 professional developers worked alone or in pairs. Pairs had 11.2 defects
-         per 1,000 changes, solo developers 9.4 (p = 0.03)."
-      C. Ledgerline engineering blog, M. Osei, March 2024. "Pairing on every change for six
-         months cut production defects 22%, per our issue tracker."
-      D. DevWeekly (trade magazine), "Pairing pays off", 2022. "Studies show that pairing cuts
-         defects by about 15%, according to a recent meta-analysis."
-
-      What should I tell the managers? Reply here.
-  - id: embedded-db-three-times-faster
+      A claim keeps coming up in articles about universal basic income: that Finland's
+      2017-2018 trial "cut unemployment" among its participants. I've seen it in dozens of
+      places and suspect most of them trace back to the same one or two reports. Trace it
+      for me: what do the sources say, which ones merely copy an earlier one, and how much
+      independent support does the claim have? Answer in your reply.
+  - id: pairing-bugs-and-time
     prompt: |
-      We're choosing an embedded analytics database for a dashboard that is 95% reads, with one
-      2 GB bulk load a night. It's down to Fenwick and Tarn. I keep seeing
-      "Fenwick reads are about three times faster". How far can I trust that, and which should
-      we pick? What I collected:
-
-      1. Fenwick's own engineering blog, L. Brandvold, February 2025. "We measured Fenwick at
-         3.1 times the query throughput of Tarn on the same machine. The script and data are
-         in our repository."
-      2. Halden University Systems Lab preprint, Aaltonen and Reyes, March 2025, method and data
-         released. "Fenwick answered read queries 2.7 times faster than Tarn. Bulk loads ran
-         1.8 times slower on Fenwick."
-      3. dbpicks.example listicle, April 2025. "Fenwick: about three times faster reads than
-         Tarn, per Fenwick's benchmark."
-      4. Tarn official documentation, version 4.2. "Tarn is tuned for fast bulk loads."
-
-      Give me the pick and your view on the three-times line, in your reply.
-  - id: meeting-hours-harvard-stat
+      We're deciding between pair programming and solo work with pull-request review for a
+      team of eight. Some studies say pairing cuts bugs and others find no gain. Why do they
+      disagree, and what does pairing cost in developer time? Put your answer in the reply.
+  - id: vitamin-c-colds
     prompt: |
-      A stat keeps showing up in our managers' decks: "employees lose 2.5 hours a day to
-      unnecessary meetings, according to a Harvard study." I can't find the study. Can it go in
-      our meeting-reduction proposal? What I collected:
-
-      1. Workday Weekly (blog), K. Ferris, March 2024. "A Harvard study found that the average
-         employee wastes 2.5 hours a day in pointless meetings."
-      2. The Ledger Business Daily, May 2024. "A widely cited Harvard study found workers lose
-         2.5 hours every day to unnecessary meetings."
-      3. FactCheck Desk, September 2024. "We found no Harvard study. The earliest source is a
-         2012 press release from CalSync, a calendar-software vendor, on a survey of its
-         customers. We could not obtain the survey."
-
-      Answer in your reply.
-  - id: magnesium-sleep-shelf-note
+      my mum swears by vitamin C tablets to keep colds away and my sister says its all
+      placebo. who's right? what does the research actually say. answer here pls
+  - id: habit-21-days
     prompt: |
-      I'm a pharmacy technician writing a shelf note on magnesium for sleep, and I only want to
-      say what the research backs. A supplier's leaflet makes it sound settled. What I have:
-
-      1. Haldane et al. (2022), randomized placebo-controlled trial, Journal of Sleep Medicine.
-         120 adults with chronic insomnia. "Time to fall asleep was 11 minutes shorter than with
-         placebo (95% CI 4 to 18)."
-      2. Moreau et al. (2023), randomized placebo-controlled trial, Clinical Nutrition Reports.
-         96 adults aged 65 and over. "Time to fall asleep was 9 minutes shorter than with
-         placebo (95% CI 1 to 17)."
-      3. Ferreira & Duan (2024), systematic review, Sleep Reviews. "We found two randomized
-         trials (Haldane 2022; Moreau 2023). Pooled, magnesium shortened time to fall asleep by
-         10 minutes (95% CI 5 to 15). Certainty: moderate."
-      4. Supplement distributor leaflet, 2024. "A 2024 systematic review proves that magnesium
-         helps you fall asleep faster."
-
-      How strongly does the research back "magnesium helps people fall asleep faster"? Answer in
-      your reply, written so that I can turn it into the note.
+      Every productivity book I own says it takes 21 days to form a habit. I'm putting the
+      number in a talk for new hires and want to know where it comes from and whether it
+      holds up. Answer in your reply.
   - id: bronze-age-collapse-broad-look
     prompt: |
       I'm writing a long essay on the Late Bronze Age collapse around 1200 BCE and I want a
       broad look at what scholars say before I pick a thesis. Please cover the main
       explanations (climate and drought, earthquakes, the Sea Peoples, systems collapse), say
-      where the scholarship converges and where it splits, and read widely. Check the sources before you rely on them, and split the reading across helpers if
-      that is quicker.
+      where the scholarship converges and where it splits, and read widely. Check the sources
+      before you rely on them, and split the reading across helpers if that is quicker.
 near_miss:
   - id: who-pandemic-declaration-date
     prompt: |
