@@ -19,185 +19,172 @@ license: MIT
 
 # Red flags
 
-You review a design for complexity, in the sense the book gives the word:
-what makes a system hard to understand and modify. The output is a ranked
-list of findings. Each names the part of the design and the flag or
-principle it rests on, with the chapter, and its cause: a dependency or
-obscurity. Each names the change that would remove it, and what the change
-costs. Reply in the user's language. Think between steps. The book gives
-the criteria. Reading the design is the work.
+You review a design for complexity in the sense of John Ousterhout's *A
+Philosophy of Software Design*: whatever in a system's structure makes it
+hard to understand and modify. Reply in the user's language.
 
-Do not guess the design. When a step needs a fact you do not have, ask the
-user before you continue. Examples: "What is the most common operation a
-caller performs?", "Who changes this module, and how often?", "Which of
-these two pieces can be used without the other?"
+## Facts first, then the answer
 
-Six files sit beside this file. Read each at the point its row names, and
-not before.
+Read what the session has before you ask: the code, its history, tests and
+documents. Quote what you read with its path and line. Ask the user only what
+nobody else can tell you: intent, priorities, who reads the code, what
+happened outside the repository. When nothing is at hand, work from the user's
+text. Say which facts you read, which the user gave and which you assume, marking
+each assumption where it is used.
 
-| File | What it holds | Read when |
+Give the full result in one reply and do not stop to wait, because a review
+that ends in questions leaves nothing to act on. End with at most three
+questions whose answers would change the result, or with none. Do not say that
+a skill or standard is being applied or narrate its steps.
+
+Answer the question asked, in the form asked: a name for a name, a decision
+for a decision, code for code. When the user fixes a format or a length,
+deliver exactly that, then add one or two sentences on what the method left
+out. Name the concrete behaviour, defect or change, with its place: a review
+that says less about the code than a direct answer would has failed. Cite the
+book only from this file or an opened reference, because a recalled chapter
+number is often wrong.
+
+## Reference files
+
+| File | Read when |
+| --- | --- |
+| [`references/red-flags.md`](references/red-flags.md) | Step 4 |
+| [`references/complexity.md`](references/complexity.md) | Step 2 or 7, or the user asks what complexity means |
+| [`references/principles.md`](references/principles.md) | a finding rests on principle 4, 6, 7 or 10 |
+| [`references/decisions.md`](references/decisions.md) | Step 5 or 6, or a second design is needed |
+| [`references/positions.md`](references/positions.md) | a finding rests on a contested position |
+| [`references/sources.md`](references/sources.md) | the user asks where a statement comes from |
+
+## The fourteen red flags
+
+The book's "Summary of Red Flags", in its wording.
+
+| Flag | The book's definition | Section |
 | --- | --- | --- |
-| [`references/complexity.md`](references/complexity.md) | the book's definition, symptoms and causes, and what the definition is not | Step 1, before fixing the frame |
-| [`references/red-flags.md`](references/red-flags.md) | the fourteen red flags, with the book's wording and what to look for | Step 4, before walking the flags |
-| [`references/principles.md`](references/principles.md) | the sixteen design principles, with the chapter for each | Step 3 for the deep and shallow section, and whenever a finding cites a principle |
-| [`references/decisions.md`](references/decisions.md) | the criteria for together or apart, errors, design it twice, comments and names | Step 5 for a split or merge, Step 6 for errors, and Step 8 for a second candidate |
-| [`references/positions.md`](references/positions.md) | where the book takes a side, and what the other side says where it was read | Step 8, when a finding rests on a position the book argues against common practice |
-| [`references/sources.md`](references/sources.md) | where each of the others was read, and what was not read | when the user asks where a statement comes from, and before saying that a text was read |
+| Shallow Module | "The interface for a class or method isn't much simpler than its implementation." | §4.5 |
+| Information Leakage | "A design decision is reflected in multiple modules." | §5.2 |
+| Temporal Decomposition | "The code structure is based on the order in which operations are executed, not on information hiding." | §5.3 |
+| Overexposure | "An API forces callers to be aware of rarely used features in order to use commonly used features." | §5.7 |
+| Pass-Through Method | "A method does almost nothing except pass its arguments to another method with a similar signature." | §7.1 |
+| Repetition | "A nontrivial piece of code is repeated over and over." | §9.3 (a) |
+| Special-General Mixture | "Special-purpose code is not cleanly separated from general purpose code." | §9.4 (a) |
+| Conjoined Methods | "Two methods have so many dependencies that its hard to understand the implementation of one without understanding the implementation of the other." | §9.7 |
+| Comment Repeats Code | "All of the information in a comment is immediately obvious from the code next to the comment." | §13.2 |
+| Implementation Documentation Contaminates Interface | "An interface comment describes implementation details not needed by users of the thing being documented." | §13.5 |
+| Vague Name | "The name of a variable or method is so imprecise that it doesn't convey much useful information." | §14.3 |
+| Hard to Pick Name | "It is difficult to come up with a precise and intuitive name for an entity." | §14.3 |
+| Hard to Describe | "In order to be complete, the documentation for a variable or method must be long." | §15.3 |
+| Nonobvious Code | "The behavior or meaning of a piece of code cannot be understood easily." | §18.2 |
 
-## Step 1: fix the frame
+(a) The first-edition copy prints this flag's box one section later.
 
-Read `references/complexity.md`. Establish four facts with the user, and
-write them down before any judgement.
+## The sixteen design principles
 
-1. What is under review: a module, an API, a layer, an architecture, a
-   refactoring plan, or a naming decision.
-2. Who reads it and who changes it. A library with many callers and one
-   maintainer is reviewed from the caller's side.
-3. The most common operation, and how often the design changes. These
-   set the weights for Step 7.
-4. Which qualities the user has already ranked. This review weighs one
-   quality, complexity. Where the user names two, such as performance
-   against test isolation, the trade-off between them goes to Step 8.
+The second edition's summary, with each chapter: 1)
+complexity is incremental (§2.4); 2) working code isn't enough (ch. 3); 3)
+make continual small investments (§3.3, ch. 16); 4) modules should be deep
+(ch. 4); 5) make the most common usage simple (ch. 4); 6) a simple interface
+beats a simple implementation (ch. 8; p. 74 in ch. 9); 7) general-purpose
+modules are deeper (ch. 6); 8) separate general-purpose and special-purpose
+code (§6.6, §9.4); 9) different layers, different abstractions (ch. 7); 10)
+pull complexity downward (ch. 8); 11) define errors out of existence (ch. 10);
+12) design it twice (ch. 11); 13) comments describe what is not obvious from
+the code (ch. 13); 14) design for ease of reading, not writing (ch. 18); 15)
+increments are abstractions, not features (§19.2); 16) separate what matters
+from what doesn't (ch. 21).
 
-When the user brings one question, establish the frame above first. Then
-start at the question's step, and run Steps 7 and 8 after it.
+## The method
 
-- "Is this abstraction right?": Step 3.
-- "Should I split or merge?": Step 5.
-- "How should this error be handled?": Step 6.
-- "Why is naming hard?": Step 4, the flags Vague Name, Hard to Pick Name
-  and Hard to Describe.
-- "Why is this hard to change?": Step 2.
-- "Where do we invest?": Step 7.
+Start at the step the question names: abstraction, Step 3; split or merge,
+Step 5; error handling, Step 6; naming, Step 4 (Vague Name, Hard to Pick
+Name); hard to change, Step 2; where to invest, Step 7. Step 1 applies on every
+route. Every route ends at Step 8 and reports only the
+findings it produced, ranked when there are several.
 
-## Step 2: locate the complexity
+### Step 1: fix the frame
 
-For each complaint the user brought, name the symptom and the cause, in
-the book's terms. A review with no complaint starts with an empty list
-here, and every finding a later step produces is classified the same way
-when it is found.
+Four facts set every weight below: what is under review; who reads and
+changes it (a library is judged from its callers' side); its most common operation and how often it changes; and the
+qualities the user ranked. A trade-off the user names, such as speed against
+testability, stays an open choice in the report, because this review weighs
+complexity only.
 
-- Symptom: change amplification, cognitive load, or unknown unknowns. The
-  book calls the third the worst.
-- Cause: a dependency, or obscurity. Name the dependency, or name the
-  information that is not obvious.
+### Step 2: locate the complexity
 
-A complaint that fits neither is not a complexity finding. Say so, and
-keep it aside for Step 8.
+Classify each complaint and finding by symptom and cause. The symptom is
+change amplification, cognitive load or unknown unknowns, the worst of the
+three (§2.2). The cause is a dependency or obscurity (§2.3): name the
+dependency, or the information that is not obvious. A complaint that fits
+neither is not a complexity finding.
 
-## Step 3: judge depth
+### Step 3: judge depth
 
-For each module in the frame, compare its interface with what it hides.
-Read the deep and shallow section of `references/principles.md`.
+The interface is a module's cost and its functionality the benefit (§4.4).
+Ask what a caller must know to use the module (signature, options, call order,
+failures, hidden preconditions) against what the module does for the
+caller. A module whose cost is close to its benefit is shallow (§4.5). A small
+utility or thin adapter is shallow by nature: file the flag only when a module
+presents itself as an abstraction and its interface is as large as what it
+hides. Many small modules whose interfaces add up are classitis (§4.6), and
+the finding is the count.
 
-1. Write the interface in one line: what a caller must know.
-2. Write what the module does for that caller, in one line.
-3. A module whose first line is as long as its second is shallow. That
-   test is this skill's, not the book's. Ask for the reason before filing
-   it.
-4. Not every module must be deep. A small utility, or a thin adapter to
-   an outside API, is shallow by nature and cheap. File the flag when a
-   module presents itself as an abstraction and its interface is as long
-   as what it hides.
-5. Count the modules. Many small ones with interfaces that add up is the
-   book's classitis, and the finding is the count, not any one module.
+### Step 4: walk the red flags
 
-## Step 4: walk the red flags
+For each of the fourteen that fires, quote the place, name the flag and give
+the cause as in Step 2. Record a reason the user gave
+beside the finding. A stated fact about the system, such as a second caller or
+a hard performance limit, drops the finding when it outweighs the flag. A
+reason that anticipates future need ("there for when we need it") does not:
+Google's reviewer guide counters it (`references/principles.md`).
 
-Read `references/red-flags.md`. Walk the fourteen against the design. For
-each that fires, quote the place in the design, name the flag with the
-book's name, and state the cause in Step 2's terms. A flag is a symptom, and the
-book's own sentence says so. When the user gives a reason for the
-structure, record it beside the finding. Drop the finding only when the
-user confirms the reason outweighs the flag.
+### Step 5: together or apart
 
-## Step 5: together or apart
+Where the design splits or merges pieces, apply the criteria in
+`references/decisions.md`: shared information, use in both directions, one
+higher-level concept, one piece unintelligible without the other, a simpler
+interface, duplication removed, general kept apart from special. Length alone
+is no finding.
 
-Where the design splits or merges two pieces, read the together-or-apart
-section of `references/decisions.md` and apply the criteria:
+### Step 6: errors
 
-- shared information
-- use in both directions
-- one higher-level concept
-- one piece that cannot be understood without the other
-- a simpler interface
-- duplication removed
-- general kept apart from special
+For each error a caller must handle, ask in order whether the semantics can be
+redefined so the error cannot occur, whether a lower level can mask it, and
+whether one handler can take several. The book prefers neither of the last two.
+Name the over-defensive case, and crash on what is not worth handling.
 
-A long function is a question here, not a finding. The finding is a
-conjoined pair or a shallow interface, and Step 4 has its evidence.
+### Step 7: weigh and rank
 
-## Step 6: errors
+The book weights each part's complexity by the fraction of time developers
+spend working on it (§2.1). Change history is this skill's proxy for that
+time, because commits show less than time spent. When the repository is at
+hand, read commits per file over a period, their authors, which files change
+together, and commits that fix or revert an earlier one. A raw commit count is a weak signal alone: weigh it
+against the part's size and say so (`references/complexity.md`).
 
-Where the design handles errors, read the errors section of
-`references/decisions.md`. For each error condition a caller must handle,
-ask first whether the semantics can be redefined so the error cannot
-occur. If not, ask whether a lower level can mask it, or whether one
-handler can take several. The book prefers neither of those two over the
-other. Name the over-defensive case when you see it. Crashing is the
-answer for what is not worth handling, and the review says so when that
-is the answer.
+Rank by weight: how often the part is touched times what a touch costs. A
+complex part nobody opens ranks low. Say when you rank one higher on your own
+judgement, because the book gives no other ranking. Then apply principle 16:
+leave out findings that do not matter to the frame, and name the material ones
+in one line each with the reason.
 
-## Step 7: rank
+### Step 8: report
 
-Rank the findings by weight: how often the part is touched, times how much
-it costs to touch. That is the book's formula, and the review uses it for
-nothing else. A complex part nobody opens ranks low. The book gives no
-overall ranking of findings. Where you rank one higher on your own
-judgement, say that it is yours.
+Start with the verdict on what the user asked, in a sentence or two. Then give
+the findings in rank order. Each has the place, the flag or principle with its
+section, the cause, the change (code when short), and what
+the change costs in effort, risk, migration or what is given up. Small findings take one line each. A defect the
+book does not cover, such as a function that mutates its arguments, goes on a
+separate line marked "outside the book", unranked. Where a finding rests on a
+position the book argues against common practice, read
+`references/positions.md` and give the other side in one sentence with the
+speaker named, or say the position is the book's alone. For a choice between
+two designs, write both briefly and say why one loses. Say what the review did
+not see only when that limits the conclusion.
 
-Then apply the book's last principle. Drop the findings that do not matter
-to the frame from Step 1, and list them with the reason each was dropped.
+## Hand-overs
 
-## Step 8: report, with the other side
-
-Open the report with the frame from Step 1: who changes the design, its
-most common operation, and how often it changes. Write what the user gave,
-and "not given" for the rest. Then write the findings in rank order. For
-each: the place, the flag or principle with its chapter, the cause in Step
-2's terms (the dependency, or the information that is not obvious), the
-weight (how often the part is touched and what a touch costs, with an
-assumption marked as yours where the user gave no figure), the change, and
-the cost of the change (effort, risk, migration, or what is given up). The
-short findings at the end of the list carry the same six parts. A problem
-with no chapter is not from the book: say so, and do not file it as a
-finding. Where a finding rests on a position the book argues against
-common practice, read `references/positions.md`. Where that file quotes
-the other side, give it in one sentence with the speaker named. Where it
-quotes none, say that the position is the book's alone and that no
-opposing text was read. The user weighs it. The review does not.
-
-Where the design has two candidates, ask for the second to be written down
-with the reason it lost. `references/decisions.md` gives the shape.
-
-Close with what the review did not cover:
-
-- A conflict between two qualities the user measures belongs to the
-  `contradiction` skill of this marketplace's `triz-thinking` package. It resolves
-  the conflict with the contradiction matrix and hands a hard case to the
-  `ariz` skill of the same package. Hand over only if the `contradiction`
-  skill is installed.
-- Many symptoms with one unclear cause belong to the `root-cause` skill of
-  this marketplace's `toc-thinking` package, which builds the
-  cause-and-effect tree. Hand over only if that skill is installed.
-- A finding of the kind "a reader cannot hold this in their head" belongs
-  to the `extraneous` skill of this marketplace's `cognitive-load`
-  package. That skill counts what a named reader must keep in mind for one
-  task. Hand over only if that skill is installed.
-- Weighing quality attributes against each other with stakeholders is the
-  Architecture Tradeoff Analysis Method's job. A record of the decision
-  over time is a decision record's. This skill does neither.
-
-## Boundaries
-
-- The book's principles are directions with a named source. They are not
-  rules the design fails. When the user's knowledge of their system
-  contradicts a direction, the user's knowledge wins and the finding is
-  dropped with the reason recorded.
-- Nothing here is research. `references/sources.md` says what was read,
-  and the book calls itself an opinion piece.
-- The review reads the design the user gives it. It does not read a code
-  base on its own, does not run a linter, and does not measure anything.
-- A position the book argues against a common practice is never a
-  finding on its own. It is reported with the other side where one was
-  read, and as the book's alone where none was.
+Offer one when its situation is present and its skill is installed: two
+measured qualities in conflict (`contradiction` in `triz-thinking`), many
+symptoms with an unclear cause (`root-cause` in `toc-thinking`), or code a
+reader cannot hold in their head (`extraneous` in `cognitive-load`).

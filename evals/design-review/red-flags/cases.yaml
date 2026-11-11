@@ -2,8 +2,7 @@ positive:
   - id: user-service-split-plan
     prompt: |
       I am about to file the epic for splitting our UserService
-      (src/main/java/com/acme/user/UserService.java, 1,900 lines). This is the plan the
-      team agreed on last week:
+      (src/main/java/com/acme/user/UserService.java, 1,900 lines). The team agreed this plan:
 
       1. Move every read method into UserReader.
       2. Move every write method into UserWriter.
@@ -17,9 +16,8 @@ positive:
       most often is adding a field to the user profile, which currently touches the entity,
       the DTO, the validation and two queries.
 
-      Please assess whether this refactoring plan reduces complexity or adds to it. Then
-      draft the epic description for Jira (goal, scope, acceptance criteria) for the plan
-      you recommend.
+      Does this plan make the class easier or harder to change? Then draft the Jira epic
+      description (goal, scope, acceptance criteria) for the plan you recommend.
   - id: name-for-batch-function
     prompt: |
       I've renamed this function three times now (process_records, then normalize_and_enrich,
@@ -70,11 +68,11 @@ positive:
       ```
 
       plus CustomerDto, CustomerEntity and CustomerMapper. the architect who set this up says
-      each layer is "there for when we need it". are there too many layers or am I just being
-      lazy? what would you cut?
+      each layer is "there for when we need it". do we need all of these or am I just being
+      lazy? which ones would you cut?
   - id: tangled-cart-totals
     prompt: |
-      this cart code feels tangled and i cant tell why. it works tho. thoughts?
+      this cart code is a pain to work in and i cant tell why. it works tho. thoughts?
 
       ```ts
       let discountApplied = false;
@@ -95,7 +93,7 @@ positive:
       ```
   - id: session-delete-try-except
     prompt: |
-      Every caller of our session store wraps delete() in the same try/except and it's
+      Our session store's delete() makes each call site carry the same try/except and it's
       driving me nuts. Is the problem the callers or the store?
 
       ```python
@@ -125,13 +123,14 @@ positive:
       cleanup job crashed on a session that had already expired.
   - id: cleanup-sprint-priorities
     prompt: |
-      Next sprint we have about four engineer-days set aside for cleanup in our Django
-      monolith, and three candidates on the backlog. Please recommend which to take on and
-      in what order, then write a two-sentence sprint goal I can paste into the planning doc.
+      Next sprint we have about four engineer-days for cleanup in our Django monolith, and
+      three candidates on the backlog. Tell me which to do and in what order, then write a
+      two-sentence sprint goal I can paste into the planning doc.
 
       1. billing/proration.py: 600 lines, one function with nested ifs for the upgrade,
-         downgrade, mid-cycle and trial cases. Changed 3 times in the last year, always by
-         our one billing engineer. Each change took about a week and shipped one regression.
+         downgrade, mid-cycle and trial cases. Changed twice in the last year, always by
+         our one billing engineer. Each change took about two days and shipped without a
+         regression.
       2. catalog/search_filters.py: each new product filter means editing the filter
          registry, the serializer, the frontend query builder and a hand-written SQL
          fragment, and all four repeat the filter's field name and type. Changed 27 times in
