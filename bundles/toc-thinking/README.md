@@ -99,8 +99,7 @@ with its assumptions marked.
 | [`skills/root-cause/references/tools.md`](skills/root-cause/references/tools.md) | the structure of each tree and of the cloud, and what a root cause is |
 | [`skills/root-cause/references/clr.md`](skills/root-cause/references/clr.md) | the eight Categories of Legitimate Reservation, with software examples |
 | [`skills/root-cause/references/sources.md`](skills/root-cause/references/sources.md) | the sources and what stays unread |
-| [`plugin.json`](plugin.json) | the Agent Plugins 1.0.0 manifest |
-| [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) | a byte-identical copy of `plugin.json` at the one manifest path Claude Code documents ([documentation](https://code.claude.com/docs/en/plugins-reference), "Plugin manifest schema") |
+| `plugin.json` in `plugins/toc-thinking/`; `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/` manifests in `bundles/toc-thinking/` | the Agent Plugins 1.0.0 manifest in the first build, one manifest per client in the second |
 | [`LICENSE`](LICENSE) | the MIT license |
 
 The package has no script, hook, rule file or network access.

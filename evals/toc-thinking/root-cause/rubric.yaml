@@ -2,13 +2,14 @@ questions:
   checkout_resubmit_cause:
     cases: [checkout-problems-pile-up]
     instructions: >-
-      The answer says that the checkout page's resubmit after 5 seconds, together
-      with the missing idempotency key, produces the double charges.
+      The answer names the checkout page's resubmit after 5 seconds, together
+      with the missing idempotency key, as the cause or the likely cause of the
+      double charges.
   csv_export_separate:
     cases: [checkout-problems-pile-up]
     instructions: >-
-      The answer says that the CSV export failure does not share a cause with
-      the checkout problems.
+      The answer treats the CSV export failure as a problem apart from the
+      checkout problems.
   freeze_by_risk:
     cases: [freeze-vs-checkout-tests]
     instructions: >-

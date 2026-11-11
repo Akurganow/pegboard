@@ -58,8 +58,8 @@ ShippingService." The shared table is a second entity.
 Dettmer reads the link aloud in *if-then* form and asks how the cause produces the effect.
 
 Fails: "If we added caching then users see stale data." Passes: "If the status cache keeps an entry
-for five minutes without invalidation on write, then a status read within five minutes of a write
-returns the old value."
+for five minutes without invalidation on write, then a status read within five minutes of a write,
+while the entry is still unexpired, returns the old value."
 
 ## Level III
 
@@ -68,7 +68,8 @@ returns the old value."
 The proposed cause alone cannot explain the effect, so a co-cause joined with *and* is missing.
 
 Fails: "If there are no tests then deployments fail." Passes: "If there are no tests and no staging
-environment and deployments run unattended, then a defect reaches production undetected."
+environment and deployments run unattended and the deployed change contains a defect, then the
+defect reaches production undetected."
 
 ### 5. Additional cause
 
