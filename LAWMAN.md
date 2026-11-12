@@ -1,5 +1,5 @@
 ---
-contract_version: 3
+contract_version: 4
 ---
 
 # Constitution of Akurganow/pegboard
@@ -91,6 +91,7 @@ contract_version: 3
 - `question`: Further information is requested
 - `wontfix`: This will not be worked on
 - `accessibility`: Barrier affecting people with disabilities
+- `ready-for-human`: The machine is finished; the owner's review and merge are what remain
 
 ## Precedents
 
