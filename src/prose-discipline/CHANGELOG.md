@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 
+## prose-discipline--v2.3.1 - 2026-11-13
+#### Bug Fixes
+- (**prose-discipline**) resolve merge conflict (6b64802)
+- (**prose-discipline**) split example sentence (04471a9)
+
+- - -
+
+
 ## prose-discipline--v2.3.0 - 2026-11-11
 #### Features
 - (**prose-discipline**) cover reports and briefs (1ba4803)
