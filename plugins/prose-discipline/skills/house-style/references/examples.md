@@ -10,12 +10,7 @@ After: `issue (blocking):` This query runs inside the loop. Fetch the IDs first 
 
 ## Change description
 
-<<<<<<< HEAD
-Specimens quote PR descriptions. The same shape holds for release
-notes, migration notes, and handoff summaries.
-=======
 Before: "In this PR, we have spent significant effort replacing the custom OAuth handler with the provider adapter because it deadlocked the refresh timer (#1421). `npm test auth/` passes."
->>>>>>> origin/main
 
 After, in the template's own fields. **Summary:** Replaces the custom OAuth handler with the provider adapter, because the handler deadlocked the refresh timer (#1421). **Test plan:** `npm test auth/` passes.
 
