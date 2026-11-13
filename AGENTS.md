@@ -6,22 +6,29 @@ file and that file disagree, that file is right and this one is stale.
 
 ## What this repository is
 
-A public marketplace of Agent Plugins 1.0.0 packages. `README.md` owns what it
-publishes and which clients it claims, `plugins/` holds the packages, and
-`.claude-plugin/marketplace.json` is the catalogue index.
+A public marketplace of agent plugins. `README.md` owns what it publishes and
+which clients it claims. `src/<name>/` holds each package's hand-written source,
+and no client reads it. `tools/build.sh` writes two committed builds from it:
+`bundles/<name>/`, one tree with a manifest folder per client, and
+`plugins/<name>/`, an Agent Plugins 1.0.0 package. It also writes four
+catalogues, which index the bundles. Everything under `bundles/` and
+`plugins/` and every catalogue is a generated copy of `src/`.
+`.agents/rules/conformance.md` owns the layout.
 
 ## Read these before changing anything
 
-Four rule files under `.agents/rules/`. None carries `paths` front matter and
+Rule files under `.agents/rules/`. None carries `paths` front matter and
 each loads unconditionally, because this repository is small enough that every
 rule bears on every change.
 
 | File | Owns |
 | :-- | :-- |
+| `agent-plugins-review.md` | the sources of record for the marketplace's claims and the agent configuration |
 | `claims.md` | what a sentence about a client may rest on, and that it cites where it was read |
-| `conformance.md` | the check, what the check is allowed to be, package shape, versions |
+| `conformance.md` | the check, what the check is allowed to be, source and builds, package shape, versions |
+| `design-vocabulary.md` | the words for a design objection, and the shapes in this tree that already answer one |
 | `slop.md` | what generator residue looks like here, and what is protected from that judgement |
-| `unattended.md` | how a run works when nobody is present to answer |
+| `tests.md` | what counts as a test here, how to read the evals records, and which protections are not findings |
 
 ## The check
 
@@ -32,17 +39,7 @@ looks right" is not a result the check produced.
 
 ## This repository's own machinery
 
-Nine roles, as skills under `.agents/skills/`, each with one thin Claude
-binding under `.claude/agents/` that names its skills and carries no role text.
-Four pipeline roles share `pipeline-law`. Five roles read `github-needs`: the
-four analysis roles, and the ninth, which patrols the other eight.
-`.agents/manifest.yaml` declares the set and records why each arrangement is
-what it is.
-
-**Whatever fires them is not in this repository and never will be.** The
-caller carries the measured facts of its own environment and the clone
-sequence that environment needs, because another person cloning this repository
-works in an environment of their own. `unattended.md` owns that rule.
+`LAWMAN.md` is the constitution the Lawman roles read here.
 
 ## Content states the action, not the instrument
 
@@ -58,15 +55,19 @@ stated here** — this list says only that they exist and under which heading,
 so read them there before going near any of the three:
 
 - **Versions**, on the files a release writes, which nobody edits by hand.
-  The release job in another repository writes howp's;
-  `.github/workflows/release.yml` writes every other package's.
+  `.github/workflows/release.yml` writes them.
 - **The vendored schema is a copy, not a source**, on `tools/schemas/` and on
   what may replace it.
 - **Text only**, on what may be committed to this repository at all.
 
 ## `CLAUDE.md`
 
-A symlink to this file. Claude Code reads `CLAUDE.md` and every other harness
-reads `AGENTS.md`; a symlink is how there comes to be one text rather than two
-that drift apart. It is the same arrangement `.claude/rules` and
-`.claude/skills/` already use for the canonical directories under `.agents/`.
+A file of imports only: `@AGENTS.md`, then one `@.agents/rules/<file>.md`
+line per rule file. Claude Code reads `CLAUDE.md` and expands each `@path`
+into the text of that file, so this file and every rule stay one text each
+([memory](https://code.claude.com/docs/en/memory.md), "Import additional
+files", documentation). Claude Code reads nothing under `.agents/` on its own
+(same page, "When Claude Code reads AGENTS.md"), so a new rule file loads in
+Claude Code only once it has its line here. Imports replaced symlinks because
+the Anthropic directory's Validate does not check a symlinked file and warns
+on each one.

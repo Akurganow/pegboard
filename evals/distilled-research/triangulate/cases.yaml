@@ -1,0 +1,65 @@
+positive:
+  - id: finland-income-trial-unemployment
+    prompt: |
+      A claim keeps coming up in articles about universal basic income: that Finland's
+      2017-2018 trial "cut unemployment" among its participants. I've seen it in dozens of
+      places and suspect most of them trace back to the same one or two reports. Trace it
+      for me: what do the sources say, which ones merely copy an earlier one, and how much
+      independent support does the claim have? Answer in your reply.
+  - id: pairing-bugs-and-time
+    prompt: |
+      We're deciding between pair programming and solo work with pull-request review for a
+      team of eight. Some studies say pairing cuts bugs and others find no gain. Why do they
+      disagree, and what does pairing cost in developer time? Put your answer in the reply.
+  - id: vitamin-c-colds
+    prompt: |
+      my mum swears by vitamin C tablets to keep colds away and my sister says its all
+      placebo. who's right? what does the research actually say. answer here pls
+  - id: habit-21-days
+    prompt: |
+      Every productivity book I own says it takes 21 days to form a habit. I'm putting the
+      number in a talk for new hires and want to know where it comes from and whether it
+      holds up. Answer in your reply.
+  - id: bronze-age-collapse-broad-look
+    prompt: |
+      I'm writing a long essay on the Late Bronze Age collapse around 1200 BCE and I want a
+      broad look at what scholars say before I pick a thesis. Please cover the main
+      explanations (climate and drought, earthquakes, the Sea Peoples, systems collapse), say
+      where the scholarship converges and where it splits, and read widely. Check the sources
+      before you rely on them, and split the reading across helpers if that is quicker.
+near_miss:
+  - id: who-pandemic-declaration-date
+    prompt: |
+      On what date did the World Health Organization declare COVID-19 a pandemic? Give me
+      the date in your reply.
+  - id: summarise-remote-work-page
+    prompt: |
+      Summarise this blog post in three sentences, in your reply.
+
+      "Remote work and output: a look at one firm. For nine months, a 1,600-person travel
+      agency let call-centre staff work from home four days a week while a control group
+      stayed in the office. The home group completed 13% more calls and quit 50% less often.
+      The author notes that the study covers one firm and one type of job."
+  - id: find-evidence-grade-definition
+    prompt: |
+      I'm grepping a codebase for how a source's evidence grade gets computed. Which file and
+      line holds the actual definition of `grade_evidence`, as opposed to the calls and
+      mentions? Answer in your reply.
+
+      report/render.py:41:    label = grade_evidence(claim)
+      core/grading.py:12:def grade_evidence(claim, sources=None):
+      core/grading.py:57:    return grade_evidence(claim, sources=[])
+      docs/grading.md:3:`grade_evidence` returns A, B or C
+      tests/test_grading.py:9:    assert grade_evidence(c) == "A"
+  - id: sleep-claims-site-ranking
+    prompt: |
+      I'm writing a newsletter section on sleep and memory. Before I lean on any of these as
+      evidence, give each a tier from best to worst, with a line of reasoning per site:
+
+      - pubmed.ncbi.nlm.nih.gov
+      - sleepfoundation.org
+      - mercola.com
+      - healthline.com
+      - reddit.com/r/sleep
+
+      Put the ranked list in your reply.

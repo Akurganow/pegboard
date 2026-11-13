@@ -1,127 +1,119 @@
 ---
 name: root-cause
 description: >
-  Find the core problem behind many symptoms in a software system with
-  Goldratt's Thinking Processes, resolve the conflict that keeps it in
-  place, and plan the change with its obstacles named. Use when symptoms are
-  many and the cause is unclear, when the same failure keeps coming back, or
-  when nobody can tell whether several problems share one cause. Use when
-  two teams or two requirements want opposite things and every round ends
-  with one side giving way. Use when a migration, a decommissioning or a
-  rollout needs a sequenced plan, even when only the plan is asked for. Use
-  when a proposed change needs checking for what it could make worse before
-  it is built. Use even when the question is short and never says root
-  cause: a pasted proposal with "anything it could break?" counts. Every
-  tree link is scrutinised with the published Categories of Legitimate
-  Reservation.
+  Use this skill whenever the user has software problems and wants the real
+  cause, or wants a plan or proposal tested. Phrasings: "is it one thing or
+  four?", "this keeps happening again", "anything it could make worse?". It
+  covers many symptoms with an unclear cause, and a failure that keeps
+  coming back. It covers two teams or requirements that want opposite things
+  while one side always gives way. It covers a migration, decommissioning or
+  rollout that needs a sequenced plan, even when only the plan is asked for.
+  It covers a proposed change to check before it is built. Use it even when
+  the word root cause never appears. Use it instead of a quick fix or a list
+  of tips. It traces the symptoms to the core problem, resolves the conflict
+  that holds it, and names what the change could break. Skip it for one bug
+  with a stack trace, a slow query, estimates, a postmortem write-up or a
+  guide to 5 Whys.
 license: MIT
 ---
 
 # Root cause
 
-You guide the user through Goldratt's Thinking Processes on a software
-system. The procedure turns "the system is broken" into a core problem, a
-resolved conflict and a sequenced plan. Reply in the user's language. Think
-between steps. Do not relay an empty template. Reason about the system.
+Apply Goldratt's Thinking Processes to the user's software system. Reply in the user's language.
+Present the result, not the procedure: do not say that a skill or method is being applied or narrate
+its steps. Name a tool where you show its output.
 
-Do not present a guess about the system's structure as a fact. When a step
-needs a fact you do not have, draft from what the user said, mark the
-assumption, and ask for the fact in the closing questions. Examples: "What
-do you observe, and where?", "What changed before it started?", "Which
-component fails first?"
+## Evidence and delivery
 
-Three files sit beside this file. Read each at the point its row names, and
-not before.
+When the session has the code, history, logs, metrics, tests, tickets or documents at hand, read
+them before asking, and quote what you read with its path and line, or with the command and its
+figure. Ask the user only for what only they know: intent, priorities, owners, what they saw outside
+the system. When nothing is at hand, work from what the user gave. Say which facts you read, which
+the user gave and which you assume, marking each assumption where it is used.
 
-| File | What it holds | Read when |
-| --- | --- | --- |
-| [`references/tools.md`](references/tools.md) | the structure of each tree and of the cloud, and how its arrows are read | before building any tree or the cloud |
-| [`references/clr.md`](references/clr.md) | the eight Categories of Legitimate Reservation, with software examples | before Step 2, and whenever a link of a CRT, FRT or TT is scrutinised |
-| [`references/sources.md`](references/sources.md) | the dictionary entries and book chapters the references rest on, what was not read, and what this skill adds on its own | before attributing a statement to Goldratt, Dettmer or TOCICO, and when the user asks where a statement comes from |
+Give the whole result in one reply: the tree, the core problem where the analysis finds one and,
+when the user asked what to change, the proposed change, as a draft with its assumptions marked.
+Pause only before an action that spends the user's money,
+sends their private data out, loads a shared system or cannot be undone.
 
-## The three questions and the tools
-
-The Thinking Processes answer three questions in order. The TOCICO
-Dictionary's entry *change question sequence* names them, in its first
-sense.
-
-| Question | Tool | Logic |
-| --- | --- | --- |
-| What to change? | Current Reality Tree (CRT) | sufficiency: *if* cause *then* effect |
-| To what to change? | Evaporating Cloud (EC), then Future Reality Tree (FRT) | necessity for the cloud, sufficiency for the FRT |
-| How to cause the change? | Prerequisite Tree (PRT), then Transition Tree (TT) | necessity for the PRT, sufficiency for the TT |
-
-`references/tools.md` carries the structure of each tool and how its arrows
-are read. Read it before building one.
-
-Two kinds of check apply, and they differ by logic.
-
-- Scrutinise a sufficiency tree (CRT, FRT, TT) with the Categories of
-  Legitimate Reservation. `references/clr.md` carries them with software
-  examples. Read it before Step 2. A reservation is an offer. The tree
-  builder may accept it or reject it with a reason.
-- Scrutinise a necessity diagram (EC, PRT) by writing out and questioning
-  the assumption under each arrow.
+Answer the question asked, in the form asked: a decision, a slide, talking points, a message. When
+the user fixes a format or a length, deliver exactly that, then a note on the method in one or two
+sentences only where the format allows it. An answer that follows every step and leaves the question open has failed, and so has one
+weaker than a direct answer: name the concrete behaviour, defect or change with its place (file and
+line, service, query). End with questions only when an answer would change the result, at most
+three, and say what you did not see when it limits the conclusion.
 
 ## Step 1: classify the problem
 
-Read the user's description and pick the entry point.
+The Thinking Processes answer three questions in order: what to change, to what, and how to cause the
+change (TOCICO Dictionary). Pick the entry point from the description.
 
-- Many symptoms, unclear cause: start with the CRT.
-- Two requirements that block each other: start with the EC.
-- A known change that needs a plan: start with the PRT.
-- A proposed change that needs checking: start with the FRT.
+- Many symptoms, unclear cause: Current Reality Tree (CRT).
+- Two requirements that block each other: Evaporating Cloud (EC).
+- A known change that needs a plan: Prerequisite Tree (PRT).
+- A proposed change that needs checking: Future Reality Tree (FRT).
 
-When unsure, start with the CRT.
+When unsure, start with the CRT, and stop at the tool that answers the question. A symptom list with
+"what should we change?" goes from the CRT to the EC when a conflict holds the core problem, then to
+the FRT on its injection, then to the PRT and the Transition Tree (TT). A request for a plan alone
+takes the user's change as the PRT objective. Read `references/tools.md` before building any tree or
+cloud, and `references/sources.md` before attributing a statement to Goldratt, Dettmer or TOCICO.
 
-Open the reply with one sentence that names the diagram in full and the
-reason. For example: "I start with a Current Reality Tree, because the
-symptoms are many and the cause is unclear." Use the full name from the
-table above, not a paraphrase such as "a check of the change". Do this even
-when the user asked for a plan, a summary or a message.
+## Scrutiny becomes checks
+
+Treat each causal link on a path from a root cause to the undesirable effects (UDEs) as a hypothesis,
+not every link of a large tree. The CRT, FRT and TT use sufficiency logic (*if* cause *then* effect)
+and take the checks below. The EC and PRT use necessity logic: question the assumption under each
+arrow and name what would be observed if it were false.
+
+1. State the predicted effect: something else that must be true if the link is true, at the same time
+   and place and in the size the link implies, ideally one that tells your cause from likely rivals.
+   If pool exhaustion makes checkout slow, requests also wait for a connection in the same
+   minutes, which slow queries alone would not cause. No waiting refutes the link.
+2. Check it. When logs, metrics, code or history are at hand, run the check and report the result
+   with its source. Otherwise name a check the user can run (a command, a query, a comparison) and
+   say what each outcome means.
+3. Record the result as present, absent or not yet checked. An absent effect counts against the link:
+   rewrite or drop it. A present effect raises confidence without proof, because a rival cause may
+   predict the same effect.
+
+The eight Categories of Legitimate Reservation name the ways a link fails. Read `references/clr.md`
+before the first check. A reservation is an offer: accept it by rewording the link, or reject it and
+give the observation that answers it.
 
 ## Step 2: Current Reality Tree
 
-A UDE is a complete sentence in the present tense. It states a condition
-that exists, not a suspected cause. "p99 latency exceeds 5 seconds during
-concurrent writes" qualifies. "The system is slow" does not. One UDE is
-enough to start.
+A UDE is a complete present-tense sentence that states a condition that exists, not a suspected
+cause. "p99 latency exceeds 5 seconds during concurrent writes" qualifies. "The system is slow" does
+not. One UDE is enough to start (Dettmer, chapter 4).
 
-A root cause is an entity at the bottom of the tree with no cause below
-it. Several may exist. The core problem is the root cause whose branches
-reach most of the UDEs, including the most serious. TOCICO's guideline is
-that one to three core problems account for over 70% of the UDEs. Dettmer
-reports the 70% figure as Goldratt's and rejects it, because UDEs are not
-equally serious. Weigh the UDEs as well as counting them.
+A root cause is an entity at the bottom of the tree with no cause below it. Several may exist, and the
+tree joins co-causes with *and* (`references/tools.md`). The core problem is
+the root cause whose branches reach most of the UDEs, including the most serious: weigh them, do not
+only count them.
 
-1. Collect the UDEs from the user. List them in the reply, one
-   present-tense sentence each. Name what is measured or seen, and where,
-   for example "Android login takes 8 seconds." Put the diagnosis after the
-   list, never in place of it. Do not write a label such as "reliability
-   gap" as a UDE.
-2. For each UDE, ask what condition in the system produces it.
-3. Write each link in the reply as a full sentence: *if* cause *then*
-   effect, with the measured values where the user gave them. Without a
-   measurement, state the observed condition, mark the link as an
-   assumption, and ask for the figure in the closing questions.
-4. Join causes that are needed together with *and*.
-5. Draw causes that suffice on their own as separate arrows.
-6. Scrutinise every link with `references/clr.md`, level by level.
-7. Show each reservation and settle the wording with the user.
-8. Mark a loop: an effect that feeds a cause below it. Dettmer ranks
-   removing the root cause behind a loop among the most effective changes
-   (`tools.md`, Current Reality Tree).
-9. Keep building down until each branch ends in a root cause.
-10. Note which root causes someone within the user's reach can change.
-11. When the branches do not meet, report separate root causes. Do not
-    invent a common one.
-12. Name the core problem and ask the user whether it matches the code.
-13. Do not continue until they confirm or correct it.
+1. Collect the UDEs from the environment first (alerts, dashboards, logs, tickets, incident history),
+   then add the user's. List them in the reply, one present-tense sentence each, with what is
+   measured or seen, where, and its source: "Android login takes 8 seconds (user)." A label such as "reliability gap" is not a UDE.
+2. For each UDE, ask what condition produces it, reading the code and history that touch it. Write
+   each link as a full sentence: *if* cause *then* effect, with the measured values, or mark it
+   assumed when nothing was measured. Join causes needed together with *and*, and draw causes that
+   suffice alone as separate arrows. Check the links and show each predicted effect with its result.
+3. Mark a loop, an effect that feeds a cause below it. Removing the root cause behind a loop is among
+   the most effective changes (`references/tools.md`).
+4. Build down until each branch ends in a root cause, and note which ones someone within the user's
+   reach can change. A core problem can be too broad to act on or outside the decision maker's
+   control (Dettmer): then name the narrower root causes someone can change.
+5. When the branches do not meet, report separate root causes, because an invented common cause points
+   the fix at nothing.
+6. Show the tree as if-then sentences, and add a Mermaid diagram when it has more than a handful of
+   entities (`references/tools.md`). When the analysis runs over several turns and the session can
+   write files, offer to keep the tree in one Markdown file and update it instead of restating it.
+7. Name the core problem, or say there are several and give the UDEs of each.
 
 ## Step 3: Evaporating Cloud
 
-A core problem usually persists because a conflict keeps it in place. The
-cloud makes the conflict precise.
+A conflict usually keeps a core problem in place.
 
 ```
 A  objective      what both sides want
@@ -131,91 +123,60 @@ D  prerequisite   what is wanted to meet B
 D' prerequisite   what is wanted to meet C, and cannot coexist with D
 ```
 
-Read each arrow from its head: "to have A, we must have B", "to have B, we
-must have D". The conflict is between D and D'. To build the cloud from
-Step 2, put the practice the core problem describes in D. Put the opposite
-practice in D'. Name what each practice satisfies as B and C, and what
-both serve as A.
+Read each arrow from its head: "to have A, we must have B". The conflict is between D and D'. To build
+the cloud from Step 2, put the practice the core problem describes in D and the opposite practice in
+D', and name what each satisfies as B and C and what both serve as A. Make D and D' practices someone
+can do, because a vague cloud has no assumption to attack.
 
-1. Fill the five boxes with the user.
-2. Write each necessity arrow in the reply with its own endpoints: "In
-   order to have A, we must have B", "In order to have A, we must have C",
-   "In order to have B, we must have D", "In order to have C, we must have
-   D'", each followed by "because" and its assumption. Write D-D' as "We
-   cannot have both D and D', because" followed by its assumption. Do not
-   give the arrows as boxes, a table or a drawing alone.
-3. Ask the user to state an assumption for any arrow that has none.
-4. Question each assumption. Any of the five arrows may be attacked.
-5. State the injection: a condition or action that invalidates one or more
-   assumptions, so that the conflict disappears.
-6. Reject a compromise between D and D'. It is not an injection.
+1. Fill the five boxes from Step 2 and the environment. Mark a box you could not read as assumed.
+2. Write each necessity arrow with its own endpoints, followed by "because" and its assumption: "In
+   order to have A, we must have B" (likewise A-C, B-D, C-D'), and "We cannot have both D and D',
+   because" for D-D'. An assumption is open to attack only in the "because" clause.
+3. State a likely assumption for any arrow that has none, marked assumed. Question each assumption
+   and name what would be observed if it were false.
+4. State the injection: a condition or action that invalidates one or more assumptions, so the
+   conflict disappears.
+5. Reject a compromise between D and D'. It gives each side part of what it wants and leaves the
+   assumptions standing, so the conflict returns.
 
 ## Step 4: Future Reality Tree
 
-Dettmer sets one reservation aside in this tree. Additional cause does not
-matter here, because the question is whether the injection produces the
-effect, not whether something else also could.
+Dettmer sets additional cause aside here: the question is whether the injection produces the effect,
+not whether something else also could.
 
-1. Put the injection at the bottom.
-2. Build sufficiency chains upward: *if* injection *then* effect.
-3. Continue until the majority of the UDEs are replaced by desired effects.
-4. Look for a negative branch: a chain to a new undesirable effect.
-5. Write each one out as a Negative Branch Reservation.
-6. Trim it with a second injection where the branch turns negative.
-7. When a serious branch cannot be trimmed, reconsider the main injection.
-8. Scrutinise every link with `references/clr.md`.
+1. Put the injection at the bottom and build sufficiency chains upward: *if* injection *then* effect.
+   Continue until the majority of the UDEs are replaced by desired effects.
+2. Look for a negative branch: a chain to a new undesirable effect. Search the code, when at hand,
+   for where it would show: call sites, queues, limits, callers.
+3. Write each one out as a Negative Branch Reservation, and trim it with a second injection where the
+   branch turns negative. When a serious branch cannot be trimmed, reconsider the main injection.
+4. Check the links. Nothing has run yet, so a check is a prediction to confirm on a staging run, a
+   canary or after release, or evidence from a similar past change.
+
+When the user brought a proposed change, it is the injection. Spend the answer on the negative
+branches: each chain, its place and its trimming injection.
 
 ## Step 5: Prerequisite Tree
 
-1. State the objective: the injection, in place.
-2. List every obstacle that blocks it today, as a condition in the system.
-3. For each obstacle, state the intermediate objective that overcomes it.
-4. Order the intermediate objectives: which must be reached before which.
-5. Write each arrow in the reply as "In order to reach X, we must first
-   reach Y, because" followed by the obstacle it overcomes. Do not give the
-   arrows as boxes, a table or a drawing alone.
-6. Question the assumption under each arrow, as in Step 3.
-
-An obstacle reads like "fifteen call sites import the module directly" or
-"no transaction boundary exists around the write".
+1. State the objective: the injection, or the change the user named.
+2. List every obstacle that blocks it today as a condition in the system, such as "fifteen call sites
+   import the module directly". Find them in code, configuration, schedules and ownership files when
+   those are at hand.
+3. For each obstacle, state the intermediate objective that overcomes it, and order the objectives.
+4. Write each arrow as "In order to reach X, we must first reach Y, because" and the obstacle it
+   overcomes, for the reason in Step 3. Question the assumption under each arrow.
 
 ## Step 6: Transition Tree
 
-For each intermediate objective, in the order from Step 5, write the five
-elements of the tree as Dettmer reports Goldratt's later form. The
-original tree had four, without the rationale.
+For each intermediate objective, in the order from Step 5, write the five elements of Goldratt's later
+form as Dettmer reports it: the existing reality, the need, the specific action, the expected effect,
+and the rationale (why the action is needed and why the previous effect was not enough). Read it as
+sufficiency, *if* the existing reality *and* the action *then* the expected effect, and check the
+links. The tree is the implementation plan. Add "Observed by:" to each step, naming the command, test
+or metric that shows its expected effect.
 
-1. The existing reality: the condition now.
-2. The need: why the next state is wanted.
-3. The specific action.
-4. The expected effect of the action, which is the next state.
-5. The rationale: why this action is needed, and why the previous effect
-   was not enough.
+## Hand-over
 
-Read it as sufficiency: *if* the existing reality *and* the action *then*
-the expected effect. Scrutinise the links with `references/clr.md`.
-
-The tree is the implementation plan. For a software change this skill adds
-one line per step that TOC does not prescribe. It names how the expected
-effect is observed: a command, a test or a metric. Say so when you add it.
-
-## Boundaries
-
-- End every reply with one to three numbered questions about facts only
-  the user has, even when the user asked for a plan, a summary or a
-  message. Write the deliverable as a draft that the answers can change.
-- The procedure works on facts. Name the evidence behind each UDE: what the
-  user saw, a log, a metric, a test. Reword an interpretation into the
-  condition behind it.
-- Iterate on the cloud with the user rather than moving on with a vague
-  one.
-- A tree whose links have not been scrutinised is not finished. Write at
-  least one reservation against one of your own links in the reply, with
-  its category from `references/clr.md`. Do this for a plan or a check of a
-  change too, not only for a tree.
-- A trade-off between two measurable parameters belongs to the
-  `contradiction` skill of this marketplace's `triz` package. That skill
-  resolves the trade-off with the contradiction matrix and hands a hard
-  case to the `ariz` skill of the same package. Hand over when a cloud
-  reduces to such a trade-off, and only if the `contradiction` skill is
-  installed.
+A cloud that reduces to a trade-off between two measurable parameters belongs to the `contradiction`
+skill of this marketplace's `triz-thinking` package, which resolves it with the contradiction matrix
+and hands a hard case to `ariz`. Offer it then, if `contradiction` is installed.

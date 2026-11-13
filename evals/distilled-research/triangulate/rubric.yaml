@@ -1,0 +1,55 @@
+questions:
+  finland_small_employment_effect:
+    instructions: >-
+      The answer says the Finnish trial found at most a small effect on employment.
+    cases:
+      - finland-income-trial-unemployment
+  pairing_names_why_studies_differ:
+    instructions: >-
+      The answer names a difference between the studies, such as their tasks or participants, as a reason the results differ.
+    cases:
+      - pairing-bugs-and-time
+  pairing_costs_more_effort:
+    instructions: >-
+      The answer says pairing takes more total developer effort than working alone.
+    cases:
+      - pairing-bugs-and-time
+  vitamin_c_no_fewer_colds:
+    instructions: >-
+      The answer says regular vitamin C tablets did not reduce how many colds ordinary people catch.
+    cases:
+      - vitamin-c-colds
+  habit_21_from_maltz:
+    instructions: >-
+      The answer says the 21-day figure traces to Maxwell Maltz.
+    cases:
+      - habit-21-days
+  habit_takes_longer_than_21_days:
+    instructions: >-
+      The answer says research found that forming a habit usually takes longer than 21 days.
+    cases:
+      - habit-21-days
+  repeats_add_no_evidence:
+    instructions: >-
+      The answer says which sources repeat an earlier source and add no separate evidence.
+    cases:
+      - finland-income-trial-unemployment
+      - habit-21-days
+  grade_word_used:
+    instructions: >-
+      The answer rates a claim with one of the words Established, Probable, Tentative, Not established or Contested.
+    cases:
+      - finland-income-trial-unemployment
+      - pairing-bugs-and-time
+      - vitamin-c-colds
+      - habit-21-days
+  survey_waits_for_go_ahead:
+    instructions: >-
+      The answer asks for the user's go-ahead before the research starts.
+    cases:
+      - bronze-age-collapse-broad-look
+  survey_states_helper_limit:
+    instructions: >-
+      The answer states the most helper tasks it will start.
+    cases:
+      - bronze-age-collapse-broad-look

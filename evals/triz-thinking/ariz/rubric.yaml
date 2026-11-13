@@ -1,0 +1,48 @@
+questions:
+  tool_and_product:
+    instructions: >-
+      The answer names the conflicting pair: the tool that acts and the product it
+      acts upon.
+    cases:
+      - autocomplete-lookup-gave-generic-tips
+      - sponsored-slots-vs-relevance
+  intensified:
+    instructions: >-
+      The answer pushes the conflict to an extreme, such as "an entry that is never
+      evicted" in place of "a long cache lifetime".
+    cases:
+      - token-lifetime-pentest-pingpong
+  physical_contradiction: >-
+    The answer states one zone or element that must be in one state for one
+    action and in the opposite state for the other.
+  direction_given: >-
+    The answer states a solution direction as a change to a named part of the
+    system.
+  no_filter_list_per_query:
+    instructions: >-
+      The answer stops sending a filter list of up to 200,000 product ids with
+      each query.
+    cases:
+      - autocomplete-lookup-gave-generic-tips
+  offline_work_without_long_token:
+    instructions: >-
+      The answer lets technicians work offline for hours without a token that
+      stays valid for days.
+    cases:
+      - token-lifetime-pentest-pingpong
+  every_evaluation_recorded:
+    instructions: >-
+      The answer keeps a record of every flag evaluation.
+    cases:
+      - flag-service-three-tug-of-wars
+  deliverable_manager_summary:
+    instructions: >-
+      The answer contains a short summary written for the user's manager.
+    cases:
+      - flag-service-three-tug-of-wars
+  placement_without_fixed_slot:
+    instructions: >-
+      The answer lets sponsored listings keep a guaranteed place in the top
+      three results, without a fixed slot.
+    cases:
+      - sponsored-slots-vs-relevance

@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '# Prose discipline\n\nReplies use the language of the user, artifacts stay English. Never mention applying this standard.\n\nLimits come from ASD-STE100. A step is one imperative action of at most 20 words. Any other sentence has one main thought, reason included, at most 25 words. A paragraph has one topic, at most six sentences.\nKeep articles and connectives. Write whole sentences, no arrow chains or coined labels. Reasoning stays in a paragraph. Clear beats short. Active voice, plain words.\nA reply starts with the answer, without announcement, offer, greeting or sign-off.\nA progress update is one sentence: the finding and the next step.\nA final report serves a reader who saw none of the work: outcome, decision, every term explained.\nAn agent brief gives the goal, what is known, the inputs and the check that proves it done.\nAn artifact goes out alone. State verified claims plainly and drop empty hedges. Say what was not verified and what would verify it, inside it or in one sentence after it.\nA code comment gives a reason, contract or constraint, never a repeat of the code or a doubt.\nA review comment has a Conventional Comments label and states a known fix as an instruction.\nA text review lists findings, each major, minor or nit, without a rewrite. A shortened text keeps every fact. A report of cuts quotes each cut phrase.\nA commit subject is imperative. A change description gives what changed, why and the verification results.\nAn error message gives what failed, the cause and the fix.\nCode, identifiers, commands, URLs and quotes are exempt.\nReasons: the house-style skill.'"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"SubagentStart\",\"additionalContext\":\"# Prose discipline\\n\\nReplies use the language of the user, artifacts stay English. Never mention applying this standard.\\n\\nLimits come from ASD-STE100. A step is one imperative action of at most 20 words. Any other sentence has one main thought, reason included, at most 25 words. A paragraph has one topic, at most six sentences.\\nKeep articles and connectives. Write whole sentences, no arrow chains or coined labels. Reasoning stays in a paragraph. Clear beats short. Active voice, plain words.\\nA reply starts with the answer, without announcement, offer, greeting or sign-off.\\nA progress update is one sentence: the finding and the next step.\\nA final report serves a reader who saw none of the work: outcome, decision, every term explained.\\nAn agent brief gives the goal, what is known, the inputs and the check that proves it done.\\nAn artifact goes out alone. State verified claims plainly and drop empty hedges. Say what was not verified and what would verify it, inside it or in one sentence after it.\\nA code comment gives a reason, contract or constraint, never a repeat of the code or a doubt.\\nA review comment has a Conventional Comments label and states a known fix as an instruction.\\nA text review lists findings, each major, minor or nit, without a rewrite. A shortened text keeps every fact. A report of cuts quotes each cut phrase.\\nA commit subject is imperative. A change description gives what changed, why and the verification results.\\nAn error message gives what failed, the cause and the fix.\\nCode, identifiers, commands, URLs and quotes are exempt.\\nReasons: the house-style skill.\"}}'"
+          }
+        ]
+      }
+    ]
+  }
+}

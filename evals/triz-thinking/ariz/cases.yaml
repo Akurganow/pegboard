@@ -1,0 +1,95 @@
+positive:
+  - id: autocomplete-lookup-gave-generic-tips
+    prompt: |
+      We run a B2B catalogue with 3,000 customers. Each customer sees only its own subset
+      of our 1.4 million products, at its own negotiated price. Search autocomplete has to
+      answer within 50 ms and must never suggest a product the customer cannot buy.
+
+      - One shared index filtered at query time is correct, but p95 is 420 ms, because the
+        per-customer filter is a terms list of up to 200,000 product ids.
+      - One index per customer answers in 15 ms, but a catalogue change touches up to 3,000
+        indexes, and the rebuild queue runs 6 hours behind on busy days.
+
+      Last week I tried a structured method from an old engineering book: you name the
+      property you want to improve and the one that gets worse, look the pair up in its
+      table, and it returns a few one-line suggestions. For "speed" against "adaptability"
+      it gave us "make it dynamic", "do it in advance" and "use a copy instead of the
+      original". We have tried a version of each, and none gets us both numbers.
+
+      I want a rigorous analysis, not another table. What would you change?
+  - id: token-lifetime-pentest-pingpong
+    prompt: |
+      3rd time this year we're arguing about the same setting. our mobile app's access
+      token lived 30 days so field technicans could work offline in basements. pentest
+      flagged it, we cut it to 1 hour, technicians got logged out mid-job and couldnt sync
+      their reports, we bumped it to 7 days, next pentest flagged it again. now security
+      wants 1 hour again. each change we make comes back to bite us a few months later.
+      help me get out of this loop
+  - id: flag-service-three-tug-of-wars
+    prompt: |
+      our feature flag service is basically 3 tug-of-wars that pull on each other:
+      - sdks evaluate flags locally so checks take microseconds, but then a flag change takes
+        up to 60s to reach everyone (polling interval)
+      - we tried pushing changes over SSE so they land in ~1s, but 40k open connections cost
+        more than the whole rest of the service
+      - and compliance now wants every evaluation logged with the user id, which kills local
+        eval (we'd ship ~2 billion log events a day from the sdks)
+      each pick hurts the other two. work out what we should do, then
+      write a short summary for my manager
+  - id: sponsored-slots-vs-relevance
+    prompt: |
+      Our marketplace search has two requirements, and three attempts so far all went wrong:
+
+      - Product requires results ranked by relevance. The ranking team is measured on
+        NDCG@10 and on the share of searches that end in a purchase.
+      - Sales has contracts with 140 sellers that guarantee their sponsored listings appear
+        among the top 3 results for their keywords.
+
+      What we tried:
+
+      1. A fixed sponsored slot at position 2. Purchases per search fell 6%, and users called
+         the results "spammy" in the survey.
+      2. A relevance boost for sponsored listings. Sales could not show sellers a guaranteed
+         placement, and two sellers invoked the contract clause.
+      3. A sponsored carousel above the results. Legal says the contracts mean "in the
+         results", and the carousel is not.
+
+      I suspect we have framed the problem badly. Help me state the conflict more
+      sharply, and find a different approach.
+near_miss:
+  - id: offset-commit-middle-setting
+    prompt: |
+      I'm designing the consumer for our new `invoices.v1` Kafka topic (Java, about 3,000
+      msg/s expected at launch). Committing the offset after every message means at most one
+      duplicate invoice email after a crash, but in our load test it caps the consumer at 900
+      msg/s. Committing every 1,000 messages gives 12,000 msg/s, but a crash can resend up to
+      1,000 invoice emails. The team's proposal is a compromise: commit every 100 messages.
+      Nothing is built yet. Is there something better than picking a number in between?
+  - id: interview-problem-walkthrough
+    prompt: |
+      This is the hardest problem in our interview loop, and I want to explain the intended
+      solution to new interviewers. Walk me through the algorithm step by step, then give the
+      Python code and its time and space complexity.
+
+      Given a list of daily stock prices, return the maximum profit from at most two
+      non-overlapping buy-and-sell transactions. Example: [3, 3, 5, 0, 0, 3, 1, 4] gives 6
+      (buy at 0, sell at 3, buy at 1, sell at 4).
+  - id: sharpen-docs-problem-statement
+    prompt: |
+      Rewrite the "Problem" section of my design doc so it's sharper. Under 120 words, same
+      facts.
+
+      > ## Problem
+      > So basically our internal documentation is kind of all over the place right now.
+      > Some of it is in Confluence (about 1,900 pages), some is in the `eng-docs` Git repo
+      > and some is in random Google Drive folders, and none of the search tools cover all
+      > three. New hires end up asking the same things in #eng-help, and in the last onboarding
+      > survey 11 of 14 people said finding docs was their biggest problem in the first month.
+      > We think it would be good to have one place so that things are generally easier to
+      > find.
+  - id: npm-package-compromised
+    prompt: |
+      Our npm package `@acme/date-utils` (about 90,000 weekly downloads) was compromised an
+      hour ago. Someone used a leaked automation token to publish 4.2.1 with a postinstall
+      script that sends environment variables to an outside host. 4.2.0 is clean, and we have
+      already revoked the token. What do we do, and in what order, over the next 24 hours?

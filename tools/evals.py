@@ -3,14 +3,15 @@
 
 CI runs this after a package release (`.github/workflows/evals.yml`). One
 `run` covers one skill, one client and one repeat: positive prompts with the
-package, near-miss prompts with it, then positive prompts without it. Jev
-grades every positive answer against the skill's rubric. `report` merges the
-runs of a release and attaches them to its GitHub Release as `evals.json`. It
-files an issue for a metric that regressed against the previous release.
+package, near-miss prompts with it, then positive prompts without it. `grade`
+has Jev grade every positive answer against the skill's rubric, in a job that
+runs no client. `report` publishes each repeat to GitHub Container Registry
+(`ghcr.io/<owner>/pegboard-evals`) and files an issue when a metric
+regresses against the latest complete run.
 
 The runner is this repository's own. In Claude Code 2.1.293, `claude plugin
 eval` wrote the final reply only as the evidence of an LLM grader (running,
-2026-10-08: https://github.com/Akurganow/ai-plugins/actions/runs/37784785554).
+2026-10-08: https://github.com/Akurganow/pegboard/actions/runs/37784785554).
 That grader runs a judge model of its own. `claude plugin eval` has no
 custom-code grader, so Jev could not take the judge's place (documentation:
 https://code.claude.com/docs/en/plugin-evals).
@@ -18,6 +19,10 @@ A skill may add `held-out.yaml`: five positive and five near-miss prompts that
 run with the package on repeat 1 only and are never graded. Nobody reads them
 while editing a description, so their load count checks the trigger rate on
 prompts the description was not tuned on.
+A release runs only the sessions its changes can affect. `run` copies a
+session from the latest complete run when the session's inputs are equal and
+it did not fail; `session_inputs` says what the inputs are. A
+`workflow_dispatch` run passes `--fresh` and copies nothing.
 `validate` checks that every folder under evals/ has its skill and loads.
 `selftest` checks the parsers against the event streams in
 tools/evals-fixtures/, and the arithmetic, without calling a model. The comment
@@ -25,6 +30,8 @@ above `_selftest_parsers` gives the fixtures' origin.
 """
 
 import argparse
+import base64
+import contextlib
 import hashlib
 import http.client
 import json
@@ -40,19 +47,16 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PLUGINS_DIR = REPO_ROOT / "plugins"
+# Skills are read from the hand-written source. Clients install the builds made from it.
+SOURCES_DIR = REPO_ROOT / "src"
 EVALS_DIR = REPO_ROOT / "evals"
 FIXTURES_DIR = REPO_ROOT / "tools" / "evals-fixtures"
-MARKETPLACE = json.loads((REPO_ROOT / ".claude-plugin" / "marketplace.json").read_text())["name"]
+# The evals workflow sets MARKETPLACE from the released tag's catalogue,
+# which may carry an older name than this checkout's.
+MARKETPLACE = (os.environ.get("MARKETPLACE")
+               or json.loads((REPO_ROOT / ".claude-plugin" / "marketplace.json").read_text())["name"])
 
-CLIENTS = ("claude", "codex", "omp")
 REPEATS = 3
-MODELS = {
-    "claude": "sonnet",
-    "codex": "gpt-6-luna",
-    "omp": "openrouter/z-ai/glm-5.3-flash",
-}
-CASES_PER_KIND = 10
 HELD_OUT_PER_KIND = 5
 HELD_OUT_FILE = "held-out.yaml"
 HELD_OUT_KINDS = {"positive": "held_out_positive", "near_miss": "held_out_near_miss"}
@@ -69,14 +73,22 @@ JEV_MODEL = "jev-1.13.0"
 JEV_RETRY_STATUSES = (429, 529)
 JEV_ATTEMPTS = 6
 
-# Each client process sees only its own key. The answers are published in
-# evals.json, and an agent with a shell can print its environment.
+# A session's environment holds only its own client's key. The answers are
+# published to the container registry, and an agent with a shell can print its
+# environment. That shell can also read /proc/<pid>/environ of the job's other
+# processes, so the grading key stays out of every job that runs a client.
+# docs/design.md, "Behavioural evals run after each release", gives the sources.
 SECRET_VARS = ("ANTHROPIC_API_KEY", "CODEX_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY", "TYPESAFE_API_KEY")
-CLIENT_KEY = {"claude": "ANTHROPIC_API_KEY", "codex": "CODEX_API_KEY", "omp": "OPENROUTER_API_KEY"}
 
 # `gh ... list` stops at --limit without saying so, so a listing that fills its
 # limit is an error.
-RELEASE_LIMIT, ISSUE_LIMIT = 200, 500
+ISSUE_LIMIT = 500
+
+GHCR_URL = "https://ghcr.io"
+GHCR_PACKAGE = "pegboard-evals"
+OCI_MANIFEST_TYPE = "application/vnd.oci.image.manifest.v1+json"
+OCI_CONFIG_TYPE = "application/vnd.oci.empty.v1+json"
+OCI_LAYER_TYPE = "application/vnd.ai-plugins.evals.run.v1+json"
 
 FINGERPRINT_PREFIX = "<!-- police-fingerprint: "
 
@@ -95,28 +107,40 @@ class Parsed:
 
 class Claude:
     name = "claude"
+    model = "haiku"
 
     def __init__(self, package: str, skill: str):
         self.package, self.skill = package, skill
 
     # Read lets the skill open its reference files. With only Skill allowed,
     # Claude Code 2.1.293 denied the skill's Read call (running, 2026-10-08:
-    # https://github.com/Akurganow/ai-plugins/actions/runs/37784785554).
+    # https://github.com/Akurganow/pegboard/actions/runs/37784785554).
+    # WebSearch and WebFetch need approval, and a bare tool name allows every
+    # call of that tool (documentation, read 2026-11-11:
+    # https://code.claude.com/docs/en/permissions.md, "Permission system" and
+    # "Match all uses of a tool"). Without them Claude's answers in the
+    # distilled-research--v0.2.0 records report web search and fetch as denied,
+    # while Codex and Oh-My-Pi reached the web in the same run.
     def command(self, prompt: str, arm: str) -> list[str]:
-        return ["claude", "-p", prompt, "--model", MODELS["claude"], "--output-format", "stream-json",
-                "--verbose", "--allowedTools", "Skill", "Read"]
+        return ["claude", "-p", prompt, "--model", self.model, "--output-format", "stream-json",
+                "--verbose", "--allowedTools", "Skill", "Read", "WebSearch", "WebFetch"]
 
-    # `claude plugin disable` changes the plugin's state for later sessions, so it
-    # runs once between the arms (documentation:
-    # https://code.claude.com/docs/en/plugins/cli-reference#plugin-disable).
+    # `claude plugin disable` and `enable` change the plugin's state across sessions,
+    # so `run_job` disables it once and restores it in `finally` (documentation:
+    # https://code.claude.com/docs/en/plugins/cli-reference#plugin-disable,
+    # https://code.claude.com/docs/en/plugins/cli-reference#plugin-enable).
     def switch_to_without(self) -> None:
         subprocess.run(["claude", "plugin", "disable", f"{self.package}@{MARKETPLACE}"], check=True,
+                       env=client_env(self.name))
+
+    def switch_back(self) -> None:
+        subprocess.run(["claude", "plugin", "enable", f"{self.package}@{MARKETPLACE}"], check=True,
                        env=client_env(self.name))
 
     # Claude Code 2.1.293 shows a loaded skill as a Skill tool call whose `skill`
     # input holds "<package>:<skill>". Its init event lists `skills` and `plugins`,
     # each plugin with a `source` of "<package>@<marketplace>" (running, 2026-10-08:
-    # https://github.com/Akurganow/ai-plugins/actions/runs/37789029106).
+    # https://github.com/Akurganow/pegboard/actions/runs/37789029106).
     def parse(self, events: list[dict]) -> Parsed:
         fired, answer, cost, model, error, loaded, tools = False, None, None, None, None, None, []
         for e in events:
@@ -145,6 +169,7 @@ class Claude:
 
 class Codex:
     name = "codex"
+    model = "gpt-6-luna"
 
     def __init__(self, package: str, skill: str):
         self.package, self.skill = package, skill
@@ -152,10 +177,10 @@ class Codex:
     # On GitHub's ubuntu-latest the read-only sandbox failed every command with
     # "bwrap: loopback: Failed RTM_NEWADDR", so Codex never read SKILL.md
     # (running: Codex 0.161.0, 2026-10-08,
-    # https://github.com/Akurganow/ai-plugins/actions/runs/37786134780).
+    # https://github.com/Akurganow/pegboard/actions/runs/37786134780).
     def command(self, prompt: str, arm: str) -> list[str]:
         cmd = ["codex", "exec", "--json", "--skip-git-repo-check", "--sandbox", "danger-full-access",
-               "-m", MODELS["codex"]]
+               "-m", self.model]
         if arm == "without":
             cmd += ["--disable", "plugins"]
         return cmd + [prompt]
@@ -163,10 +188,13 @@ class Codex:
     def switch_to_without(self) -> None:
         pass
 
+    def switch_back(self) -> None:
+        pass
+
     # Codex has no skill item kind (source: ThreadItemDetails in
     # https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/exec/src/exec_events.rs#L107-L133).
     # A skill load is a shell read of its SKILL.md in the plugin cache (running:
-    # https://github.com/Akurganow/ai-plugins/actions/runs/37786134780).
+    # https://github.com/Akurganow/pegboard/actions/runs/37786134780).
     # A top-level "error" event also announces each retry, so only "turn.failed"
     # marks a failed turn (source:
     # https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/exec/src/event_processor_with_jsonl_output.rs#L447-L457,
@@ -200,11 +228,12 @@ class Codex:
             error = f"no agent_message, last error: {retried}" if retried else "no agent_message"
         elif not completed and error is None:
             error = "no turn.completed"
-        return Parsed(fired, answer, None, tokens, MODELS["codex"], error, None, tools)
+        return Parsed(fired, answer, None, tokens, self.model, error, None, tools)
 
 
 class Omp:
     name = "omp"
+    model = "openrouter/z-ai/glm-5.3-flash"
 
     def __init__(self, package: str, skill: str):
         self.package, self.skill = package, skill
@@ -216,15 +245,18 @@ class Omp:
     # https://github.com/can1357/oh-my-pi/blob/cde91bb38674d365e8c3916d05d2292273bb8554/docs/settings.md#L495).
     # On three red-flags cases `low` took 116 s against 472 s at `high`, and loaded
     # the skill every time (running, Oh-My-Pi 18.8.6, 2026-10-08:
-    # https://github.com/Akurganow/ai-plugins/actions/runs/37860528358).
+    # https://github.com/Akurganow/pegboard/actions/runs/37860528358).
     def command(self, prompt: str, arm: str) -> list[str]:
         cmd = ["omp", "-p", "--mode", "json", "--no-session", "--no-title", "--auto-approve",
-               "--model", MODELS["omp"], "--thinking", "low"]
+               "--model", self.model, "--thinking", "low"]
         if arm == "without":
             cmd += ["--no-skills", "--no-rules"]
         return cmd + [prompt]
 
     def switch_to_without(self) -> None:
+        pass
+
+    def switch_back(self) -> None:
         pass
 
     # Oh-My-Pi loads a skill by reading skill://<name>, a file under it, or either
@@ -262,7 +294,8 @@ class Omp:
         return Parsed(fired, answer or None, cost, None, model, error, None, tools)
 
 
-ADAPTERS = {"claude": Claude, "codex": Codex, "omp": Omp}
+# Adding a client touches this table, an adapter class above, and the runtime, install and key blocks in .github/workflows/evals.yml.
+CLIENTS = {"claude": (Claude, "ANTHROPIC_API_KEY"), "codex": (Codex, "CODEX_API_KEY"), "omp": (Omp, "OPENROUTER_API_KEY")}
 
 
 def load_events(text: str) -> list[dict]:
@@ -292,20 +325,26 @@ def load_cases(skill_dir: Path) -> tuple[dict, dict]:
     return check_cases(skill_dir, cases, rubric, held_out)
 
 
+# `count` None asks for at least one entry. CONTRIBUTING.md says which prompts a
+# list holds, so the number follows from the skill's clauses.
+def check_entries(where: str, kind: str, entries, count: int | None = None) -> list[str]:
+    if not isinstance(entries, list) or not entries or (count is not None and len(entries) != count):
+        raise SystemExit(f"{where}: {kind} must list " + (f"exactly {count} entries." if count else "at least one entry."))
+    if not all(isinstance(c, dict) and isinstance(c.get("id"), str) and isinstance(c.get("prompt"), str)
+               for c in entries):
+        raise SystemExit(f"{where}: every {kind} entry needs a string id and prompt.")
+    return [c["id"] for c in entries]
+
+
 def check_cases(skill_dir: Path, cases, rubric, held_out=None) -> tuple[dict, dict]:
     if not isinstance(cases, dict):
         raise SystemExit(f"{skill_dir}/cases.yaml: expected a map with positive and near_miss.")
+    ids = []
     for kind in ("positive", "near_miss"):
-        entries = cases.get(kind)
-        if not isinstance(entries, list) or len(entries) != CASES_PER_KIND:
-            raise SystemExit(f"{skill_dir}/cases.yaml: {kind} must list exactly {CASES_PER_KIND} entries.")
-        if not all(isinstance(c, dict) and isinstance(c.get("id"), str) and isinstance(c.get("prompt"), str)
-                   for c in entries):
-            raise SystemExit(f"{skill_dir}/cases.yaml: every {kind} entry needs a string id and prompt.")
+        ids += check_entries(f"{skill_dir}/cases.yaml", kind, cases.get(kind))
     always_on = cases.get("always_on", [])
     if not isinstance(always_on, list) or not set(always_on) <= set(CLIENTS):
         raise SystemExit(f"{skill_dir}/cases.yaml: always_on must list client names from {', '.join(CLIENTS)}.")
-    ids = [c["id"] for kind in ("positive", "near_miss") for c in cases[kind]]
     if len(ids) != len(set(ids)):
         raise SystemExit(f"{skill_dir}/cases.yaml: case ids repeat.")
     # Held-out prompts sit in their own file: cases_sha256 covers cases.yaml alone,
@@ -315,13 +354,7 @@ def check_cases(skill_dir: Path, cases, rubric, held_out=None) -> tuple[dict, di
         if not isinstance(entries, dict) or set(entries) != {"positive", "near_miss"}:
             raise SystemExit(f"{skill_dir}/{HELD_OUT_FILE}: expected a held_out map with positive and near_miss.")
         for kind in ("positive", "near_miss"):
-            group = entries[kind]
-            if not isinstance(group, list) or len(group) != HELD_OUT_PER_KIND:
-                raise SystemExit(f"{skill_dir}/{HELD_OUT_FILE}: {kind} must list exactly {HELD_OUT_PER_KIND} entries.")
-            if not all(isinstance(c, dict) and isinstance(c.get("id"), str) and isinstance(c.get("prompt"), str)
-                       for c in group):
-                raise SystemExit(f"{skill_dir}/{HELD_OUT_FILE}: every {kind} entry needs a string id and prompt.")
-            ids += [c["id"] for c in group]
+            ids += check_entries(f"{skill_dir}/{HELD_OUT_FILE}", kind, entries[kind], HELD_OUT_PER_KIND)
         if len(ids) != len(set(ids)):
             raise SystemExit(f"{skill_dir}/{HELD_OUT_FILE}: case ids repeat.")
         cases = cases | {"held_out": entries}
@@ -371,7 +404,7 @@ def sha256(path: Path) -> str:
 
 def client_env(client: str) -> dict:
     env = {k: v for k, v in os.environ.items() if k not in SECRET_VARS}
-    key = CLIENT_KEY[client]
+    key = CLIENTS[client][1]
     if os.environ.get(key):
         env[key] = os.environ[key]
     return env
@@ -437,8 +470,8 @@ def jev_question(q) -> dict:
 
 # The answer is never split, and Jev limits the state plus the longest question
 # to 32k tokens (documentation: https://docs.typesafe.ai/models.md, read
-# 2026-10-08). A request Jev rejects raises `JevError`, and `run_job` records
-# the session as not graded.
+# 2026-10-08). A request Jev rejects raises `JevError`, and `grade_sessions`
+# records the session as not graded.
 def grade(request_text: str, answer: str, questions: dict, send=jev_request) -> dict:
     body = {
         "model": JEV_MODEL,
@@ -452,24 +485,109 @@ def grade(request_text: str, answer: str, questions: dict, send=jev_request) -> 
         raise JevError(f"jev reply without a noul: {json.dumps(reply)[:300]}") from e
 
 
-def run_job(adapter, cases: dict, questions: dict, session=run_session, grader=grade,
-            held_out: bool = False) -> list[dict]:
-    sessions = [session(adapter, c, kind, "with") for kind in ("positive", "near_miss") for c in cases[kind]]
+# The tree a client installs, by path and content, less what changes on every
+# release or no session reads: the manifests' `version`, the listing icon in a
+# manifest folder, README.md and LICENSE. The rest of a manifest stays in: the
+# Codex manifest names the hooks file, and whether a client shows the
+# description to the model was not checked.
+MANIFEST_DIRS = (".claude-plugin", ".codex-plugin", ".cursor-plugin")
+LISTING_FILES = ("README.md", "LICENSE")
+
+
+def package_tree(bundle: Path) -> str:
+    digest, measured = hashlib.sha256(), 0
+    for path in sorted(p for p in bundle.rglob("*") if p.is_file()):
+        rel = path.relative_to(bundle)
+        if rel.parts[0] in MANIFEST_DIRS:
+            if path.name != "plugin.json":
+                continue
+            manifest = {k: v for k, v in json.loads(path.read_text()).items() if k != "version"}
+            content = json.dumps(manifest, sort_keys=True).encode()
+        elif rel.as_posix() in LISTING_FILES:
+            continue
+        else:
+            content, measured = path.read_bytes(), measured + 1
+        digest.update(rel.as_posix().encode() + b"\0" + hashlib.sha256(content).digest())
+    if not measured:
+        raise SystemExit(f"{bundle}: no package files to measure.")
+    return digest.hexdigest()
+
+
+# What can change a session's result. The command holds the prompt, the model
+# alias, the thinking level and the arm's flags. The package tree is the whole
+# package, not the skill's folder: a skill reads its siblings' files
+# (triangulate's SKILL.md reads ../vet-sources/SKILL.md), and Codex counts such
+# a read as a load of the sibling. The without arm runs without the package.
+def session_inputs(adapter, case: dict, arm: str, tree: str | None) -> str | None:
+    if arm == "with" and tree is None:
+        return None
+    parts = [json.dumps(adapter.command(case["prompt"], arm))] + ([tree] if arm == "with" else [])
+    return hashlib.sha256("\0".join(parts).encode()).hexdigest()
+
+
+# Sessions of the baseline record that may stand in for new ones, keyed by case,
+# kind, arm and inputs. A failed session or grade is run again. Jev's scores
+# stay only while the rubric and the Jev model are the ones that gave them.
+def reusable(record: dict | None, rubric_sha256: str) -> dict:
+    if not record:
+        return {}
+    scores_hold = record.get("rubric_sha256") == rubric_sha256 and record.get("jev_model") == JEV_MODEL
+    return {(s["case"], s["kind"], s["arm"], s["inputs"]):
+            s | {"carried_from": s.get("carried_from") or record["tag"],
+                 "client_version": s.get("client_version") or record.get("client_version"),
+                 "nouls": s["nouls"] if scores_hold else None}
+            for s in record["sessions"] if s.get("inputs") and not s["error"] and not s.get("grade_error")}
+
+
+# Runs the items at `picked` in their order, the with arm first, and switches
+# the package off once for the without arm.
+def run_items(adapter, items: list, picked: list[int], session) -> dict:
+    done = {}
+    for i in picked:
+        if items[i][2] == "with":
+            done[i] = session(adapter, *items[i][:3])
+    without = [i for i in picked if items[i][2] == "without"]
+    if without:
+        adapter.switch_to_without()
+        try:
+            for i in without:
+                done[i] = session(adapter, *items[i][:3])
+        finally:
+            adapter.switch_back()
+    return done
+
+
+def run_job(adapter, cases: dict, session=run_session, held_out: bool = False,
+            inputs=None, carry: dict | None = None) -> list[dict]:
+    items = [(c, kind, "with") for kind in ("positive", "near_miss") for c in cases[kind]]
     # Held-out prompts measure loading alone: with the package only, never graded.
     if held_out and "held_out" in cases:
-        sessions += [session(adapter, c, HELD_OUT_KINDS[kind], "with")
-                     for kind in ("positive", "near_miss") for c in cases["held_out"][kind]]
-    adapter.switch_to_without()
-    sessions += [session(adapter, c, "positive", "without") for c in cases["positive"]]
+        items += [(c, HELD_OUT_KINDS[kind], "with") for kind in ("positive", "near_miss") for c in cases["held_out"][kind]]
+    items += [(c, "positive", "without") for c in cases["positive"]]
+    items = [(c, kind, arm, inputs(c, arm) if inputs else None) for c, kind, arm in items]
+    carried = [(carry or {}).get((c["id"], kind, arm, key)) for c, kind, arm, key in items]
+    done = run_items(adapter, items, [i for i, s in enumerate(carried) if not s], session)
+    # A record holds one model: when the fresh sessions ran on another one, the
+    # carried items run again.
+    models = {s["model"] for s in done.values() if s.get("model")}
+    if models and any(s and s.get("model") and s["model"] not in models for s in carried):
+        done |= run_items(adapter, items, [i for i, s in enumerate(carried) if s], session)
+    for i, s in done.items():
+        if items[i][3]:
+            s["inputs"] = items[i][3]
+    return [done.get(i) or carried[i] for i in range(len(items))]
+
+
+def grade_sessions(sessions: list[dict], cases: dict, questions: dict, grader=grade) -> None:
     prompts = {c["id"]: c["prompt"] for c in cases["positive"]}
+    # A carried answer keeps its scores while they hold (`reusable`).
     for s in sessions:
-        if s["kind"] != "positive" or s["error"]:
+        if s["kind"] != "positive" or s["error"] or s["nouls"] is not None:
             continue
         try:
-            s["nouls"] = grader(prompts[s["case"]], redact(s["answer"]), applicable(questions, s["case"]))
+            s["nouls"] = grader(prompts[s["case"]], s["answer"], applicable(questions, s["case"]))
         except JevError as e:
             s["grade_error"] = str(e)
-    return sessions
 
 
 def redact(text: str) -> str:
@@ -481,10 +599,18 @@ def redact(text: str) -> str:
 
 
 # A refused client key fails every session, and a refused Jev key fails every
-# grade. Either means the run itself broke.
+# grade. Either means the run itself broke. A carried session ran in an earlier
+# run, so it says nothing about this run's keys unless it was graded again here.
+# While the carried sessions outnumber the failed ones, the record is still
+# mostly measured, and the failures stay in the summary's Excluded list.
 def run_broke(sessions: list[dict]) -> bool:
-    gradable = [s for s in sessions if s["kind"] == "positive" and not s["error"]]
-    return all(s["error"] for s in sessions) or (bool(gradable) and all(s["grade_error"] for s in gradable))
+    fresh = [s for s in sessions if not s.get("carried_from")]
+    carried = len(sessions) - len(fresh)
+    graded_here = [s for s in sessions if s["kind"] == "positive" and not s["error"]
+                   and (not s.get("carried_from") or s["grade_error"])]
+    kept = sum(1 for s in sessions if s.get("carried_from") and s["nouls"])
+    return ((len(fresh) > carried and all(s["error"] for s in fresh))
+            or (len(graded_here) > kept and all(s["grade_error"] for s in graded_here)))
 
 
 def metrics(sessions: list[dict], always_on: bool = False) -> dict:
@@ -538,6 +664,9 @@ def compare(old_runs: list[dict], new_runs: list[dict]) -> dict:
     for field, label in (("cases_sha256", "cases"), ("rubric_sha256", "rubric")):
         if {r[field] for r in old_runs} != {r[field] for r in new_runs}:
             return {"comparable": False, "reason": f"not comparable: {label} changed"}
+    # A run without a recorded model says nothing about which model ran it.
+    if {r.get("model") for r in old_runs} - {None} != {r.get("model") for r in new_runs} - {None}:
+        return {"comparable": False, "reason": "not comparable: model changed"}
     found = {}
     for metric in METRICS:
         old = [v for r in old_runs if (v := metrics(r["sessions"], r.get("always_on", False))[metric]) is not None]
@@ -550,7 +679,7 @@ def compare(old_runs: list[dict], new_runs: list[dict]) -> dict:
 
 # A package without skills/ is valid (Agent Plugins 1.0.0 §6.2) and has nothing to measure.
 def skills_of(package: str) -> list[str]:
-    skills = PLUGINS_DIR / package / "skills"
+    skills = SOURCES_DIR / package / "skills"
     return sorted(p.name for p in skills.iterdir() if p.is_dir()) if skills.is_dir() else []
 
 
@@ -562,19 +691,23 @@ def package_of(tag: str) -> str:
     package, sep, version = tag.rpartition("--v")
     if not sep or not package or not version:
         raise SystemExit(f"{tag}: not a <package>--v<version> tag.")
-    if not (PLUGINS_DIR / package).is_dir():
-        raise SystemExit(f"{tag}: no package {package} under plugins/.")
+    if not (SOURCES_DIR / package).is_dir():
+        raise SystemExit(f"{tag}: no package {package} under src/.")
     return package
 
 
-def matrix(tags: list[str]) -> dict:
+def matrix(tags: list[str], clients: list[str] | tuple = ()) -> dict:
+    picked = list(dict.fromkeys(clients or CLIENTS))
+    unknown = [c for c in picked if c not in CLIENTS]
+    if unknown:
+        raise SystemExit(f"unknown client: {', '.join(unknown)}. Choose from {', '.join(CLIENTS)}.")
     include = []
     for tag in dict.fromkeys(tags):
         package = package_of(tag)
         for skill in skills_of(package):
             if not has_cases(package, skill):
                 continue
-            for client in CLIENTS:
+            for client in picked:
                 for repeat in range(1, REPEATS + 1):
                     include.append({"tag": tag, "package": package, "skill": skill, "client": client, "repeat": repeat})
     return {"include": include}
@@ -583,8 +716,8 @@ def matrix(tags: list[str]) -> dict:
 # `load` is a parameter so that the selftest runs without PyYAML.
 def check_folder(folder: Path, load=load_cases) -> str | None:
     package, skill = folder.parent.name, folder.name
-    if not (PLUGINS_DIR / package / "skills" / skill / "SKILL.md").is_file():
-        return f"evals/{package}/{skill}: no plugins/{package}/skills/{skill}/SKILL.md."
+    if not (SOURCES_DIR / package / "skills" / skill / "SKILL.md").is_file():
+        return f"evals/{package}/{skill}: no src/{package}/skills/{skill}/SKILL.md."
     try:
         load(folder)
     except SystemExit as e:
@@ -612,9 +745,18 @@ def cmd_run(args) -> int:
     package = package_of(args.tag)
     skill_dir = EVALS_DIR / package / args.skill
     cases, questions = load_cases(skill_dir)
-    adapter = ADAPTERS[args.client](package, args.skill)
+    adapter = CLIENTS[args.client][0](package, args.skill)
     version = client_version(args.client)
-    sessions = run_job(adapter, cases, questions, held_out=args.repeat == 1)
+    # A run by hand may measure a tag from before the bundles/ layout. Its with
+    # arm then records no inputs, so no later run copies it.
+    bundle = Path(args.released) / "bundles" / package
+    tree = package_tree(bundle) if bundle.is_dir() or not args.fresh else None
+    carry = {} if args.fresh else reusable(baseline_record(package, args.tag, args.skill, args.client, args.repeat),
+                                           sha256(skill_dir / "rubric.yaml"))
+    sessions = run_job(adapter, cases, held_out=args.repeat == 1, carry=carry,
+                       inputs=lambda case, arm: session_inputs(adapter, case, arm, tree))
+    for s in sessions:
+        s.setdefault("client_version", version)
     record = {
         "tag": args.tag, "package": package, "skill": args.skill, "client": args.client, "repeat": args.repeat,
         "client_version": version, "model": next((s["model"] for s in sessions if s["model"]), None),
@@ -624,10 +766,33 @@ def cmd_run(args) -> int:
     }
     Path(args.out).write_text(redact(json.dumps(record, indent=1)))
     failed = sum(1 for s in sessions if s["error"])
-    ungraded = sum(1 for s in sessions if s["grade_error"])
+    reused = sum(1 for s in sessions if s.get("carried_from"))
     print(f"{package}/{args.skill} on {args.client}, repeat {args.repeat}: {len(sessions)} sessions, "
-          f"{failed} failed, {ungraded} not graded.")
+          f"{reused} carried, {failed} failed.")
     return 1 if run_broke(sessions) else 0
+
+
+# Each record keeps its path under `runs`, so `report` reads `out` as it would
+# read `runs`. A record whose every grade failed is not written, so `report`
+# publishes no broken run. Only this step holds the grading key, so a Jev error
+# that echoes it is redacted here or nowhere.
+def grade_runs(runs: Path, out: Path, load=load_cases, grader=grade) -> int:
+    broke = 0
+    for path in sorted(runs.rglob("*.json")):
+        record = json.loads(path.read_text())
+        cases, questions = load(EVALS_DIR / record["package"] / record["skill"])
+        grade_sessions(record["sessions"], cases, questions, grader)
+        ungraded = sum(1 for s in record["sessions"] if s["grade_error"])
+        broken = run_broke(record["sessions"])
+        print(f"{record['package']}/{record['skill']} on {record['client']}, repeat {record['repeat']}: "
+              f"{ungraded} not graded{', so it is left out' if broken else ''}.")
+        if broken:
+            broke += 1
+            continue
+        target = out / path.relative_to(runs)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(redact(json.dumps(record, indent=1)))
+    return 1 if broke else 0
 
 
 # stderr goes straight to the job log, so a refused upload or a missing release
@@ -648,21 +813,180 @@ def version_key(tag: str) -> tuple:
     return tuple(int(p) for p in parts) if all(p.isdigit() for p in parts) else ()
 
 
-def previous_results(package: str, tag: str, workdir: Path) -> dict | None:
-    tags = within_limit(json.loads(gh("release", "list", "--limit", str(RELEASE_LIMIT), "--json", "tagName")),
-                        RELEASE_LIMIT, "release list")
-    older = sorted((t["tagName"] for t in tags if t["tagName"].startswith(f"{package}--v")
-                    and version_key(t["tagName"]) and version_key(t["tagName"]) < version_key(tag)),
-                   key=version_key, reverse=True)
-    if not older:
+def ghcr_owner(repo: str) -> str:
+    return (repo.split("/")[0] if "/" in repo else "akurganow").lower()
+
+
+def ghcr_request(path: str, method: str = "GET", data: bytes | None = None, headers: dict | None = None,
+                 allow_404: bool = False) -> tuple[bytes | None, dict]:
+    url = path if path.startswith("https://") else f"{GHCR_URL}{path}"
+    for attempt in range(JEV_ATTEMPTS):
+        request = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return response.read(), dict(response.headers.items())
+        except urllib.error.HTTPError as e:
+            if e.code in JEV_RETRY_STATUSES and attempt < JEV_ATTEMPTS - 1:
+                time.sleep(2 ** attempt)
+                continue
+            if e.code == 404 and allow_404:
+                return None, {}
+            try:
+                detail = e.read()[:300].decode(errors="replace")
+            except (OSError, http.client.HTTPException) as cut:
+                detail = f"error body unreadable: {cut!r}"
+            raise SystemExit(f"ghcr {method} {url} -> {e.code}: {detail}") from e
+        except (OSError, http.client.HTTPException) as e:
+            if attempt < JEV_ATTEMPTS - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise SystemExit(f"ghcr {method} {url} unreachable: {e!r}") from e
+    raise AssertionError("unreachable")
+
+
+def ghcr_token(owner: str, scope: str = "pull", token: str = "") -> str:
+    headers = {}
+    if token:
+        encoded = base64.b64encode(f"token:{token}".encode()).decode()
+        headers["Authorization"] = f"Basic {encoded}"
+    body, _ = ghcr_request(f"/token?service=ghcr.io&scope=repository:{owner}/{GHCR_PACKAGE}:{scope}", headers=headers)
+    assert body is not None
+    return json.loads(body)["token"]
+
+
+def push_blob(owner: str, bearer: str, data: bytes) -> str:
+    digest = f"sha256:{hashlib.sha256(data).hexdigest()}"
+    _, headers = ghcr_request(f"/v2/{owner}/{GHCR_PACKAGE}/blobs/uploads/", method="POST", data=b"",
+                              headers={"Authorization": f"Bearer {bearer}"})
+    location = headers.get("Location") or headers.get("location")
+    if not location:
+        raise SystemExit("ghcr blob upload returned no Location header.")
+    sep = "&" if "?" in location else "?"
+    ghcr_request(f"{location}{sep}digest={digest}", method="PUT", data=data,
+                 headers={"Authorization": f"Bearer {bearer}", "Content-Type": "application/octet-stream"})
+    return digest
+
+
+def oci_tag(record: dict) -> str:
+    return f"{record['tag']}_{record['skill']}_{record['client']}_{record['run']}_r{record['repeat']}"
+
+
+def push_record(owner: str, bearer: str, record: dict, created: str, source: str) -> None:
+    config = b"{}"
+    layer = redact(json.dumps(record, indent=1)).encode()
+    config_digest = push_blob(owner, bearer, config)
+    layer_digest = push_blob(owner, bearer, layer)
+    manifest = {
+        "schemaVersion": 2,
+        "mediaType": OCI_MANIFEST_TYPE,
+        "config": {"mediaType": OCI_CONFIG_TYPE, "digest": config_digest, "size": len(config)},
+        "layers": [{"mediaType": OCI_LAYER_TYPE, "digest": layer_digest, "size": len(layer)}],
+        "annotations": {
+            "org.opencontainers.image.created": created,
+            "org.opencontainers.image.version": record["tag"],
+            # A package whose first push names its repository inherits that
+            # repository's access, so the workflow's GITHUB_TOKEN may push to it
+            # (documentation: https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility#about-inheritance-of-access-permissions).
+            "org.opencontainers.image.source": source,
+        },
+    }
+    ghcr_request(f"/v2/{owner}/{GHCR_PACKAGE}/manifests/{oci_tag(record)}", method="PUT",
+                 data=json.dumps(manifest, indent=1).encode(),
+                 headers={"Authorization": f"Bearer {bearer}", "Content-Type": OCI_MANIFEST_TYPE})
+
+
+def run_stamp() -> tuple[str, str]:
+    created = os.environ.get("RUN_STAMP") or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    stamp = created.translate(str.maketrans("", "", "-:"))
+    attempt = os.environ.get("RUN_ATTEMPT") or "1"
+    return created, f"{stamp}a{attempt}"
+
+
+def next_link(headers: dict) -> str | None:
+    link = headers.get("Link") or headers.get("link") or ""
+    for part in link.split(","):
+        if 'rel="next"' in part and "<" in part and ">" in part:
+            return part[part.index("<") + 1:part.index(">")]
+    return None
+
+
+def ghcr_tags(owner: str, bearer: str) -> list[str]:
+    tags, path = [], f"/v2/{owner}/{GHCR_PACKAGE}/tags/list"
+    while path:
+        body, headers = ghcr_request(path, headers={"Authorization": f"Bearer {bearer}"}, allow_404=True)
+        if body is None:
+            return []
+        tags += json.loads(body).get("tags") or []
+        path = next_link(headers)
+    return tags
+
+
+def fetch_record(owner: str, bearer: str, tag_name: str) -> dict | None:
+    manifest_body, _ = ghcr_request(
+        f"/v2/{owner}/{GHCR_PACKAGE}/manifests/{tag_name}",
+        headers={"Authorization": f"Bearer {bearer}", "Accept": OCI_MANIFEST_TYPE},
+        allow_404=True,
+    )
+    if manifest_body is None:
         return None
-    previous = older[0]
-    assets = json.loads(gh("release", "view", previous, "--json", "assets"))["assets"]
-    if not any(a["name"] == "evals.json" for a in assets):
+    layers = json.loads(manifest_body).get("layers") or []
+    if not layers or not layers[0].get("digest"):
         return None
-    target = workdir / "previous" / previous
-    gh("release", "download", previous, "--pattern", "evals.json", "--dir", str(target))
-    return json.loads((target / "evals.json").read_text())
+    blob_body, _ = ghcr_request(
+        f"/v2/{owner}/{GHCR_PACKAGE}/blobs/{layers[0]['digest']}",
+        headers={"Authorization": f"Bearer {bearer}"},
+        allow_404=True,
+    )
+    return json.loads(blob_body) if blob_body is not None else None
+
+
+def previous_results(owner: str, package: str, tag: str, bearer: str | None = None, only=None) -> dict | None:
+    bearer = bearer or ghcr_token(owner, "pull")
+    current_run_id = os.environ.get("GITHUB_RUN_ID") or None
+    target_key = version_key(tag)
+    grouped: dict[tuple[str, str], dict[tuple[str, str, int], dict[int, str]]] = {}
+    for name in ghcr_tags(owner, bearer):
+        if not name.startswith(f"{package}--v"):
+            continue
+        head, sep_r, rep = name.rpartition("_r")
+        head, sep_l, run_label = head.rpartition("_")
+        head, sep_c, client = head.rpartition("_")
+        cand_tag, sep_s, skill = head.partition("_")
+        stamp, sep_a, attempt = run_label.rpartition("a")
+        vkey = version_key(cand_tag)
+        if not (sep_r and sep_l and sep_c and sep_s and sep_a and cand_tag.rpartition("--v")[0] == package
+                and rep in ("1", "2", "3") and stamp and attempt.isdigit() and vkey and vkey <= target_key):
+            continue
+        grouped.setdefault((skill, client), {}).setdefault((cand_tag, stamp, int(attempt)), {})[int(rep)] = name
+    baseline = []
+    for skill, client in sorted(grouped):
+        if only and (skill, client) != only:
+            continue
+        candidates = sorted(
+            ((cand_tag, stamp, attempt, reps) for (cand_tag, stamp, attempt), reps in grouped[(skill, client)].items()
+             if set(reps) == {1, 2, 3}),
+            key=lambda item: (version_key(item[0]), item[1], item[2]),
+            reverse=True,
+        )
+        for _, _, _, reps in candidates:
+            cand_runs = [fetch_record(owner, bearer, reps[r]) for r in (1, 2, 3)]
+            if current_run_id and any(r and r.get("run_id") == current_run_id for r in cand_runs):
+                continue
+            # shortcut: a single errored case inside a repeat stays in Excluded and does not disqualify the baseline; tighten if partial repeats reach releases
+            if (all(r and r.get("sessions") and not run_broke(r["sessions"]) for r in cand_runs)
+                    and len({r.get("client_version") for r in cand_runs if r}) == 1):
+                baseline += [r for r in cand_runs if r]
+                break
+    return {"tag": baseline[0]["tag"], "runs": baseline} if baseline else None
+
+
+# The run `report` compares this one with, so a carried session comes from the
+# baseline itself. The registry package is public, so a run job reads it with
+# an anonymous token.
+def baseline_record(package: str, tag: str, skill: str, client: str, repeat: int) -> dict | None:
+    found = previous_results(ghcr_owner(os.environ.get("GITHUB_REPOSITORY", "")), package, tag, only=(skill, client))
+    return next((r for r in (found or {}).get("runs", [])
+                 if r["skill"] == skill and r["client"] == client and r["repeat"] == repeat), None)
 
 
 def open_fingerprints() -> set[str]:
@@ -732,18 +1056,25 @@ def counted(runs: list[dict], metric: str) -> str:
     return "/".join(parts)
 
 
+# A carried session keeps the client version it ran on, so one run can hold two.
+def versions(runs: list[dict]) -> str:
+    found = dict.fromkeys(str(s.get("client_version") or r.get("client_version")) for r in runs for s in r["sessions"])
+    return ", ".join(found) or str(runs[0].get("client_version"))
+
+
 def issue_body(package, skill, client, old_tag, new_tag, found, old_runs, new_runs, run_url, repo) -> str:
     rows = "\n".join(f"| `{m}` | {span(old)} ({covers(old)}) | {span(new)} ({covers(new)}) |"
                      for m, (old, new) in found.items())
-    asset = "https://github.com/{}/releases/download/{}/evals.json"
+    old_head = f"`{old_tag}` (`{old_runs[0].get('run', 'old')}`)" if old_tag == new_tag else f"`{old_tag}`"
+    new_head = f"`{new_tag}` (`{new_runs[0].get('run', 'new')}`)" if old_tag == new_tag else f"`{new_tag}`"
     return (
         f"{fingerprint(package, skill, client)}\n\n"
-        f"`{package}/{skill}` on {client} regressed between `{old_tag}` and `{new_tag}`. "
+        f"`{package}/{skill}` on {client} regressed between {old_head} and {new_head}. "
         "Each range spans the repeats of one release, and the two ranges do not overlap.\n\n"
-        f"| Metric | `{old_tag}` | `{new_tag}` |\n| :-- | :-- | :-- |\n{rows}\n\n"
-        f"Client version: {old_runs[0]['client_version']} → {new_runs[0]['client_version']}. "
+        f"| Metric | {old_head} | {new_head} |\n| :-- | :-- | :-- |\n{rows}\n\n"
+        f"Client version: {versions(old_runs)} → {versions(new_runs)}. "
         f"Model: {old_runs[0]['model']} → {new_runs[0]['model']}.\n\n"
-        f"Run: {run_url}. Results: {asset.format(repo, old_tag)} and {asset.format(repo, new_tag)}.\n"
+        f"Run: {run_url}. Results: https://github.com/{repo}/pkgs/container/{GHCR_PACKAGE}.\n"
     )
 
 
@@ -752,35 +1083,38 @@ def file_issue(title: str, body: str) -> None:
 
 
 def cmd_report(args) -> int:
-    records = [json.loads(p.read_text()) for p in Path(args.runs).rglob("*.json")]
+    records = [json.loads(p.read_text()) for p in sorted(Path(args.runs).rglob("*.json"))]
     repo = os.environ.get("GITHUB_REPOSITORY", "")
-    run_url = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
+    owner = ghcr_owner(repo)
+    created, label = run_stamp()
+    run_id = os.environ.get("GITHUB_RUN_ID") or None
+    bearer = None
+    source = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}"
+    run_url = f"{source}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
     summary = ["# Behavioural evals", "",
                "Each cell is the range over the repeats that gave a figure, so a repeat without one drops out. "
                "n is the sessions or graded answers behind it, "
                "and for improvement the graded answers with and without the package.", ""]
     seen = open_fingerprints()
     can_file = label_exists("police-report")
-    with tempfile.TemporaryDirectory() as tmp:
-        workdir = Path(tmp)
-        for tag in dict.fromkeys(args.tags.split()):
-            package = package_of(tag)
-            runs = [r for r in records if r["tag"] == tag]
-            no_cases = [s for s in skills_of(package) if not has_cases(package, s)]
-            if not runs:
-                # A failed manual run must not replace a release's complete evals.json.
-                summary += [f"## `{tag}`", "", "No run reported, so nothing was uploaded.", ""]
-                if no_cases:
-                    summary += ["No cases: " + ", ".join(no_cases), ""]
-                continue
-            # gh names the asset after the file. A "#" suffix sets only a display
-            # label (documentation: https://cli.github.com/manual/gh_release_upload).
-            results = workdir / tag / "evals.json"
-            results.parent.mkdir()
-            results.write_text(json.dumps({"tag": tag, "package": package, "no_cases": no_cases, "runs": runs}, indent=1))
-            gh("release", "upload", tag, str(results), "--clobber")
-            previous = previous_results(package, tag, workdir)
-            summary += report_tag(tag, package, runs, no_cases, previous, seen, run_url, repo, can_file)
+    for tag in dict.fromkeys(args.tags.split()):
+        package = package_of(tag)
+        runs = [r for r in records if r["tag"] == tag]
+        no_cases = [s for s in skills_of(package) if not has_cases(package, s)]
+        if not runs:
+            summary += [f"## `{tag}`", "", "No run reported, so nothing was uploaded.", ""]
+            if no_cases:
+                summary += ["No cases: " + ", ".join(no_cases), ""]
+            continue
+        if bearer is None:
+            bearer = ghcr_token(owner, "pull,push",
+                                os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or "")
+        previous = previous_results(owner, package, tag, bearer)
+        for r in runs:
+            r["run"] = label
+            r["run_id"] = run_id
+            push_record(owner, bearer, r, created, source)
+        summary += report_tag(tag, package, runs, no_cases, previous, seen, run_url, repo, can_file)
     Path(os.environ.get("GITHUB_STEP_SUMMARY", "/dev/stdout")).write_text("\n".join(summary) + "\n")
     return 0
 
@@ -834,13 +1168,16 @@ def question_detail(package, skill, client, group, always_on) -> list[str]:
             hits = ", ".join(c for c, f, _ in found if f)
             parts.append(f"{kind.replace('_', '-')} {fired}/{done}" + (f" ({hits})" if hits else ""))
         notes.append("Held-out prompts loaded, with the package: " + ", ".join(parts) + ".")
-    carried = [s for s in sessions if s.get("loaded") is not None]
-    if carried:
-        key = f"{package}@{MARKETPLACE}"
+    with_list = [s for s in sessions if s.get("loaded") is not None]
+    if with_list:
+        # The report job runs from this checkout, whose catalogue name may be
+        # newer than the one the released tag installed under.
+        prefix = f"{package}@"
 
         def listed(arm):
-            of_arm = [s for s in carried if s["arm"] == arm]
-            return f"{sum(key in s['loaded']['plugins'] for s in of_arm)} of {len(of_arm)}"
+            of_arm = [s for s in with_list if s["arm"] == arm]
+            found = sum(any(p.startswith(prefix) for p in s["loaded"]["plugins"]) for s in of_arm)
+            return f"{found} of {len(of_arm)}"
 
         notes.append(f"Package in the session's plugin list: {listed('with')} sessions with it, "
                      f"{listed('without')} without.")
@@ -861,7 +1198,9 @@ def report_tag(tag, package, runs, no_cases, previous, seen, run_url, repo, can_
             values = {m: [v for r in group if (v := metrics(r["sessions"], r.get("always_on", False))[m]) is not None]
                       for m in METRICS}
             always_on = all(r.get("always_on", False) for r in group)
-            sessions = [s for r in group for s in r["sessions"]]
+            # Spend is this run's: a carried session was paid for in the run it came from.
+            sessions = [s for r in group for s in r["sessions"] if not s.get("carried_from")]
+            reused = sum(1 for r in group for s in r["sessions"] if s.get("carried_from"))
             cost = sum(s["cost_usd"] or 0 for s in sessions)
             tokens = sum((s["tokens"] or {}).get("input_tokens", 0) + (s["tokens"] or {}).get("output_tokens", 0)
                          for s in sessions)
@@ -881,13 +1220,14 @@ def report_tag(tag, package, runs, no_cases, previous, seen, run_url, repo, can_
                     if not can_file:
                         status += " (no issue: the label police-report is not on the label list)"
                     elif mark not in seen:
+                        old_tag = old[0]["tag"] if "--v" in old[0].get("tag", "") else previous["tag"]
                         file(f"evals: {package}/{skill} regressed on {client} in {tag}",
-                             issue_body(package, skill, client, previous["tag"], tag, outcome["regressed"],
+                             issue_body(package, skill, client, old_tag, tag, outcome["regressed"],
                                         old, group, run_url, repo))
                         seen.add(mark)
                 else:
                     status = "no regression"
-            spent = f"${cost:.2f}" if client != "codex" else f"{tokens} tokens"
+            spent = (f"${cost:.2f}" if client != "codex" else f"{tokens} tokens") + (f", {reused} carried" if reused else "")
             cells = " | ".join("n/a" if always_on and m in NOT_APPLICABLE_ALWAYS_ON
                                else f"{span(values[m])} (n={counted(group, m)}, {covers(values[m])})" for m in METRICS)
             marked_na = marked_na or always_on
@@ -906,8 +1246,8 @@ def report_tag(tag, package, runs, no_cases, previous, seen, run_url, repo, can_
 
 # The fixtures are event streams trimmed from runs on GitHub's ubuntu-latest on
 # 2026-10-08: Claude Code 2.1.293 and Oh-My-Pi 18.8.4 in
-# https://github.com/Akurganow/ai-plugins/actions/runs/37789029106, and Codex
-# 0.161.0 in https://github.com/Akurganow/ai-plugins/actions/runs/37786134780.
+# https://github.com/Akurganow/pegboard/actions/runs/37789029106, and Codex
+# 0.161.0 in https://github.com/Akurganow/pegboard/actions/runs/37786134780.
 def _selftest_parsers() -> None:
     def events(name):
         return load_events((FIXTURES_DIR / f"{name}.jsonl").read_text())
@@ -925,27 +1265,34 @@ def _selftest_parsers() -> None:
             "message": {"content": [{"type": "tool_use", "name": "Bash", "input": {"command": "ls"}}]}}
     assert Claude("p", "s").parse([bash]).tools == ["Bash"]
 
-    codex = Codex("design-review", "red-flags").parse(events("codex"))
-    assert codex.fired and codex.error is None, codex
-    assert codex.answer.startswith("I\u2019ll use the design-review skill"), codex.answer
-    assert codex.answer.count("\n\n## Review") == 1 and len(codex.answer.split("\n\n")) >= 4, codex.answer
-    said = [{"type": "item.completed", "item": {"type": "agent_message", "text": "Draft"}},
-            {"type": "item.completed", "item": {"type": "agent_message", "text": "The draft is above."}},
-            {"type": "turn.completed", "usage": {}}]
-    assert Codex("p", "s").parse(said).answer == "Draft\n\nThe draft is above."
-    assert codex.tokens["input_tokens"] == 141929, codex.tokens
-    assert not Codex("triz", "red-flags").parse(events("codex")).fired
-    assert codex.loaded is None and len(codex.tools) == 3, codex
-    assert all(t.startswith("command ") for t in codex.tools), codex.tools
-    assert codex.tools[0].endswith("red-flags/SKILL.md'"), codex.tools[0]
-    retry = {"type": "error", "message": "Reconnecting... 1/5"}
-    assert Codex("design-review", "red-flags").parse([retry] + events("codex")).error is None
-    failed = {"type": "turn.failed", "error": {"message": "quota exceeded"}}
-    assert "quota exceeded" in Codex("design-review", "red-flags").parse(events("codex") + [failed]).error
-    only_retry = Codex("design-review", "red-flags").parse([{"type": "turn.started"}, retry])
-    assert only_retry.error == "no agent_message, last error: Reconnecting... 1/5", only_retry
-    interrupted = Codex("design-review", "red-flags").parse(events("codex")[:-1])
-    assert interrupted.error == "no turn.completed" and interrupted.answer, interrupted
+    # The Codex stream was recorded while the catalogue was named ai-plugins,
+    # and the cache path the parser matches carries that name.
+    global MARKETPLACE
+    current, MARKETPLACE = MARKETPLACE, "ai-plugins"
+    try:
+        codex = Codex("design-review", "red-flags").parse(events("codex"))
+        assert codex.fired and codex.error is None, codex
+        assert codex.answer.startswith("I\u2019ll use the design-review skill"), codex.answer
+        assert codex.answer.count("\n\n## Review") == 1 and len(codex.answer.split("\n\n")) >= 4, codex.answer
+        said = [{"type": "item.completed", "item": {"type": "agent_message", "text": "Draft"}},
+                {"type": "item.completed", "item": {"type": "agent_message", "text": "The draft is above."}},
+                {"type": "turn.completed", "usage": {}}]
+        assert Codex("p", "s").parse(said).answer == "Draft\n\nThe draft is above."
+        assert codex.tokens["input_tokens"] == 141929, codex.tokens
+        assert not Codex("triz", "red-flags").parse(events("codex")).fired
+        assert codex.loaded is None and len(codex.tools) == 3, codex
+        assert all(t.startswith("command ") for t in codex.tools), codex.tools
+        assert codex.tools[0].endswith("red-flags/SKILL.md'"), codex.tools[0]
+        retry = {"type": "error", "message": "Reconnecting... 1/5"}
+        assert Codex("design-review", "red-flags").parse([retry] + events("codex")).error is None
+        failed = {"type": "turn.failed", "error": {"message": "quota exceeded"}}
+        assert "quota exceeded" in Codex("design-review", "red-flags").parse(events("codex") + [failed]).error
+        only_retry = Codex("design-review", "red-flags").parse([{"type": "turn.started"}, retry])
+        assert only_retry.error == "no agent_message, last error: Reconnecting... 1/5", only_retry
+        interrupted = Codex("design-review", "red-flags").parse(events("codex")[:-1])
+        assert interrupted.error == "no turn.completed" and interrupted.answer, interrupted
+    finally:
+        MARKETPLACE = current
 
     omp = Omp("design-review", "red-flags").parse(events("omp"))
     assert omp.fired and omp.error is None, omp
@@ -967,6 +1314,11 @@ def _selftest_parsers() -> None:
 
     assert Codex("p", "s").command("q", "without")[-3:] == ["--disable", "plugins", "q"]
     assert Omp("p", "s").command("q", "without")[-3:] == ["--no-skills", "--no-rules", "q"]
+    assert {k: (cls.name, cls.model, key) for k, (cls, key) in CLIENTS.items()} == {
+        "claude": ("claude", "haiku", "ANTHROPIC_API_KEY"),
+        "codex": ("codex", "gpt-6-luna", "CODEX_API_KEY"),
+        "omp": ("omp", "openrouter/z-ai/glm-5.3-flash", "OPENROUTER_API_KEY"),
+    }
 
 
 def _session(case, kind, arm, fired, nouls=None, error=None) -> dict:
@@ -981,6 +1333,25 @@ def _expect_error(call, *needles: str) -> None:
         assert all(n in str(e) for n in needles), e
     else:
         raise AssertionError(f"expected an error naming {needles}")
+
+
+@contextlib.contextmanager
+def _fixture_tree(specs: dict[str, list[str]]):
+    global SOURCES_DIR, EVALS_DIR
+    real_sources, real_evals = SOURCES_DIR, EVALS_DIR
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        SOURCES_DIR, EVALS_DIR = root / "src", root / "evals"
+        try:
+            for pkg, skills in specs.items():
+                (SOURCES_DIR / pkg).mkdir(parents=True, exist_ok=True)
+                for skill in skills:
+                    (SOURCES_DIR / pkg / "skills" / skill).mkdir(parents=True, exist_ok=True)
+                    (SOURCES_DIR / pkg / "skills" / skill / "SKILL.md").write_text("")
+                    (EVALS_DIR / pkg / skill).mkdir(parents=True, exist_ok=True)
+            yield root
+        finally:
+            SOURCES_DIR, EVALS_DIR = real_sources, real_evals
 
 
 def _selftest_core() -> None:
@@ -1014,6 +1385,10 @@ def _selftest_core() -> None:
         "comparable": False, "reason": "not comparable: cases changed"}
     assert compare(old, [{"cases_sha256": "a", "rubric_sha256": "s", "sessions": sample}]) == {
         "comparable": False, "reason": "not comparable: rubric changed"}
+    assert compare([dict(old[0], model="a")], [dict(old[0], model="b")]) == {
+        "comparable": False, "reason": "not comparable: model changed"}
+    assert compare([dict(old[0], model="a")], [dict(old[0], model="a"), old[0]])["comparable"], \
+        "a repeat without a model is no change"
     assert compare(old, old) == {"comparable": True, "regressed": {}}
 
     def runs(sessions, count=REPEATS):
@@ -1034,10 +1409,11 @@ def _selftest_core() -> None:
     subprocess.run = lambda cmd, **kw: spawned.append(kw["env"]) or subprocess.CompletedProcess(cmd, 0, stdout="1.0\n")
     try:
         Claude("p", "s").switch_to_without()
+        Claude("p", "s").switch_back()
         assert client_version("claude") == "1.0"
     finally:
         subprocess.run = real_run
-    assert len(spawned) == 2 and all("TYPESAFE_API_KEY" not in e and "ANTHROPIC_API_KEY" in e for e in spawned), spawned
+    assert len(spawned) == 3 and all("TYPESAFE_API_KEY" not in e and "ANTHROPIC_API_KEY" in e for e in spawned), spawned
 
     class Reply:
         def __enter__(self):
@@ -1095,33 +1471,46 @@ def _selftest_core() -> None:
         def switch_to_without(self):
             self.order.append("switch")
 
+        def switch_back(self):
+            self.order.append("back")
+
     fake = Fake()
     cases = {"positive": [{"id": "p", "prompt": "P"}], "near_miss": [{"id": "n", "prompt": "N"}]}
 
     def fake_session(adapter, case, kind, arm):
         adapter.order.append(f"{case['id']}:{arm}")
-        return _session(case["id"], kind, arm, arm == "with") | {"answer": "leaked selftest-secret-value"}
+        return _session(case["id"], kind, arm, arm == "with") | {"answer": "A"}
 
     seen = []
-    graded = run_job(fake, cases, {"q": "Q"}, session=fake_session,
-                     grader=lambda r, a, q: seen.append(a) or {"q": 1.0})
-    assert fake.order == ["p:with", "n:with", "switch", "p:without"], fake.order
+    graded = run_job(fake, cases, session=fake_session)
+    assert fake.order == ["p:with", "n:with", "switch", "p:without", "back"], fake.order
+    assert all(s["nouls"] is None for s in graded), graded
+    grade_sessions(graded, cases, {"q": "Q"}, grader=lambda r, a, q: seen.append(a) or {"q": 1.0})
     assert [s["nouls"] for s in graded] == [{"q": 1.0}, None, {"q": 1.0}], graded
-    assert seen == ["leaked ***", "leaked ***"], seen
+    assert seen == ["A", "A"], seen
     assert not run_broke(graded)
     spare = cases | {"held_out": {"positive": [{"id": "hp", "prompt": "HP"}], "near_miss": [{"id": "hn", "prompt": "HN"}]}}
     fake = Fake()
-    first = run_job(fake, spare, {"q": "Q"}, session=fake_session, grader=lambda r, a, q: {"q": 1.0}, held_out=True)
-    assert fake.order == ["p:with", "n:with", "hp:with", "hn:with", "switch", "p:without"], fake.order
+    first = run_job(fake, spare, session=fake_session, held_out=True)
+    grade_sessions(first, spare, {"q": "Q"}, grader=lambda r, a, q: {"q": 1.0})
+    assert fake.order == ["p:with", "n:with", "hp:with", "hn:with", "switch", "p:without", "back"], fake.order
+    boom = Fake()
+    try:
+        run_job(boom, cases,
+                session=lambda a, c, k, arm: (_ for _ in ()).throw(RuntimeError("boom")) if arm == "without" else fake_session(a, c, k, arm))
+    except RuntimeError:
+        pass
+    assert boom.order == ["p:with", "n:with", "switch", "back"], boom.order
     assert [s["kind"] for s in first[2:4]] == ["held_out_positive", "held_out_near_miss"], first
     assert all(s["nouls"] is None for s in first[2:4]), first
-    assert len(run_job(Fake(), spare, {"q": "Q"}, session=fake_session, grader=lambda r, a, q: {"q": 1.0})) == 3
+    assert len(run_job(Fake(), spare, session=fake_session)) == 3
     assert metrics(first)["trigger_hit"] == 1.0 and metrics(first)["counts"]["positive_with"] == 1, metrics(first)
 
     two = {"positive": [{"id": "p", "prompt": "P"}, {"id": "o", "prompt": "O"}], "near_miss": []}
     asked = {}
-    scoped_run = run_job(Fake(), two, {"q1": "Q1", "q2": {"instructions": "Q2", "cases": ["p"]}}, session=fake_session,
-                         grader=lambda r, a, q: asked.setdefault(r, []).append(list(q)) or dict.fromkeys(q, 1.0))
+    scoped_run = run_job(Fake(), two, session=fake_session)
+    grade_sessions(scoped_run, two, {"q1": "Q1", "q2": {"instructions": "Q2", "cases": ["p"]}},
+                   grader=lambda r, a, q: asked.setdefault(r, []).append(list(q)) or dict.fromkeys(q, 1.0))
     assert asked == {"P": [["q1", "q2"]] * 2, "O": [["q1"]] * 2}, asked
     assert [s["nouls"] for s in scoped_run] == [{"q1": 1.0, "q2": 1.0}, {"q1": 1.0}] * 2, scoped_run
 
@@ -1131,10 +1520,36 @@ def _selftest_core() -> None:
     def refusing(request_text, answer, questions):
         raise JevError("jev 401: invalid key")
 
-    refused = run_job(Fake(), cases, {"q": "Q"}, session=broken_session, grader=refusing)
+    refused = run_job(Fake(), cases, session=broken_session)
+    assert not run_broke(refused)
+    grade_sessions(refused, cases, {"q": "Q"}, grader=refusing)
     assert [s["grade_error"] for s in refused] == ["jev 401: invalid key", None, None], refused
     assert run_broke(refused)
     assert run_broke([_session("p", "positive", "with", False, error="exit 1")])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        runs, out = Path(tmp, "runs"), Path(tmp, "out")
+        for name, answers in (("evals-ok", ["good", "echo"]), ("evals-bad", ["bad"])):
+            (runs / name).mkdir(parents=True)
+            record = {"package": "p", "skill": "s", "client": "claude", "repeat": 1,
+                      "sessions": [_session("p", "positive", "with", True) | {"answer": a} for a in answers]}
+            (runs / name / "run.json").write_text(json.dumps(record))
+
+        def picky(request_text, answer, questions):
+            if answer == "bad":
+                raise JevError("jev 401: invalid key")
+            if answer == "echo":
+                raise JevError("jev 500: bearer selftest-secret-value")
+            return {"q": 1.0}
+
+        loaded = []
+        assert grade_runs(runs, out, load=lambda d: loaded.append(d) or (cases, {"q": "Q"}), grader=picky) == 1
+        assert loaded == [EVALS_DIR / "p" / "s"] * 2, loaded
+        assert [p.relative_to(out).as_posix() for p in out.rglob("*.json")] == ["evals-ok/run.json"]
+        written = json.loads((out / "evals-ok" / "run.json").read_text())["sessions"]
+        assert [(s["nouls"], s["grade_error"]) for s in written] == [
+            ({"q": 1.0}, None), (None, "jev 500: bearer ***")], written
+        assert grade_runs(Path(tmp, "none"), out) == 0
 
     sent = {}
     grade("R", "A", {"q": "Q?"}, send=lambda body: sent.update(body) or {"answers": {"q": {"noul": 0.9}}})
@@ -1152,8 +1567,10 @@ def _selftest_core() -> None:
         assert not is_question(bad), bad
     pool = {"q1": "Q1?", "q2": scoped, "q3": bounded}
     assert applicable(pool, "p") == pool and applicable(pool, "o") == {"q1": "Q1?", "q3": bounded}
-    ten = {kind: [{"id": f"{kind[0]}{i}", "prompt": "T"} for i in range(CASES_PER_KIND)]
+    ten = {kind: [{"id": f"{kind[0]}{i}", "prompt": "T"} for i in range(3)]
            for kind in ("positive", "near_miss")}
+    one = {"positive": ten["positive"][:1], "near_miss": ten["near_miss"][:1]}
+    assert check_cases(Path("d"), one, {"questions": {"q": "Q?"}}) == (one, {"q": "Q?"})
     assert check_cases(Path("d"), ten, {"questions": {"q": "Q?"}}) == (ten, {"q": "Q?"})
     for rubric, needle in (({"questions": {"q": {"instructions": "Q?", "cases": ["n0"]}}}, "not a positive case: n0"),
                            ({"questions": {"q": {"instructions": "Q?", "cases": ["p0"]}}}, "no question applies to p1"),
@@ -1161,8 +1578,8 @@ def _selftest_core() -> None:
                            ({"questions": {}}, "questions must map")):
         _expect_error(lambda: check_cases(Path("d"), ten, rubric), needle)
     _expect_error(lambda: check_cases(Path("d"), ten | {"always_on": ["hermes"]}, {"questions": {"q": "Q?"}}), "always_on")
-    _expect_error(lambda: check_cases(Path("d"), ten | {"near_miss": ten["near_miss"][:3]}, {"questions": {"q": "Q?"}}),
-                  "near_miss must list exactly")
+    _expect_error(lambda: check_cases(Path("d"), ten | {"near_miss": []}, {"questions": {"q": "Q?"}}),
+                  "near_miss must list at least one entry")
     rubric = {"questions": {"q": "Q?"}}
     five = {kind: [{"id": f"h{kind[0]}{i}", "prompt": "H"} for i in range(HELD_OUT_PER_KIND)]
             for kind in ("positive", "near_miss")}
@@ -1191,15 +1608,16 @@ def _selftest_publish() -> None:
     nested = (f"```\n~~~\n{mark['f']}\n```\n````\n```\n{mark['g']}\n````\n"
               f"```\n```python\n{mark['i']}\n```\n{mark['h']}\n")
     assert fingerprint_lines(nested) == [mark["h"]], fingerprint_lines(nested)
-    assert package_of("triz--v0.2.0") == "triz"
-    for bad in ("howp-v0.3.12", "nosuch--v1.0.0"):
-        try:
-            package_of(bad)
-        except SystemExit:
-            pass
-        else:
-            raise AssertionError(f"{bad} must be rejected")
-    assert version_key("triz--v0.10.0") > version_key("triz--v0.9.1")
+    with _fixture_tree({"alpha": ["s"]}):
+        assert package_of("alpha--v0.2.0") == "alpha"
+        for bad in ("alpha-v0.3.12", "nosuch--v1.0.0"):
+            try:
+                package_of(bad)
+            except SystemExit:
+                pass
+            else:
+                raise AssertionError(f"{bad} must be rejected")
+    assert version_key("alpha--v0.10.0") > version_key("alpha--v0.9.1")
     assert span([0.5, 0.25]) == "0.25–0.50" and span([]) == "–"
 
     def run(repeat, fired, version, extra=()):
@@ -1220,6 +1638,7 @@ def _selftest_publish() -> None:
     lines = report(current, True, seen)
     assert len(filed) == 1 and fingerprint("p", "s", "claude") in filed[0][1], filed
     assert "Client version: 1.0 → 2.0" in filed[0][1], filed[0][1]
+    assert "https://github.com/o/r/pkgs/container/pegboard-evals" in filed[0][1], filed[0][1]
     row = next(line for line in lines if line.startswith("| s | claude |"))
     assert "regressed: trigger_hit" in row and "0.00–0.00 (n=1, 3 of 3 repeats)" in row, row
     assert "| `trigger_hit` | 1.00–1.00 (3 of 3 repeats) | 0.00–0.00 (3 of 3 repeats) |" in filed[0][1], filed[0][1]
@@ -1281,7 +1700,7 @@ def _selftest_publish() -> None:
 
 
 def _selftest_gh() -> None:
-    global gh, PLUGINS_DIR
+    global gh
     calls, replies = [], {}
 
     def fake(*args):
@@ -1290,35 +1709,77 @@ def _selftest_gh() -> None:
 
     real_gh, gh = gh, fake
     try:
-        with tempfile.TemporaryDirectory() as tmp:
-            workdir = Path(tmp)
+        with _fixture_tree({"alpha": ["s"]}) as workdir:
             runs_dir = workdir / "runs"
             runs_dir.mkdir()
-            record = {"tag": "triz--v0.3.0", "skill": "ariz", "client": "claude", "repeat": 1, "client_version": "1",
+            record = {"tag": "alpha--v0.3.0", "skill": "s", "client": "claude", "repeat": 1, "client_version": "1",
                       "model": "m", "cases_sha256": "a", "rubric_sha256": "r",
-                      "sessions": [_session("p", "positive", "with", True) | {"cost_usd": 0.1, "tokens": None}]}
+                      "sessions": [_session("p", "positive", "with", True)
+                                   | {"answer": "secret selftest-secret-value", "cost_usd": 0.1, "tokens": None}]}
             (runs_dir / "run.json").write_text(json.dumps(record))
-            os.environ["GITHUB_STEP_SUMMARY"] = str(workdir / "summary.md")
-            assert cmd_report(argparse.Namespace(tags="triz--v0.2.0 triz--v0.3.0", runs=str(runs_dir))) == 0
-            uploads = [c[2] for c in calls if c[:2] == ("release", "upload")]
-            assert uploads == ["triz--v0.3.0"], "a tag with no runs must not replace its evals.json"
-            summary = (workdir / "summary.md").read_text()
-            assert "## `triz--v0.2.0`\n\nNo run reported, so nothing was uploaded." in summary, summary
+            os.environ.update({"GITHUB_STEP_SUMMARY": str(workdir / "summary.md"),
+                               "GITHUB_REPOSITORY": "Akurganow/pegboard", "GH_TOKEN": "gh-tok",
+                               "RUN_STAMP": "2026-10-20T21:53:00Z", "RUN_ATTEMPT": "2", "GITHUB_RUN_ID": "99"})
+            pushed = []
 
-            real_dir, PLUGINS_DIR = PLUGINS_DIR, workdir / "plugins"
-            (PLUGINS_DIR / "nocases" / "skills" / "s").mkdir(parents=True)
+            class RegistryReply:
+                def __init__(self, body=b"", headers=None):
+                    self.body, self.headers = body, headers or {}
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *exc):
+                    return False
+
+                def read(self):
+                    return self.body
+
+            def fake_registry(req, timeout):
+                pushed.append((req.get_method(), req.full_url, dict(req.header_items()), req.data))
+                if "/token?" in req.full_url:
+                    return RegistryReply(b'{"token": "reg-tok"}')
+                if "/tags/list" in req.full_url:
+                    return RegistryReply(b'{"tags": []}')
+                if req.full_url.endswith("/blobs/uploads/"):
+                    return RegistryReply(headers={"Location": "/v2/akurganow/pegboard-evals/blobs/uploads/u1"})
+                return RegistryReply()
+
+            real_open = urllib.request.urlopen
+            urllib.request.urlopen = fake_registry
             try:
-                cmd_report(argparse.Namespace(tags="nocases--v1.0.0", runs=str(runs_dir)))
-            finally:
-                PLUGINS_DIR = real_dir
-            summary = (workdir / "summary.md").read_text()
-            assert "No run reported, so nothing was uploaded.\n\nNo cases: s" in summary, summary
+                assert cmd_report(argparse.Namespace(tags="alpha--v0.2.0 alpha--v0.3.0", runs=str(runs_dir))) == 0
+                assert not [c for c in calls if c[:2] == ("release", "upload")], calls
+                urls = [p[1] for p in pushed]
+                assert urls.index("https://ghcr.io/v2/akurganow/pegboard-evals/tags/list") < next(
+                    i for i, u in enumerate(urls) if "/blobs/uploads/" in u), urls
+                manifests = [p for p in pushed if "/manifests/" in p[1]]
+                assert len(manifests) == 1, pushed
+                assert manifests[0][1].endswith(
+                    "/v2/akurganow/pegboard-evals/manifests/alpha--v0.3.0_s_claude_20261020T215300Za2_r1"), manifests[0][1]
+                manifest = json.loads(manifests[0][3])
+                assert manifest["mediaType"] == OCI_MANIFEST_TYPE and manifest["config"]["mediaType"] == OCI_CONFIG_TYPE
+                assert manifest["annotations"] == {
+                    "org.opencontainers.image.created": "2026-10-20T21:53:00Z",
+                    "org.opencontainers.image.version": "alpha--v0.3.0",
+                    "org.opencontainers.image.source": "https://github.com/Akurganow/pegboard",
+                }, manifest["annotations"]
+                blobs = {p[1].split("digest=")[1]: p[3] for p in pushed if "digest=" in p[1]}
+                layer_bytes = blobs[manifest["layers"][0]["digest"]]
+                assert manifest["layers"][0]["mediaType"] == OCI_LAYER_TYPE
+                stored = json.loads(layer_bytes)
+                assert stored["run"] == "20261020T215300Za2" and stored["run_id"] == "99", stored
+                assert stored["sessions"][0]["answer"] == "secret ***", stored["sessions"][0]
+                summary = (workdir / "summary.md").read_text()
+                assert "## `alpha--v0.2.0`\n\nNo run reported, so nothing was uploaded." in summary, summary
 
-            replies["release view"] = '{"assets": []}'
-            replies["release list"] = json.dumps([{"tagName": f"p--v0.0.{i}"} for i in range(RELEASE_LIMIT - 1)])
-            assert previous_results("p", "p--v1.0.0", workdir) is None
-            replies["release list"] = json.dumps([{"tagName": f"p--v0.0.{i}"} for i in range(RELEASE_LIMIT)])
-            _expect_error(lambda: previous_results("p", "p--v1.0.0", workdir), "release list", str(RELEASE_LIMIT))
+                (SOURCES_DIR / "nocases" / "skills" / "s").mkdir(parents=True)
+                cmd_report(argparse.Namespace(tags="nocases--v1.0.0", runs=str(runs_dir)))
+                summary = (workdir / "summary.md").read_text()
+                assert "No run reported, so nothing was uploaded.\n\nNo cases: s" in summary, summary
+            finally:
+                urllib.request.urlopen = real_open
+
             replies["issue list"] = json.dumps([{"body": ""}] * (ISSUE_LIMIT - 1))
             assert open_fingerprints() == set()
             replies["issue list"] = json.dumps([{"body": ""}] * ISSUE_LIMIT)
@@ -1327,42 +1788,265 @@ def _selftest_gh() -> None:
         gh = real_gh
 
 
+def _selftest_registry() -> None:
+    class Reply:
+        def __init__(self, body=b"", headers=None):
+            self.body, self.headers = body, headers or {}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return self.body
+
+    def make_run(tag, repeat, run_label, version="1.0", fired=True, sessions=None, run_id=None):
+        if sessions is None:
+            sessions = [_session("p", "positive", "with", fired) | {"cost_usd": 0.1, "tokens": None}]
+        return {"tag": tag, "package": "alpha", "skill": "s", "client": "claude", "repeat": repeat,
+                "run": run_label, "run_id": run_id, "client_version": version, "model": "m", "cases_sha256": "a",
+                "rubric_sha256": "r", "sessions": sessions}
+
+    store_manifests, store_blobs, pages = {}, {}, []
+    status_override = {}
+
+    def put_candidate(tag, run_label, repeats=(1, 2, 3), versions=("1.0", "1.0", "1.0"), sessions_list=None,
+                      run_id=None):
+        for idx, rep in enumerate(repeats):
+            rec = make_run(tag, rep, run_label, version=versions[idx],
+                           sessions=None if sessions_list is None else sessions_list[idx], run_id=run_id)
+            raw = json.dumps(rec).encode()
+            digest = f"sha256:{hashlib.sha256(raw).hexdigest()}"
+            store_blobs[digest] = raw
+            tname = f"{tag}_s_claude_{run_label}_r{rep}"
+            store_manifests[tname] = json.dumps({"layers": [{"digest": digest}]}).encode()
+
+    put_candidate("alpha--v0.2.9", "20261009T000000Za1", versions=("0.9", "0.9", "0.9"))
+    put_candidate("alpha--v0.2.10", "20261010T000000Za1", versions=("1.0", "1.0", "1.0"))
+    put_candidate("alpha--v0.2.10", "20261012T000000Za1", repeats=(1, 2), versions=("1.2", "1.2"))
+    put_candidate("alpha--v0.2.10", "20261013T000000Za1", versions=("1.3", "1.3", "1.4"))
+    put_candidate("alpha--v0.2.10", "20261014T000000Za1", sessions_list=([], [], []))
+    broke = [_session("p", "positive", "with", False, error="exit 1")]
+    put_candidate("alpha--v0.2.10", "20261015T000000Za1", sessions_list=(broke, broke, broke))
+    put_candidate("alpha--v0.2.10", "20261015T120000Za1", versions=("1.5", "1.5", "1.5"), run_id="same-run")
+    put_candidate("alpha--v0.2.11", "20261016T000000Za1", versions=("2.0", "2.0", "2.0"))
+
+    all_tags = sorted(store_manifests)
+    mid = len(all_tags) // 2
+    pages[:] = [all_tags[:mid], all_tags[mid:]]
+    auth_seen = []
+
+    def transport(req, timeout):
+        url = req.full_url
+        for key, code in status_override.items():
+            if key in url:
+                raise urllib.error.HTTPError(url, code, "err", http.client.HTTPMessage(), None)
+        if "/token?" in url:
+            auth_seen.append(dict(req.header_items()).get("Authorization"))
+            return Reply(b'{"token": "anon-tok"}')
+        if url.endswith("/tags/list"):
+            return Reply(json.dumps({"tags": pages[0]}).encode(),
+                         headers={"Link": '</v2/akurganow/pegboard-evals/tags/list?page=2>; rel="next"'})
+        if "tags/list?page=2" in url:
+            return Reply(json.dumps({"tags": pages[1]}).encode())
+        if "/manifests/" in url:
+            tname = url.rsplit("/", 1)[1]
+            if tname not in store_manifests:
+                raise urllib.error.HTTPError(url, 404, "not found", http.client.HTTPMessage(), None)
+            return Reply(store_manifests[tname])
+        if "/blobs/sha256:" in url:
+            digest = url.rsplit("/", 1)[1]
+            return Reply(store_blobs[digest])
+        raise AssertionError(f"unexpected url: {url}")
+
+    real_open = urllib.request.urlopen
+    urllib.request.urlopen = transport
+    os.environ["GITHUB_RUN_ID"] = "same-run"
+    try:
+        got = previous_results("akurganow", "alpha", "alpha--v0.2.10")
+        assert auth_seen == [None], auth_seen
+        assert got is not None and len(got["runs"]) == 3, got
+        assert {r["run"] for r in got["runs"]} == {"20261010T000000Za1"}, got["runs"]
+        assert {r["client_version"] for r in got["runs"]} == {"1.0"}, got["runs"]
+        reused = previous_results("akurganow", "alpha", "alpha--v0.2.10", bearer="pre-tok")
+        assert auth_seen == [None] and reused == got, auth_seen
+
+        status_override["/tags/list"] = 404
+        assert previous_results("akurganow", "alpha", "alpha--v0.2.10") is None
+        for code in (401, 403):
+            status_override["/tags/list"] = code
+            _expect_error(lambda: previous_results("akurganow", "alpha", "alpha--v0.2.10"), str(code))
+    finally:
+        urllib.request.urlopen = real_open
+
+    old_runs = [make_run("alpha--v0.2.10", r, "20261010T000000Za1", "1.0", True) for r in (1, 2, 3)]
+    new_runs = [make_run("alpha--v0.2.10", r, "20261020T000000Za1", "1.1", False) for r in (1, 2, 3)]
+    same_tag_body = issue_body("alpha", "s", "claude", "alpha--v0.2.10", "alpha--v0.2.10",
+                               {"trigger_hit": ([1.0] * 3, [0.0] * 3)}, old_runs, new_runs, "RUN_URL", "o/r")
+    assert "`alpha--v0.2.10` (`20261010T000000Za1`)" in same_tag_body, same_tag_body
+    assert "`alpha--v0.2.10` (`20261020T000000Za1`)" in same_tag_body, same_tag_body
+    assert "| Metric | `alpha--v0.2.10` (`20261010T000000Za1`) | `alpha--v0.2.10` (`20261020T000000Za1`) |" in same_tag_body
+    assert "https://github.com/o/r/pkgs/container/pegboard-evals" in same_tag_body, same_tag_body
+
+
 def _selftest_folders() -> None:
-    global PLUGINS_DIR
-    real_dir = PLUGINS_DIR
+    with _fixture_tree({"bare": [], "alpha": ["s"]}):
+        assert package_of("bare--v1.0.0") == "bare" and skills_of("bare") == []
+        assert matrix(["bare--v1.0.0"]) == {"include": []}
+        assert [j["client"] for j in matrix(["alpha--v1.0.0"])["include"]] == ["claude"] * 3 + ["codex"] * 3 + ["omp"] * 3
+        assert [j["client"] for j in matrix(["alpha--v1.0.0"], ["claude", "omp", "claude"])["include"]] == (
+            ["claude"] * 3 + ["omp"] * 3)
+        _expect_error(lambda: matrix(["alpha--v1.0.0"], ["claude", "hermes"]), "hermes")
+        _expect_error(lambda: package_of("nosuch--v1.0.0"), "nosuch")
+        loaded = []
+        assert check_folder(Path("evals/alpha/s"), load=loaded.append) is None and loaded == [Path("evals/alpha/s")]
+        loaded.clear()
+        assert check_folder(Path("evals/alpha/gone"), load=loaded.append) == (
+            "evals/alpha/gone: no src/alpha/skills/gone/SKILL.md.") and not loaded
+
+        def refuse(folder):
+            raise SystemExit("evals/alpha/s/cases.yaml: case ids repeat.")
+
+        def corrupt(folder):
+            raise ValueError("expected the node content,\n  found '<stream end>'")
+
+        assert check_folder(Path("evals/alpha/s"), load=refuse) == "evals/alpha/s/cases.yaml: case ids repeat."
+        assert check_folder(Path("evals/alpha/s"), load=corrupt) == (
+            "evals/alpha/s: ValueError: expected the node content, found '<stream end>'")
+
+
+def _selftest_carry() -> None:
     with tempfile.TemporaryDirectory() as tmp:
-        PLUGINS_DIR = Path(tmp)
-        try:
-            (PLUGINS_DIR / "bare").mkdir()
-            (PLUGINS_DIR / "p" / "skills" / "s").mkdir(parents=True)
-            (PLUGINS_DIR / "p" / "skills" / "s" / "SKILL.md").write_text("")
-            assert package_of("bare--v1.0.0") == "bare" and skills_of("bare") == []
-            assert matrix(["bare--v1.0.0"]) == {"include": []}
-            _expect_error(lambda: package_of("nosuch--v1.0.0"), "nosuch")
-            loaded = []
-            assert check_folder(Path("evals/p/s"), load=loaded.append) is None and loaded == [Path("evals/p/s")]
-            loaded.clear()
-            assert check_folder(Path("evals/p/gone"), load=loaded.append) == (
-                "evals/p/gone: no plugins/p/skills/gone/SKILL.md.") and not loaded
+        def tree(version, readme, skill_text, description="D", hooks="./hooks/codex.json"):
+            root = Path(tmp, f"t{len(list(Path(tmp).iterdir()))}")
+            for folder in MANIFEST_DIRS:
+                (root / folder).mkdir(parents=True)
+                (root / folder / "plugin.json").write_text(json.dumps(
+                    {"version": version, "description": description, "hooks": hooks}))
+            (root / ".claude-plugin" / "icon.png").write_bytes(version.encode())
+            (root / "skills" / "s").mkdir(parents=True)
+            (root / "skills" / "s" / "SKILL.md").write_text(skill_text)
+            (root / "README.md").write_text(readme)
+            (root / "LICENSE").write_text(version)
+            return package_tree(root)
 
-            def refuse(folder):
-                raise SystemExit("evals/p/s/cases.yaml: case ids repeat.")
+        base = tree("0.1.0", "old", "rules")
+        assert tree("0.1.1", "new", "rules") == base
+        assert tree("0.1.1", "old", "rules, edited") != base
+        assert tree("0.1.1", "old", "rules", description="E") != base
+        assert tree("0.1.1", "old", "rules", hooks="./hooks/other.json") != base
+        Path(tmp, "empty", "README.md").parent.mkdir()
+        Path(tmp, "empty", "README.md").write_text("r")
+        _expect_error(lambda: package_tree(Path(tmp, "empty")), "no package files")
 
-            def corrupt(folder):
-                raise ValueError("expected the node content,\n  found '<stream end>'")
+    class Fake:
+        name = "fake"
 
-            assert check_folder(Path("evals/p/s"), load=refuse) == "evals/p/s/cases.yaml: case ids repeat."
-            assert check_folder(Path("evals/p/s"), load=corrupt) == (
-                "evals/p/s: ValueError: expected the node content, found '<stream end>'")
-        finally:
-            PLUGINS_DIR = real_dir
+        def __init__(self, model="m"):
+            self.order, self.model = [], model
+
+        def command(self, prompt, arm):
+            return ["fake", self.model, prompt] + (["--off"] if arm == "without" else [])
+
+        def switch_to_without(self):
+            self.order.append("switch")
+
+        def switch_back(self):
+            self.order.append("back")
+
+    case = {"id": "p", "prompt": "P"}
+    assert session_inputs(Fake(), case, "without", "t1") == session_inputs(Fake(), case, "without", "t2")
+    assert session_inputs(Fake(), case, "with", "t1") != session_inputs(Fake(), case, "with", "t2")
+    assert session_inputs(Fake(), case, "with", "t1") != session_inputs(Fake("m2"), case, "with", "t1")
+    assert session_inputs(Fake(), case, "with", None) is None and session_inputs(Fake(), case, "without", None)
+
+    cases = {"positive": [case, {"id": "o", "prompt": "O"}], "near_miss": [{"id": "n", "prompt": "N"}]}
+
+    def fake_session(adapter, c, kind, arm):
+        adapter.order.append(f"{c['id']}:{arm}")
+        return _session(c["id"], kind, arm, arm == "with") | {"answer": "A", "model": adapter.model}
+
+    def inputs_of(tree_hash):
+        return lambda c, arm: session_inputs(Fake(), c, arm, tree_hash)
+
+    first = run_job(Fake(), cases, session=fake_session, inputs=inputs_of("t1"))
+    for s in first:
+        s["nouls"] = {"q": 1.0} if s["kind"] == "positive" else None
+    first[1]["error"] = "exit 1"
+    record = {"tag": "x--v0.1.0", "client_version": "1", "rubric_sha256": "r", "jev_model": JEV_MODEL,
+              "sessions": first}
+    carry = reusable(record, "r")
+    assert len(carry) == 4 and not any(k[0] == "o" and k[2] == "with" for k in carry), carry
+
+    # Only the package changed: the with arm runs again, the without arm is carried.
+    fake = Fake()
+    second = run_job(fake, cases, session=fake_session, inputs=inputs_of("t2"), carry=carry)
+    assert fake.order == ["p:with", "o:with", "n:with"], fake.order
+    assert [s.get("carried_from") for s in second] == [None, None, None, "x--v0.1.0", "x--v0.1.0"], second
+    assert second[3]["nouls"] == {"q": 1.0} and second[3]["client_version"] == "1", second[3]
+    assert all(s["inputs"] for s in second), second
+    # Nothing changed: only the failed session runs again.
+    fake = Fake()
+    third = run_job(fake, cases, session=fake_session, inputs=inputs_of("t1"), carry=carry)
+    assert fake.order == ["o:with"], fake.order
+    # A session carried twice names the run that measured it.
+    again = reusable({"tag": "x--v0.1.1", "client_version": "2", "rubric_sha256": "r", "jev_model": JEV_MODEL,
+                      "sessions": third}, "r")
+    assert {s["carried_from"] for k, s in again.items() if k[0] != "o"} == {"x--v0.1.0"}, again
+    # A new rubric or Jev model keeps the answers and drops the scores.
+    assert all(s["nouls"] is None for s in reusable(record, "r2").values())
+    assert all(s["nouls"] is None for s in reusable(record | {"jev_model": "jev-0"}, "r").values())
+    # Unchanged held-out sessions on repeat 1 are carried with their load result.
+    spare = cases | {"held_out": {"positive": [{"id": "hp", "prompt": "HP"}], "near_miss": [{"id": "hn", "prompt": "HN"}]}}
+    held = run_job(Fake(), spare, session=fake_session, held_out=True, inputs=inputs_of("t1"))
+    held_record = {"tag": "x--v0.1.0", "client_version": "1", "rubric_sha256": "r", "jev_model": JEV_MODEL,
+                   "sessions": held}
+    fake = Fake()
+    kept_held = run_job(fake, spare, session=fake_session, held_out=True, inputs=inputs_of("t1"),
+                        carry=reusable(held_record, "r"))
+    assert fake.order == [], fake.order
+    assert [(s["kind"], s["fired"], s["carried_from"]) for s in kept_held[3:5]] == [
+        ("held_out_positive", True, "x--v0.1.0"), ("held_out_near_miss", True, "x--v0.1.0")], kept_held
+    # A fresh session on another model makes the carried ones run again.
+    fake = Fake("m2")
+    moved = run_job(fake, cases, session=fake_session, inputs=inputs_of("t2"), carry=carry)
+    assert fake.order == ["p:with", "o:with", "n:with", "switch", "p:without", "o:without", "back"], fake.order
+    assert not any(s.get("carried_from") for s in moved), moved
+
+    # A refused key fails every fresh session, even when carried ones are fine.
+    refused = [s | {"error": "exit 1"} if not s.get("carried_from") else s for s in second]
+    assert run_broke(refused) and not run_broke(second)
+    assert not run_broke([s for s in third if s.get("carried_from")])
+    # One flaky session among carried ones is excluded, not a broken run.
+    flaky = [s for s in third if s.get("carried_from")] + [_session("o", "positive", "with", False, error="timeout")]
+    assert not run_broke(flaky)
+    # A carried answer keeps its scores while they hold.
+    regraded = [s | {"nouls": None} if s["case"] == "p" else s for s in third]
+    asked = []
+    grade_sessions(regraded, cases, {"q": "Q"}, grader=lambda r, a, q: asked.append(r) or {"q": 0.5})
+    assert asked == ["P", "O", "P"] and [s["grade_error"] for s in regraded] == [None] * 5, (asked, regraded)
+    assert regraded[4]["nouls"] == {"q": 1.0}, regraded[4]
+    # A refused Jev key fails every grade made here, while kept scores stay.
+    assert run_broke([s | {"nouls": None, "grade_error": "jev 401"} if s["kind"] == "positive" and s is not regraded[4]
+                      else s for s in regraded])
+
+    runs = [{"skill": "s", "client": "claude", "repeat": r, "always_on": False, "client_version": "2",
+             "sessions": [s | {"cost_usd": 1.0, "tokens": None} for s in second]} for r in (1, 2, 3)]
+    assert versions(runs) == "2, 1", versions(runs)
+    row = next(l for l in report_tag("x--v0.1.1", "x", runs, [], None, set(), "u", "o/r", False)
+               if l.startswith("| s | claude"))
+    assert "$9.00, 6 carried" in row, row
 
 
 def selftest() -> int:
     _selftest_parsers()
     _selftest_core()
+    _selftest_carry()
     _selftest_publish()
     _selftest_gh()
+    _selftest_registry()
     _selftest_folders()
     print("selftest passed")
     return 0
@@ -1373,11 +2057,17 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     m = sub.add_parser("matrix", help="print the job matrix for some release tags")
     m.add_argument("--tags", required=True)
+    m.add_argument("--clients", default="")
     r = sub.add_parser("run", help="run one skill on one client, one repeat")
     for name in ("--tag", "--skill", "--out"):
         r.add_argument(name, required=True)
     r.add_argument("--client", required=True, choices=CLIENTS)
     r.add_argument("--repeat", required=True, type=int)
+    r.add_argument("--released", default=str(REPO_ROOT), help="checkout of the released tag")
+    r.add_argument("--fresh", action="store_true", help="run every session, carrying none over")
+    g = sub.add_parser("grade", help="grade the positive answers of some runs with Jev")
+    g.add_argument("--runs", required=True)
+    g.add_argument("--out", required=True)
     p = sub.add_parser("report", help="publish the runs of some release tags")
     p.add_argument("--tags", required=True)
     p.add_argument("--runs", required=True)
@@ -1385,11 +2075,13 @@ def main() -> int:
     sub.add_parser("selftest", help="check the parsers and the arithmetic without a model")
     args = parser.parse_args()
     if args.command == "matrix":
-        result = matrix(args.tags.split())
+        result = matrix(args.tags.split(), args.clients.split())
         print(json.dumps(result))
         return 0
     if args.command == "run":
         return cmd_run(args)
+    if args.command == "grade":
+        return grade_runs(Path(args.runs), Path(args.out))
     if args.command == "report":
         return cmd_report(args)
     if args.command == "validate":

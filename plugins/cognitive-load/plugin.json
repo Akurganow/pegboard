@@ -1,14 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "cognitive-load",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "description": "Separates the cognitive load a task needs from the load a code base's structure adds, and names the change that removes the second.",
   "author": {
     "name": "Alexander Kurganov",
     "url": "https://github.com/Akurganow"
   },
-  "homepage": "https://github.com/Akurganow/ai-plugins/tree/main/plugins/cognitive-load",
-  "repository": "https://github.com/Akurganow/ai-plugins",
+  "homepage": "https://github.com/Akurganow/pegboard/tree/main/plugins/cognitive-load",
+  "repository": "https://github.com/Akurganow/pegboard",
   "license": "MIT",
   "keywords": [
     "cognitive-load",
@@ -18,10 +18,5 @@
     "onboarding",
     "sweller",
     "zakirullin"
-  ],
-  "extensions": {
-    "io.github.akurganow.ai-plugins": {
-      "category": "Developer Tools"
-    }
-  }
+  ]
 }

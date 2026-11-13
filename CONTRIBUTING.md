@@ -23,7 +23,8 @@ Commits follow Conventional Commits. The type sets the next version:
 
 Source: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), documentation.
 
-cocogitto versions each package from the commits that touched its path, and
+cocogitto versions each package from the commits that touched its source,
+`src/<name>/`, or its builds, `bundles/<name>/` and `plugins/<name>/`. It
 writes that package's `CHANGELOG.md`. Source:
 [Automatic versioning for monorepo](https://github.com/cocogitto/website/blob/8fa24cde1ec4598ccee7cdd47de40fa594282de2/src/guide/README.md#automatic-versioning-for-monorepo),
 cocogitto documentation.
@@ -36,59 +37,142 @@ releases a minor version and `fix!:` a patch version. Source:
 [`bump.rs`](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L258-L273),
 cocogitto source at 7.0.0, the release that `release.yml` installs.
 
-Put the package name in the scope, as in `fix(triz): correct one matrix cell`.
+Put the package name in the scope, as in `fix(triz-thinking): correct one matrix cell`.
 Renaming a skill breaks its users, so it takes `!`, as in
-`feat(triz)!: rename the skill`. Use `docs:`, `ci:` or `chore:` for changes
-outside `plugins/`.
+`feat(triz-thinking)!: rename the skill`. Use `docs:`, `ci:` or `chore:` for changes
+outside a package's source and builds.
 
 Pull requests merge with a merge commit, so each commit reaches `main` as
 written. CI refuses a pull request with a non-conventional commit that touches
-`plugins/`, because the release would skip that commit. The `commits` job in
+`src/`, `bundles/`, `plugins/`, `LICENSE`, `tools/build.sh` or
+`tools/regions.sh`, because the release would skip that commit. The `commits` job in
 [`conformance.yml`](.github/workflows/conformance.yml) runs that check.
 
-Never edit `version` in a `plugin.json`, and never edit a package's
-`CHANGELOG.md`. [`release.yml`](.github/workflows/release.yml) writes both when
-it releases a package.
+Never edit `version` in a `source.json` or in a manifest, and never edit a
+package's `CHANGELOG.md`. [`release.yml`](.github/workflows/release.yml) writes
+the version and the changelog when it releases a package, and runs the builder
+so that every manifest carries the new version.
 
-The repository that builds the `hp` binary releases `howp`. That release
-writes four files here, and nobody edits them by hand:
+## Read the layout
 
-- `version` in `plugins/howp/plugin.json`
-- `plugins/howp/binaries.json`
-- `plugins/howp/skills/forecast/references/commands.md`
-- `plugins/howp/.claude-plugin/plugin.json`, a byte copy of `plugins/howp/plugin.json`
+```
+src/<name>/                       the hand-written source; no client reads it
+  source.json                     name, version, description and the other metadata
+  README.md                       what the plugin does and how to use it
+  CHANGELOG.md                    written by the release
+  skills/<skill>/SKILL.md         a skill, Agent Skills format
+  skills/<skill>/references/      files the skill reads when a step needs them
+src/prose-discipline/rules/       the full rules, with the marked short form the hooks print
+bundles/<name>/                   generated; one tree with a manifest folder per client
+  .claude-plugin/plugin.json      Claude Code, and OpenClaw when no Codex manifest exists
+  .codex-plugin/plugin.json       Codex, and OpenClaw
+  .cursor-plugin/plugin.json      Cursor
+  hooks/, rules/                  prose-discipline only: two hooks files and the .mdc rule
+plugins/<name>/                   generated; the Agent Plugins 1.0.0 package
+  plugin.json                     manifest with the canonical $schema
+  README.md, LICENSE, skills/     copies of the source and the root LICENSE
+.claude-plugin/marketplace.json   generated catalogue, read by Claude Code and OpenClaw
+.agents/plugins/marketplace.json  generated catalogue, read by Codex
+.omp-plugin/marketplace.json      generated catalogue, read by Oh-My-Pi
+.cursor-plugin/marketplace.json   generated catalogue, read by Cursor
+tools/build.sh                    writes bundles/, plugins/ and the catalogues from src/
+tools/regenerate.sh               fills the README regions, then runs the builder
+tools/regions.sh                  region helpers both scripts source
+tools/check-conformance.py        the conformance check
+tools/evals.py                    the post-release evals runner, with selftest and validate
+tools/evals-fixtures/             event streams recorded from the clients, for the selftest
+tools/templates/                  sources of generated text
+tools/source.schema.json          schema of source.json
+tools/schemas/                    vendored Agent Plugins manifest schema
+tools/package.json                pins doctoc for tools/regenerate.sh
+tools/package-lock.json           pins doctoc's dependency tree
+docs/clients.md                   how each client loads a package, with sources
+docs/design.md                    why the repository is built this way
+docs/banner.svg                   the README banner, written by scripts/compose-banner.py
+docs/banner/                      the banner's parts and layout, and how to add a tool
+scripts/compose-banner.py         writes docs/banner.svg; no check or workflow runs it
+evals/<name>/<skill>/             prompts and Jev questions for one skill's evals
+cog.toml                          release configuration, one entry per package
+.github/                          CI workflows and issue forms
+```
+
+Edit `src/` only. [Run the checks](#run-the-checks) says how the builds
+follow.
 
 ## Run the checks
 
 CI runs these checks on every pull request. Run them before you push.
 
-### Regenerate the generated files
+### Edit the source, then regenerate
 
-[`tools/regenerate.sh`](tools/regenerate.sh) writes some files and regions
-from another source. Edit the source, run the script, and commit what it
-changes:
+Edit `src/` only. `bundles/`, `plugins/`, the four catalogues and the
+generated regions of the READMEs come from it. Never edit one by hand, because
+the next run rewrites it and CI fails on the difference.
+
+[`tools/regenerate.sh`](tools/regenerate.sh) fills the regions and tables of
+contents, then runs [`tools/build.sh`](tools/build.sh):
 
 ```
 bash tools/regenerate.sh
 ```
 
-It needs `jq`, Node.js with `npm`, and `shasum` or `sha256sum`. It installs
-doctoc from `tools/package-lock.json` when `tools/node_modules` does not match it.
-That install needs the npm registry. CI runs the script and fails if the tree
-changes afterwards.
+Commit what it changes in the same commit as the change that produced it. CI
+checks every commit of a pull request. For each commit that changes `src/`,
+`LICENSE`, `tools/build.sh` or `tools/regions.sh`, it runs the builder and
+fails when the tree differs. cocogitto counts the builds toward a package's
+release, so builds that land in a later commit leave the earlier commit with
+nothing to release.
 
-It writes these whole files:
+The script needs `jq`, Node.js with `npm`, and `shasum` or `sha256sum`. It
+installs doctoc from `tools/package-lock.json` when `tools/node_modules` does
+not match it. That install needs the npm registry. The builder needs `jq`,
+resvg 0.48.1 and POSIX tools, so `bash tools/build.sh` runs alone when no
+README region changes. It refuses any other resvg version, because another
+version renders other PNG bytes, and a commit that carries them releases every
+package. Install resvg 0.48.1 from its
+[release page](https://github.com/linebender/resvg/releases/tag/v0.48.1), or
+build it with `cargo install resvg --version 0.48.1 --locked`.
 
-- `.claude-plugin/marketplace.json`, built from every `plugin.json` and
-  `tools/templates/marketplace.json`
-- `plugins/<name>/.claude-plugin/plugin.json`, a byte-identical copy of `plugins/<name>/plugin.json`
-- `plugins/<name>/LICENSE`, a byte-identical copy of the root `LICENSE`
+Each package's listing icon is `src/<name>/icon.svg`. Change the SVG and run
+the builder, which renders `bundles/<name>/.claude-plugin/icon.png` at 1024 by 1024 px.
+CI does not compare that PNG with a fresh render, so commit it with the SVG.
+The icons follow the plugin list of claude.ai: one everyday object, outline
+only, a `#969696` line of width 1.56 on a 24-unit grid with 2 units of padding,
+scaled into the centre 26 units of a 48-unit `#0b0b0b` tile with radius 8.
+Copy the frame of an existing `icon.svg` and draw only the object.
+
+The builder writes these, from `src/<name>/source.json`, the other files of
+`src/<name>/` and `tools/templates/marketplace.json`:
+
+- `bundles/<name>/`, with a manifest folder for Claude Code, Codex and Cursor
+- `plugins/<name>/`, the Agent Plugins package
+- `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`,
+  `.omp-plugin/marketplace.json` and `.cursor-plugin/marketplace.json`
+
+For `prose-discipline`, it also writes the two hooks files and the `.mdc` rule
+into the bundle. It refuses a short form of the rules that breaks a limit, and
+the message names the limit.
+[About this repository's design](docs/design.md#no-hook-blocks-the-agent)
+gives the reasons.
 
 A generated region sits between two comments, `<!-- <region>:start -->` and
 `<!-- <region>:end -->`. A table of contents sits between doctoc's
 `START doctoc` and `END doctoc` comments. Never edit inside either pair.
 
 ### Run the conformance check
+
+`tools/check-conformance.py` checks the parts of Agent Plugins 1.0.0 that this
+repository controls. It validates each `plugins/<name>/plugin.json` against the
+vendored schema in `tools/schemas/`, and each `src/<name>/source.json` against
+`tools/source.schema.json`. It also checks what a schema cannot express:
+
+- where files sit
+- where paths resolve
+- what skill front matter says
+- that no symlink sits under `bundles/` or `plugins/`
+
+CI runs it on every pull request and on pushes to `main`, as
+[`conformance.yml`](.github/workflows/conformance.yml) defines.
 
 The check needs the Python packages `jsonschema` and `pyyaml`. Install the
 versions that [`conformance.yml`](.github/workflows/conformance.yml) pins,
@@ -124,31 +208,40 @@ It must exit 0. CI runs it in the `check` job.
 
 ### Validate with Claude Code
 
-With Claude Code installed, validate each plugin you changed:
+With Claude Code installed, validate each bundle you changed and the Claude
+catalogue:
 
 ```
-claude plugin validate plugins/<name>
+claude plugin validate --strict bundles/<name>
+claude plugin validate --strict .claude-plugin/marketplace.json
+claude plugin validate --profile directory bundles/<name>
 ```
 
-Source: [Plugins reference](https://code.claude.com/docs/en/plugins-reference),
-Claude Code documentation, read 2026-09-25. CI also runs the Agent Skills and
-Hermes validators. It installs every package into each client that
+`--strict` fails on a warning, such as an unknown manifest field. The directory
+profile runs the checks the Anthropic plugin directory applies before it
+accepts a submission, and needs Claude Code 2.1.305 or later. CI fails on any
+finding of that profile, so a bundle without its icon fails with
+`ICON_MISSING`. Source: [Plugins CLI reference](https://code.claude.com/docs/en/plugins/cli-reference),
+Claude Code documentation, read 2026-11-04, for `--strict`; running
+`claude plugin validate --help` on Claude Code 2.1.305, for `--profile`. CI
+also runs the Agent Skills and Hermes validators on `plugins/<name>`. It installs every package into each client that
 [`integration.yml`](.github/workflows/integration.yml) lists.
 
 ## Propose a new package
 
 1. Open a **New package** issue before you write the package.
-2. Once a maintainer accepts the proposal, open a pull request that adds `plugins/<name>/`.
-3. Follow the shape of an existing package, such as `plugins/triz/`.
-4. Write `plugin.json` as an Agent Plugins 1.0.0 manifest.
+2. Once a maintainer accepts the proposal, open a pull request that adds `src/<name>/`.
+3. Follow the shape of an existing package, such as `src/triz-thinking/`.
+4. Write `source.json` with the nine fields that `tools/source.schema.json` requires, and no other.
 5. Make its `description` one sentence of at most 250 characters and 25 words.
-6. Set `extensions["io.github.akurganow.ai-plugins"].category` to the category of the closest package.
+6. Set its `category` to the category of the closest package.
 7. Write `README.md` with the sections of the other package READMEs, in their order.
-8. Put each skill in `skills/<skill>/SKILL.md` with `license: MIT` in its front matter.
-9. Add the package to the `[monorepo.packages]` table in `cog.toml`.
-10. For each skill, write `evals/<name>/<skill>/cases.yaml` and `rubric.yaml` by [these rules](#write-a-skills-evals-cases).
-11. Run `bash tools/regenerate.sh`, then the checks above.
-12. After the merge, a maintainer pushes the seed tag `<name>--v<version>` at the merge commit.
+8. Draw `icon.svg` as described in [Run the checks](#run-the-checks), and get the maintainer's approval of it.
+9. Put each skill in `skills/<skill>/SKILL.md` with `license: MIT` in its front matter.
+10. Add the package to the `[monorepo.packages]` table in `cog.toml`, with the `include` globs of the other entries.
+11. For each skill, write `evals/<name>/<skill>/cases.yaml` and `rubric.yaml` by [these rules](#write-a-skills-evals-cases).
+12. Run `bash tools/regenerate.sh`, then the checks above, and commit the builds with the source.
+13. After the merge, a maintainer pushes the seed tag `<name>--v<version>` at the merge commit.
 
 In a package README, link a file outside the package by its full GitHub URL,
 and a file inside it by a relative path. A package installs alone, and the
@@ -156,7 +249,7 @@ Hermes catalogue renders its README at the pinned commit. Source:
 [`plugin-catalog/README.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/plugin-catalog/README.md#L86),
 Hermes documentation.
 
-The seed tag carries the version in the package's `plugin.json`.
+The seed tag carries the version in the package's `source.json`.
 [`release.yml`](.github/workflows/release.yml) refuses to release any package
 while a `cog.toml` package has no such tag reachable from `main`.
 
@@ -168,10 +261,11 @@ Oh-My-Pi documentation.
 
 ### Write a skill's evals cases
 
-A skill's folder holds two files:
+A skill's folder holds `cases.yaml` and `rubric.yaml`, and may hold
+`held-out.yaml` and `calibration.json`:
 
-- `cases.yaml` has a `positive` list and a `near_miss` list. Each list has ten
-  entries, and each entry has an `id` and a `prompt`.
+- `cases.yaml` has a `positive` list and a `near_miss` list. Each list has at
+  least one entry, and each entry has an `id` and a `prompt`.
 - `cases.yaml` may also have `always_on`, a list of the clients that get the
   skill's rules in every session without loading the skill. A comment beside
   it names each client's route and its source. For those clients the summary
@@ -179,9 +273,9 @@ A skill's folder holds two files:
 - `held-out.yaml` is optional. It has a `held_out` map with a `positive` list
   and a `near_miss` list of five entries each, in the same shape. They run
   with the package on the first repeat only and are not graded. Write them
-  once, from the method's own sources, and do not read them while editing
-  a description: their load count checks the description on prompts it was
-  not tuned on.
+  once, from the method's own sources. Do not read them while editing a
+  description, and do not change them in a commit that changes one: their
+  load count checks the description on prompts it was not tuned on.
 - `rubric.yaml` has a `questions` map from a question id to one statement,
   or to an `instructions` statement with optional `criteria` and `cases`.
   `criteria` holds a quoted `"true"` and `"false"`, each saying what that
@@ -193,8 +287,13 @@ The Agent Skills guide sets the shape of a trigger test. Source:
 Agent Skills documentation, read 2026-10-09. These rules follow the guide, add
 this repository's own, and apply to every skill:
 
-- **Positive prompts** cover every "Use when" clause of the skill's
-  `description` at least once.
+- **Positive prompts** cover every situation the skill's `description` lists
+  at least once. One prompt may cover several.
+- **Near-miss prompts** cover every skip clause of the `description` and
+  every neighbour skill it names.
+- **No two prompts** test the same clause on the same axis. Every positive
+  prompt runs three times per client with the package on each release that
+  changes the package, so a duplicate adds that cost and no clause.
 - **Positive prompts** vary along four axes. Phrasing runs from formal to
   casual, with an occasional typo. Explicitness runs from naming the domain to
   describing only the need. Detail runs from terse to context-heavy.
@@ -211,37 +310,34 @@ this repository's own, and apply to every skill:
 - **The result in the reply.** A prompt asks for its result in the reply, never
   in a file, because Jev grades only the final message.
 - **Neutral.** A prompt never names the skill, its package or the text the
-  skill rests on. A user who names them needs no trigger.
+  skill rests on, because a user who names them needs no trigger. It shares
+  no example with the skill's files, because an answer could copy it.
 - **Ids** are short kebab-case names of what the prompt asks. They stay unique
   across both lists.
 
-Jev grades each positive answer on the questions that apply to its prompt. Two
-of the rules below rest on the failure modes that TypeSafe documents for
+Jev grades each positive answer on the questions that apply to its prompt. The
+"One step" rule below rests on the failure modes that TypeSafe documents for
 `jev-1.13`. Source:
 [Jev 1.13 jaggedness](https://docs.typesafe.ai/model-jaggedness/jev-1.13.md),
 TypeSafe documentation, read 2026-10-09. The measurements behind the other
 rules are in
 [About this repository's design](docs/design.md#behavioural-evals-run-after-each-release).
 
-- **One question per rule** of the skill that a reader can check in the answer
-  text. Take the rules from `SKILL.md` and the references it names as required
-  output.
+- **One question per expected finding:** the point a right answer to that
+  prompt must reach, with the prompt in `cases`. Where several answers are
+  right, state a property all of them have. Add at most three questions about
+  form, from `SKILL.md`, unless form is what the skill delivers.
 - **`cases` for a rule of one form.** A question about one artifact form, such
   as a review comment or a PR description, names in `cases` the prompts that
   write it.
 - **No question at the ceiling.** Drop a question that every answer passes in
   both arms, because it measures nothing.
-- **A statement that holds** for an answer which follows the skill, such as
-  "Each finding names the chapter of the book it rests on."
-- **One step.** Each question is answerable from the answer text in one step.
-  Jev answers less reliably when a question needs extra levels of indirection
-  (section "Indirection").
-- **No counting.** `jev-1.13` does not count reliably (section "Counting"). A
-  sentence-length or item-count rule stays out.
-- **No condition, position or bundle.** A question is not conditional ("each
-  finding that rests on X ..."), positional ("before any finding ...", "ends
-  with ...") or a bundle of several facts. Each of those makes Jev find
-  something first and then judge it, which is two steps.
+- **A statement that is true of a right answer**, such as "The answer cites a
+  chapter of the book."
+- **One step.** Jev answers less reliably through extra levels of indirection
+  and does not count reliably (sections "Indirection" and "Counting"). So a
+  question is not conditional ("each finding that rests on X ..."), positional
+  ("ends with ..."), a bundle of several facts, or a count.
 - **Criteria where the boundary is unclear.** TypeSafe documents `criteria`
   for a subtle yes-or-no boundary. Source:
   [Noul](https://docs.typesafe.ai/primitives/noul.md), TypeSafe documentation,
@@ -257,5 +353,5 @@ rules are in
   the request, and never needs knowledge the answer does not contain. When an
   answer may quote the text it checks or cleans, a style question says
   "outside text it quotes".
-- **Three to eight questions** apply to each positive prompt. Each id is a
+- **At most eight questions** apply to each positive prompt. Each id is a
   short snake_case name.

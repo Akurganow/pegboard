@@ -23,15 +23,17 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: Release tags separated by spaces, such as "triz--v0.2.0"
+        description: Release tags separated by spaces, such as "triz-thinking--v0.3.0"
         type: string
         required: true
+      clients:
+        description: Clients separated by spaces, or empty for all clients
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
-
-env:
-  MARKETPLACE: ai-plugins
 
 jobs:
   matrix:
@@ -47,8 +49,9 @@ jobs:
       - id: list
         env:
           TAGS: ${{ inputs.tags }}
+          CLIENTS: ${{ inputs.clients }}
         run: |
-          matrix=$(python tools/evals.py matrix --tags "$TAGS")
+          matrix=$(python tools/evals.py matrix --tags "$TAGS" --clients "$CLIENTS")
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "count=$(jq '.include | length' <<<"$matrix")" >> "$GITHUB_OUTPUT"
 
@@ -103,7 +106,11 @@ jobs:
           bun-version: latest
 
       - name: Install the client and the released package
+        # The released tag's catalogue names the marketplace, and a tag from
+        # before the rename to pegboard names it ai-plugins.
         run: |
+          MARKETPLACE=$(python -c 'import json; print(json.load(open("released/.claude-plugin/marketplace.json"))["name"])')
+          echo "MARKETPLACE=$MARKETPLACE" >> "$GITHUB_ENV"
           case "$CLIENT" in
             claude)
               npm install -g @anthropic-ai/claude-code@latest
@@ -120,24 +127,31 @@ jobs:
           esac
           "$CLIENT" --version
 
-      # Each client gets only its own key. Codex's documentation says not to set
+      # The step's environment holds only its own client's key, and the grading key
+      # stays in the report job. Codex's documentation says not to set
       # CODEX_API_KEY at job level in a workflow that runs repository code
       # (documentation: https://learn.chatgpt.com/docs/non-interactive-mode, read 2026-10-08).
+      # A session whose inputs match the previous run's is copied from it, so a
+      # release pays only for what it changed. A run by hand measures every
+      # session: it is the baseline and the recovery path. When release.yml
+      # calls this workflow, the github context is the caller's, so event_name
+      # is push (documentation:
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations,
+      # read 2026-11-07).
       - name: Run the skill
         env:
           ANTHROPIC_API_KEY: ${{ matrix.client == 'claude' && secrets.ANTHROPIC_API_KEY || '' }}
           CODEX_API_KEY: ${{ matrix.client == 'codex' && secrets.OPENAI_API_KEY || '' }}
           OPENROUTER_API_KEY: ${{ matrix.client == 'omp' && secrets.OPENROUTER_API_KEY || '' }}
-          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
           TAG: ${{ matrix.tag }}
           SKILL: ${{ matrix.skill }}
           REPEAT: ${{ matrix.repeat }}
+          FRESH: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: >-
           python tools/evals.py run --tag "$TAG" --skill "$SKILL" --client "$CLIENT"
-          --repeat "$REPEAT" --out "$RUNNER_TEMP/run.json"
+          --repeat "$REPEAT" --released "$PWD/released" ${FRESH:+--fresh} --out "$RUNNER_TEMP/run.json"
 
-      - if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: evals-${{ matrix.tag }}-${{ matrix.skill }}-${{ matrix.client }}-${{ matrix.repeat }}
           path: ${{ runner.temp }}/run.json
@@ -149,8 +163,8 @@ jobs:
 
   report:
     needs: [matrix, run]
-    # Not always(): that also runs after a cancel, and would replace a release's
-    # complete evals.json with a partial one (documentation:
+    # Not always(): that also runs after a cancel, and would publish a cancelled
+    # run's partial set (documentation:
     # https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#always,
     # read 2026-10-08). It does run after a failed run job: compare in
     # tools/evals.py ranges a metric only with all three repeats on both sides,
@@ -158,8 +172,9 @@ jobs:
     if: ${{ !cancelled() && needs.matrix.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       issues: write
+      packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -170,10 +185,23 @@ jobs:
         with:
           pattern: evals-*
           path: ${{ runner.temp }}/runs
+      - run: python -m pip install --disable-pip-version-check pyyaml==6.0.3
+      # Jev grades in this job because it runs no client: a session's shell can
+      # read /proc/<pid>/environ of the other processes in its job. The sources
+      # are in docs/design.md, "Behavioural evals run after each release". A run
+      # whose every grade failed is left out and fails this step.
+      - name: Grade the answers
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+        run: python tools/evals.py grade --runs "$RUNNER_TEMP/runs" --out "$RUNNER_TEMP/graded"
+      # After a failed grade step, the runs that were graded are still published.
       - name: Publish the results
+        if: ${{ !cancelled() }}
         env:
           GH_TOKEN: ${{ github.token }}
           TAGS: ${{ inputs.tags }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
-          mkdir -p "$RUNNER_TEMP/runs"
-          python tools/evals.py report --tags "$TAGS" --runs "$RUNNER_TEMP/runs"
+          mkdir -p "$RUNNER_TEMP/graded"
+          python tools/evals.py report --tags "$TAGS" --runs "$RUNNER_TEMP/graded"

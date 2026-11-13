@@ -1,16 +1,16 @@
 # The canonical agent configuration of this repository (.agents folder
-# specification, AGENTS-1). Vendor entry points are symlinks into this tree;
-# only a client's own configuration, which no standard defines, keeps content
-# of its own.
+# specification, AGENTS-1). The vendor entry point, `CLAUDE.md`, imports this
+# tree and holds no text of its own; only a client's own configuration, which
+# no standard defines, keeps content of its own.
 specVersion: "1.0.0"
 
 project:
-  name: ai-plugins
+  name: pegboard
   description: >-
-    A public marketplace of agent plugins. Every package under `plugins/` is
-    an Agent Plugins 1.0.0 package, and the repository's job is that a client
-    implementing the specification can install one without knowing anything
-    about this repository.
+    A public marketplace of agent plugins. Every package under `plugins/`,
+    built from `src/`, is an Agent Plugins 1.0.0 package, and the
+    repository's job is that a client implementing the specification can
+    install one without knowing anything about this repository.
 
 defaults:
   mode: maintainer
@@ -21,18 +21,7 @@ enabled:
     - maintainer
   policies:
     - repository
-  skills:
-    - pipeline-law
-    - github-needs
-    - issue-court
-    - tracker-clerk
-    - repo-police
-    - slop-police
-    - agent-police
-    - pipeline-clerk
-    - spec-writer
-    - spec-reviewer
-    - implementer
+  skills: []
 
 # `rules/` is not one of the directories the required layout names, and the
 # specification does not close that list: it defines canonical sources by
@@ -50,62 +39,17 @@ x:
       scoping: >-
         None. This repository is small enough that every rule bears on every
         change, so no rule carries `paths` front matter and each one loads
-        unconditionally.
-      vendorPaths:
-        - .claude/rules
+        unconditionally. `CLAUDE.md` imports each rule file by name.
 
     # The root entry point, outside `.agents/` and so not a canonical source
     # under this specification — the layout defines those by location. It is
     # declared here for the same reason `rules` is: so a tool that reads only
-    # the manifest can find it. `AGENTS.md` is the text; `CLAUDE.md` is a
-    # symlink to it, because Claude Code reads that name and every other
-    # harness reads the first, and two files would drift apart.
+    # the manifest can find it. `AGENTS.md` is the text; `CLAUDE.md` imports
+    # it, because Claude Code reads that name and every other harness reads
+    # the first, and two texts would drift apart.
     entryPoint:
       file: ../AGENTS.md
       format: commonmark
       carriesRules: false
       vendorPaths:
         - ../CLAUDE.md
-
-    # The roles of this repository's own unattended machinery. They lived in
-    # eight routine bodies, edited by hand in a web form, until 2026-09-12;
-    # moving them here makes a change to one a pull request with a review and
-    # a history. They are not marketplace packages: nothing under `plugins/`
-    # refers to them and `tools/check-conformance.py` does not read them.
-    skills:
-      dir: skills
-      # The specification requires `SKILL.yaml` and, in the same breath,
-      # defers the skill format to the Agent Skills specification, which
-      # requires "A skill is a directory containing, at minimum, a `SKILL.md`
-      # file". The two clauses disagree and the draft does not resolve them.
-      # Every harness that reads `.agents/skills/` at all probes for
-      # `SKILL.md`, so a `SKILL.yaml` here would be found by none of them and
-      # the skills would exist for no reader. Hence `SKILL.md`, deliberately.
-      format: agent-skills-skill-md
-      vendorPaths:
-        - .claude/skills
-      shared:
-        pipeline-law: >-
-          Read by pipeline-clerk, spec-writer, spec-reviewer and implementer.
-          One file where there were four byte-identical copies.
-        github-needs: >-
-          Read by issue-court, tracker-clerk, repo-police, slop-police and
-          agent-police. The same, for what a run needs from GitHub. It
-          holds the one definition of the machine population, which
-          pipeline-law cites for the four pipeline roles.
-      notCarriedHere: >-
-        The measured facts of a routine's environment, and the clone sequence
-        that environment needs. Those belong to whoever runs the agent, never
-        to a public repository other people clone into environments of their
-        own, and `.agents/rules/unattended.md` is where that rule is written.
-
-    # Claude Code's vendor entry point. One thin agent per role: its `skills`
-    # field names the role's skill and the document that role shares, and
-    # Claude Code preloads both, so these carry no role text of their own.
-    # Real files rather than symlinks: Claude Code documents symlink support
-    # for `.claude/skills/` entries and for `.claude/rules/`, and documents
-    # none for `.claude/agents/`.
-    claudeAgents:
-      dir: ../.claude/agents
-      format: claude-code-agent
-      canonicalText: skills

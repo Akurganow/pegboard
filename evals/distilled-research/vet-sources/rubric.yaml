@@ -1,0 +1,43 @@
+questions:
+  names_record:
+    instructions: >-
+      The answer names an outside record that a rating rests on.
+    cases:
+      - can-i-cite-wikipedia-and-statista
+      - framework-benchmark-sources
+      - is-this-a-reliable-source-single
+      - mmr-papers-which-hold-up
+  calls_no_source_safe:
+    instructions: >-
+      The answer does not describe any source as safe.
+    cases:
+      - can-i-cite-wikipedia-and-statista
+      - framework-benchmark-sources
+      - is-this-a-reliable-source-single
+      - mmr-papers-which-hold-up
+  gives_a_tier_each:
+    instructions: >-
+      The answer gives each source a tier.
+    cases:
+      - framework-benchmark-sources
+      - mmr-papers-which-hold-up
+  iea_most_reliable:
+    instructions: >-
+      The answer ranks iea.org as the most reliable of the sources.
+    cases:
+      - can-i-cite-wikipedia-and-statista
+  benchmarks_game_not_frameworks:
+    instructions: >-
+      The answer says the benchmarks game measures small programs across programming languages and not web framework latency.
+    cases:
+      - framework-benchmark-sources
+  flags_unreliable_site:
+    instructions: >-
+      The answer says naturalnews.com is not reliable for nutrition claims.
+    cases:
+      - is-this-a-reliable-source-single
+  wakefield_retracted:
+    instructions: >-
+      The answer says the 1998 Wakefield paper in The Lancet was retracted.
+    cases:
+      - mmr-papers-which-hold-up

@@ -1,0 +1,60 @@
+positive:
+  - id: can-i-cite-wikipedia-and-statista
+    prompt: |
+      writing my undergrad thesis on EV adoption and my supervisor told me to check where my
+      numbers come from. which of these are fine as evidence and which arent? tell me for each
+      one
+
+      en.wikipedia.org
+      statista.com
+      iea.org
+      electrek.co
+
+      just reply here
+  - id: framework-benchmark-sources
+    prompt: |
+      Our team wants to back a memo claim that Rust web frameworks beat Go ones on latency.
+      Three places we found material: the TechEmpower Framework Benchmarks repo
+      (github.com/TechEmpower/FrameworkBenchmarks), the benchmarks game site at
+      benchmarksgame-team.pages.debian.net, and the 2024 Stack Overflow Developer Survey. How
+      much weight can each carry in the memo? Give me a tier for each in the reply.
+  - id: is-this-a-reliable-source-single
+    prompt: |
+      should i trust naturalnews.com when it comes to nutrition claims? i keep seeing it
+      get cited in a forum I'm in and I want to know before I repeat anything from it
+  - id: mmr-papers-which-hold-up
+    prompt: |
+      Our school board is drafting a parent handout on the MMR vaccine and autism. Which of
+      these papers can it cite as evidence? Give a tier for each and say why, in the reply:
+
+      - Wakefield et al. (1998), The Lancet, "Ileal-lymphoid-nodular hyperplasia, non-specific
+        colitis, and pervasive developmental disorder in children"
+      - Madsen et al. (2002), New England Journal of Medicine, "A population-based study of
+        measles, mumps, and rubella vaccination and autism"
+      - Hviid et al. (2019), Annals of Internal Medicine, "Measles, Mumps, Rubella Vaccination
+        and Autism: A Nationwide Cohort Study"
+near_miss:
+  - id: install-safety-colourama
+    prompt: |
+      my teammate told me to pip install "colourama" for terminal colours. thats spelled
+      differently from colorama, right? is that package safe to install or is it a
+      typosquat? answer here pls
+  - id: malware-scan-suspicious-pdf
+    prompt: |
+      A supplier emailed me invoice_2291.pdf and my antivirus is quiet but the sender
+      address looks off. Its SHA-256 is
+      3f2a9c1be6d54f0a8a7c19e0d4b7c25f6a1e8d93b04c7f52a6d8e1c9b0f347aa.
+      Can you tell me whether this file is malware? Reply with what you can say about it.
+  - id: licence-check-gpl-dependency
+    prompt: |
+      We ship a closed-source desktop app and just added the npm dependency `ffmpeg-static`
+      to package.json. Is its licence compatible with proprietary distribution? Tell me
+      what the licence terms mean for us, in the reply.
+  - id: remote-work-productivity-agreement
+    prompt: |
+      I'm writing a memo for our leadership team on remote versus in-office work and
+      productivity. Before I write it, what do the sources actually agree on? Please read
+      widely: academic studies, company surveys, think-tank reports and press coverage. I
+      also suspect many of the articles just repeat one or two famous studies, so tell me
+      which sources only copy each other and which are independent. Reply with the agreed
+      points and the disputed ones.
