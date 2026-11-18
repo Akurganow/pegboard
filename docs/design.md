@@ -227,7 +227,7 @@ Claude Code documents no plain-stdout route for `SubagentStart` ([Claude Code](c
 (standard: [POSIX `echo`](https://pubs.opengroup.org/onlinepubs/9799919799/utilities/echo.html))
 The commands name no variable, no command substitution and no wildcard.
 The plugin directory's checklist restricts all three in a hook command ([Anthropic plugin directory](clients.md#anthropic-plugin-directory)).
-Its text does not say whether a literal `echo` or `printf` counts as an inline program, so that question stays open there.
+The directory's Validate blocks every hook from an organization that is not Verified, a literal one included ([Anthropic plugin directory](clients.md#anthropic-plugin-directory)).
 
 Codex's file adds a `commandWindows` to each hook.
 Codex runs `COMSPEC` or `cmd.exe /C` on Windows and documents `commandWindows` as the Windows-only override ([Codex](clients.md#codex)).
@@ -292,6 +292,18 @@ That proves the commands print the text, and not that Codex delivers it, because
 Codex skips plugin hooks until the user trusts them, and it ties trust to a hash of the whole installed plugin ([Codex](clients.md#codex)).
 Every release changes `version` in the manifests, so Codex asks again after each release.
 The rules in every Codex session outweigh that prompt.
+
+## `prose-discipline` is not submitted to the Anthropic directory
+
+The directory's Validate blocks a hook and a `.mdc` file from an organization that is not Verified ([Anthropic plugin directory](clients.md#anthropic-plugin-directory)).
+`prose-discipline` ships both, and no page read says how an organization becomes Verified (same section).
+So the package is not submitted, a decision of 2026-11-18.
+Claude Code installs it from this repository's catalogue, where the hooks run.
+The repository root is not submitted either, because the directory takes one plugin folder at a time (same section).
+
+A build without hooks lost.
+The directory and the catalogue would read the same folder, so it needs a third build.
+From it, Claude Code would load the rules only when the skill fires.
 
 ## Releases come from cocogitto, straight to main
 
