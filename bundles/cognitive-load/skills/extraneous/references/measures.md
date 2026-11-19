@@ -30,15 +30,10 @@ increment (Appendix B3). Shorthand adds nothing: "Cognitive Complexity does not
 increment for methods", so extracting a method lowers the count.
 
 PMD "reports methods with a
-complexity of 15 or more"
-([`design.xml`](https://github.com/pmd/pmd/blob/4a1d37d3eb785695084393fcc7315b0aca123809/pmd-java/src/main/resources/category/java/design.xml#L299),
-source). The ESLint rule moved from the archived `eslint-plugin-sonarjs` into
-SonarJS, default threshold 15
-([`rule.ts`](https://github.com/SonarSource/SonarJS/blob/793d14cc05902a65682f8d59f4edf9e9d19b6334/packages/analysis/src/jsts/rules/S3776/rule.ts#L39),
-source). SonarSource's Java rule calls it "a measure of how hard it is to
-understand the control flow of a unit of code"
-([`S3776.html`](https://github.com/SonarSource/sonar-java/blob/ceb8058cc5d60196c6b7641d748a079bbd473c00/sonar-java-plugin/src/main/resources/org/sonar/l10n/java/rules/java/S3776.html),
-documentation) and claims no validation.
+complexity of 15 or more". The ESLint rule moved from the archived
+`eslint-plugin-sonarjs` into SonarJS, default threshold 15. SonarSource's
+Java rule calls it "a measure of how hard it is to understand the control
+flow of a unit of code" and claims no validation.
 
 Validation: Muñoz Barón, Wyrich and Wagner, ESEM 2020, a random-effects
 meta-analysis of 10 earlier studies, 427 snippets, about 24,000 human
@@ -107,14 +102,13 @@ and physiological signals.
 
 Google's guide for authors of changes: "100 lines is usually a reasonable size
 for a CL, and 1000 lines is usually too large, but it's up to the judgment of
-your reviewer", and a change spread across many files counts as larger
-([`small-cls.md`](https://github.com/google/eng-practices/blob/3bb3ec25b3b0199f4940b1aa75f0ac5c5753301c/review/developer/small-cls.md),
-documentation). The reason given is reading, not load: a small change is
+your reviewer", and a change spread across many files counts as larger.
+The reason given is reading, not load: a small change is
 "Reviewed more thoroughly" and "Less likely to introduce bugs".
 
 ## LLM agents as readers of code
 
-Abstracts of preprints, read 2026-11-11. Removing identifier names degrades
+Abstracts of preprints. Removing identifier names degrades
 summarization and execution tasks ([2510.03178](https://arxiv.org/abs/2510.03178)).
 Classical complexity metrics correlate minimally or not at all with model
 success on code benchmarks (AUROC 0.63, against 0.86 for trained shadow models:
