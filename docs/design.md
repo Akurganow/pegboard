@@ -1,10 +1,7 @@
 # About this repository's design
 
 This page explains why the repository and its packages are built the way they are.
-The client facts behind each reason are in [How each client loads a package](clients.md), with their sources.
-The evals section cites its running facts in place, because they come from runs of the evals workflow.
-Every other fact here names its kind: source at a commit, or documentation read on 2026-09-25 unless its citation gives a date or a commit.
-A fact about this repository names a dated read of its settings or releases, or a run of this repository's CI.
+The client facts behind each reason are in [How each client loads a package](clients.md).
 
 ## One source for every copy
 
@@ -17,7 +14,6 @@ Claude Code documents `category` on a catalogue entry and not in the manifest ([
 So one package has three client manifests and four catalogues, and each repeats a description.
 Every package README repeats the install commands, and every build carries its own `LICENSE`.
 A package installs alone, and Agent Plugins 1.0.0 §4.1 keeps every path it supplies inside its root.
-(documentation: [Agent Plugins specification §4.1](https://github.com/agentplugins/agent-plugins-spec/blob/ff8ab5e392cc87bd88d87c060815a87490e51003/spec/1.0.0.md#L58-L64))
 So each build carries its own copy, not a path to a root file.
 
 A copy kept by hand drifts from its source, and nothing notices until a reader does.
@@ -32,8 +28,7 @@ The failure message names the command that repairs it.
 For each pull request commit that changes `src/` or a file the builder shares, CI also runs the builder on that commit alone.
 cocogitto counts a package's builds toward its release, so builds that land in a later commit would leave the earlier commit with nothing to release.
 
-Three alternatives lost.
-One command per kind of copy leaves a contributor to remember which command follows which edit.
+One command per kind of copy would leave a contributor to remember which command follows which edit.
 A CI job that commits the copies back would put changes on `main` that no pull request showed.
 Keeping the source in `plugins/<name>/` would let a client read hand-written files, and the Hermes install command reads that path.
 
@@ -55,8 +50,8 @@ Each client picks one manifest folder and ignores the rest.
 Claude Code and Oh-My-Pi read `.claude-plugin/plugin.json`, Cursor reads `.cursor-plugin/plugin.json`, and Codex and OpenClaw prefer `.codex-plugin/plugin.json` ([Claude Code](clients.md#claude-code), [Oh-My-Pi](clients.md#oh-my-pi), [Cursor](clients.md#cursor), [Codex](clients.md#codex), [OpenClaw](clients.md#openclaw)).
 So one tree with three manifest folders serves five clients.
 Claude Code's validator raises no warning for the other clients' folders ([Claude Code](clients.md#claude-code)).
-No other source read here says a client rejects a package for them.
-Separate trees per client would add copies for no gain that these sources show.
+No client is known to reject a package for them.
+Separate trees per client would add copies for no known gain.
 
 The Agent Plugins build keeps the path `plugins/<name>/`.
 The Hermes install commands, the `homepage` URLs and the README links stay valid.
@@ -65,22 +60,16 @@ Both builds hold regular files only, and the conformance check fails on a symlin
 Claude Code reads only `.claude-plugin/plugin.json`, and fails on a manifest that is not JSON ([Claude Code](clients.md#claude-code)).
 Claude Code, Codex and Oh-My-Pi fetch a marketplace with git on the user's machine ([Claude Code](clients.md#claude-code), [Codex](clients.md#codex), [Oh-My-Pi](clients.md#oh-my-pi)).
 With `core.symlinks` false, git checks a symlink out as a plain file holding the link text.
-(documentation: [git manual, `core.symlinks`](https://github.com/git/git/blob/c44beea485f0f2feaf460e2ac87fdd5608d63cf0/Documentation/config/core.adoc#L237-L246))
 Git for Windows disables symlink support by default.
-(documentation: [Git for Windows vs symbolic links](https://gitforwindows.org/symbolic-links))
 Its installer enables symlinks only under Developer Mode, or when a test link succeeds for the installing user.
-(source: [`install.iss` L1342–L1369](https://github.com/git-for-windows/build-extra/blob/c8241c75c7c06d6db94ed6a8dd9b8ca76d1ed842/installer/install.iss#L1342-L1369),
-[L2459–L2467](https://github.com/git-for-windows/build-extra/blob/c8241c75c7c06d6db94ed6a8dd9b8ca76d1ed842/installer/install.iss#L2459-L2467))
 So a default Windows checkout turns a symlinked manifest into text, and Claude Code fails to load it.
 Codex also fails its hook-trust hash on any entry that is neither a regular file nor a directory ([Codex](clients.md#codex)).
 A CI job cannot settle the question.
 GitHub's Windows runner image installs Git with symlinks enabled.
-(source: [`Install-Git.ps1` L27–L37](https://github.com/actions/runner-images/blob/ebade26c60adcb867918b31c8f8caa37343a3d39/images/windows/scripts/build/Install-Git.ps1#L27-L37))
 A job there loads a symlink that a default user checkout breaks.
 
 The Agent Plugins build holds the only root manifest, and it holds no other manifest.
 Agent Plugins 1.0.0 §5.1 says no other file can "replace, supplement, or override the core fields in root `plugin.json`".
-(documentation: [Agent Plugins specification §5.1](https://github.com/agentplugins/agent-plugins-spec/blob/ff8ab5e392cc87bd88d87c060815a87490e51003/spec/1.0.0.md#L133-L137))
 The cost of two builds is the same skills twice, which the builder and CI keep equal.
 
 ## What conformance buys
@@ -89,14 +78,13 @@ Agent Plugins 1.0.0 describes a plugin as a directory with a single root (§4.1)
 A conforming client can at least load a plugin from a directory path (§11.1).
 Every `plugins/<name>/` keeps its manifest at the root with the canonical `$schema` (§5.1, §5.2).
 Its skills sit in the fixed `skills/` location (§6.1).
-(documentation: [Agent Plugins 1.0.0](https://agent-plugins.org/specification), the specification)
 
 A client that implements Agent Plugins 1.0.0 can load `plugins/<name>` directly.
 `bundles/<name>/` is not an Agent Plugins package, and [Two builds from one source](#two-builds-from-one-source) says why it has no root `plugin.json`.
 
 The specification defines no repository-level catalogue.
 How a client gets from this repository to a plugin root is specific to that client.
-So each install command in the [README](../README.md#install) cites that client's own source.
+So the [README](../README.md#install) gives each client its own install command.
 
 ## Icons are rendered from SVG
 
@@ -107,18 +95,17 @@ The directory accepts a PNG or a JPEG and no SVG ([Anthropic plugin directory](c
 Its source is `src/<name>/icon.svg`, which a diff can show, and the builder renders it on every run like every other build file.
 The Agent Plugins build carries no icon, because the 1.0.0 manifest has no field for one.
 
-The builder accepts one resvg version, 0.48.1, and refuses any other.
+The builder accepts one resvg version, the one it pins, and refuses any other.
 Another version renders other PNG bytes, and a commit that carries them releases every package, because cocogitto counts a package's builds.
 CI installs that version from its release archive, checked by a SHA-256 digest committed in the workflow.
 CI still leaves `bundles/*/.claude-plugin/icon.png` out of both tree comparisons.
-Whether one resvg version writes the same bytes on every system was not measured, and a comparison would fail on a difference nobody made.
+Whether one resvg version writes the same bytes on every system is unknown, and a comparison would fail on a difference nobody made.
 The directory profile in CI fails a bundle whose icon is missing.
 
 The icons follow the plugin list of claude.ai, where every plugin is drawn as one glyph of the app's own icon font in a dark tile.
-The tile colour, the line colour and the stroke width were measured on that page, and each icon draws its own object in that frame.
-Two alternatives lost.
-A hand-drawn PNG as the source makes every change invisible in a diff and needs an image editor.
-A renderer that runs only by hand leaves the builder unable to write the whole bundle.
+The tile colour, the line colour and the stroke width are taken from that page, and each icon draws its own object in that frame.
+A hand-drawn PNG as the source would make every change invisible in a diff and need an image editor.
+A renderer that runs only by hand would leave the builder unable to write the whole bundle.
 
 ## Skill names carry no plugin prefix
 
@@ -180,11 +167,8 @@ Hermes loads no hooks and no `rules/` from a package ([Hermes](clients.md#hermes
 So `skills/house-style/SKILL.md` carries the full rules in a generated region.
 The package README shows the `skills.auto_load` entry, with the qualified name `tools/regenerate.sh` computes from the manifest `name`.
 
-Python lost.
-A Hermes native plugin can add a system-prompt section, but it needs `plugin.yaml` and an `__init__.py` ([Hermes](clients.md#hermes)).
+A Hermes native plugin could add a system-prompt section, but it needs `plugin.yaml` and an `__init__.py` ([Hermes](clients.md#hermes)).
 When a directory holds both manifests, Hermes loads the native one and skips the portable `plugin.json`.
-(source: [`plugins_discovery.py` L147–L155](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugins_discovery.py#L147-L155),
-[`plugin_validate.py` L482–L485](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugin_validate.py#L482-L485))
 A native half would stop Hermes from loading the package as Agent Plugins.
 
 In Claude Code, Cursor and Oh-My-Pi, invoking `house-style` puts the rules in context a second time.
@@ -196,11 +180,8 @@ In Codex, the user trusts the hook once, and again after each release ([Codex](c
 
 Clients offer ways to force a standard, not only to state it.
 A Claude Code `Stop` hook can return `"decision": "block"` and keep Claude working.
-(documentation: [Hooks, Stop decision control](https://code.claude.com/docs/en/hooks#stop-decision-control))
 A `PreToolUse` hook can deny a tool call.
-(documentation: [Hooks, PreToolUse decision control](https://code.claude.com/docs/en/hooks#pretooluse-decision-control))
 A `UserPromptSubmit` hook can add context to every prompt.
-(documentation: [Hooks, UserPromptSubmit](https://code.claude.com/docs/en/hooks#userpromptsubmit))
 In Oh-My-Pi, a TTSR rule aborts a response on a match and retries it ([Oh-My-Pi](clients.md#oh-my-pi)).
 
 `prose-discipline` states the standard and enforces nothing.
@@ -220,7 +201,6 @@ No script runs and no file is read, so no command can fail on a missing file or 
 The object is `hookSpecificOutput`, with the event name and an `additionalContext` that holds the short form.
 Claude Code documents no plain-stdout route for `SubagentStart` ([Claude Code](clients.md#claude-code)).
 `printf` carries the JSON because the result of `echo` is implementation-defined when an operand holds a backslash, and the JSON escapes line feeds as `\n`.
-(standard: [POSIX `echo`](https://pubs.opengroup.org/onlinepubs/9799919799/utilities/echo.html))
 The commands name no variable, no command substitution and no wildcard.
 The plugin directory's checklist restricts all three in a hook command ([Anthropic plugin directory](clients.md#anthropic-plugin-directory)).
 
@@ -240,11 +220,9 @@ Each limit prevents one failure:
   The directory restricts variables, command substitution and wildcards.
 - **Line starts.** Every line starts with a letter, a digit, `#` or `- `.
   cmd.exe prints help for `echo /?` instead of the line.
-  (documentation: [Microsoft, `echo`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/echo), last updated 2024-02-16)
 - **Size.** The short form stays under 8000 bytes.
   Codex moves hook context over 2,500 tokens to a file, and Claude Code caps hook output at 10,000 characters ([Codex](clients.md#codex), [Claude Code](clients.md#claude-code)).
 - **Windows command.** The `commandWindows` string stays under 8191 characters, the command-line limit of cmd.exe.
-  (documentation: [Microsoft, command-line string limitation](https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/command-line-string-limitation))
   Each line adds `echo` and `&`, so a text under 8000 bytes can still exceed it.
 
 `conformance.yml` feeds the builder one bad input per limit and fails when it accepts one.
@@ -254,7 +232,6 @@ The `hooks.json` and `codex.json` files carry no `additionalContextLimit`, the C
 
 Claude Code's file is `hooks/hooks.json`, the path Claude Code loads by default.
 The Claude manifest declares no `hooks` field.
-(documentation: [Plugin components, Hooks](https://code.claude.com/docs/en/plugins/components#hooks))
 It is also the only hooks path that the platform-support page names for Cowork ([Claude Code](clients.md#claude-code)).
 
 Codex's file is `hooks/codex.json`, declared in `.codex-plugin/plugin.json`.
@@ -266,13 +243,12 @@ Putting Codex's commands in their own file keeps that field out of the file Clau
 Claude Code without Git Bash runs a shell-form hook in PowerShell, and the `SubagentStart` command uses `printf` ([Claude Code](clients.md#claude-code)).
 No check here runs that command in PowerShell.
 GitHub's Windows runner image installs Git, and Git for Windows brings Git Bash, so CI cannot show the gap.
-(source: [`Install-Git.ps1` L27–L37](https://github.com/actions/runner-images/blob/ebade26c60adcb867918b31c8f8caa37343a3d39/images/windows/scripts/build/Install-Git.ps1#L27-L37))
 The risk is that `SubagentStart` prints nothing there.
 
 ## Codex declares its hooks in its own manifest
 
 Codex documents plugin hooks under `extensions.com.openai` in a root `plugin.json` ([Codex](clients.md#codex)).
-Its loader returns no hooks for a package in Agent Plugins format, and two open issues report it ([Codex](clients.md#codex)).
+Its loader returns no hooks for a package in Agent Plugins format ([Codex](clients.md#codex)).
 A root manifest in that format also outranks every manifest folder ([Codex](clients.md#codex)).
 
 Codex documents `.codex-plugin/plugin.json` as a compatibility fallback, and says legacy packages can declare `hooks` there ([Codex](clients.md#codex)).
@@ -280,7 +256,7 @@ The loader reads the declared file ([Codex](clients.md#codex)).
 So `bundles/prose-discipline/` has no root `plugin.json`, and its Codex manifest declares `./hooks/codex.json`.
 
 A fallback is the route Codex can drop.
-The integration job installs Codex 0.155.1, which reads the catalogue, the local entry shape, `.codex-plugin/plugin.json` and a declared hooks file ([Codex](clients.md#codex)).
+The integration job installs a pinned Codex, which reads the catalogue, the local entry shape, `.codex-plugin/plugin.json` and a declared hooks file ([Codex](clients.md#codex)).
 It runs the installed hook commands and compares their output with the short form.
 That proves the commands print the text, and not that Codex delivers it, because no job starts a Codex session.
 
@@ -292,11 +268,10 @@ The rules in every Codex session outweigh that prompt.
 
 The directory's Validate blocks a hook and a `.mdc` file from an organization that is not Verified ([Anthropic plugin directory](clients.md#anthropic-plugin-directory)).
 `prose-discipline` ships both, and no page read says how an organization becomes Verified (same section).
-So the package is not submitted, a decision of 2026-11-18.
+So the package is not submitted.
 Claude Code installs it from this repository's catalogue, where the hooks run.
 
-A build without hooks lost.
-The directory and the catalogue would read the same folder, so it needs a third build.
+A build without hooks would be a third build, because the directory and the catalogue read the same folder.
 From it, Claude Code would load the rules only when the skill fires.
 
 ## Releases come from cocogitto, straight to main
@@ -309,68 +284,46 @@ A release should follow the commit that earned it, with no release pull request 
 [cocogitto](https://github.com/cocogitto/cocogitto) releases every package.
 `cog bump --auto` derives each package's next version from the conventional commits that touched its paths.
 A package's paths are `src/<name>/` and, through `include` in `cog.toml`, `bundles/<name>/**` and `plugins/<name>/**`.
-(source: [`settings/mod.rs` L367–L372](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/settings/mod.rs#L367-L372))
 Shared files such as `tools/build.sh` are not paths of any package.
 A commit to one therefore releases the packages whose builds it changes, because CI requires it to carry those builds.
 The bump runs a hook per package that writes the new version into `src/<name>/source.json` and runs the builder, so every manifest in both builds carries the version in the version commit.
 A package whose source did not change gets byte-identical output, so the version commit holds no change for it.
 A failing hook fails the release job, and no tag is pushed.
 It writes one version commit and one tag per bumped package.
-(documentation: [cocogitto, Monorepo](https://github.com/cocogitto/cocogitto/blob/8cfddce66f6eece4e5f310565737cac030be8e63/website/guide/monorepo.md))
 `cog.toml` sets the separator `--` and the prefix `v`, so tags read `<name>--v<version>`.
-(documentation: [cocogitto configuration reference L138–L140](https://github.com/cocogitto/cocogitto/blob/8cfddce66f6eece4e5f310565737cac030be8e63/website/reference/config.md#L138-L140),
-[L209–L212](https://github.com/cocogitto/cocogitto/blob/8cfddce66f6eece4e5f310565737cac030be8e63/website/reference/config.md#L209-L212))
 A workflow on each push to `main` runs the bump and publishes one GitHub release per new tag.
 It pushes with `GITHUB_TOKEN`, and a push made with that token starts no workflow run.
-(documentation: [GitHub Docs, GITHUB_TOKEN](https://github.com/github/docs/blob/75ea7dd097a5564f27364a5b70eaa1979106eabd/data/reusables/actions/actions-do-not-trigger-workflows.md))
 So the version commit cannot start the release again.
 
-Three other tools lost.
+The other release tools fit worse.
 release-please works through release pull requests.
-(documentation: [release-please README L18–L21](https://github.com/googleapis/release-please/blob/edce3d805ef3ac964d1ba2b29b0f42905f2fa412/README.md#L18-L21))
 A pull request opened with `GITHUB_TOKEN` starts its workflow runs in an approval-required state.
-(documentation: [GitHub Docs, GITHUB_TOKEN](https://github.com/github/docs/blob/75ea7dd097a5564f27364a5b70eaa1979106eabd/data/reusables/actions/actions-do-not-trigger-workflows.md))
 So every release would wait for a person to approve its checks and merge a second pull request.
 semantic-release does not officially support monorepos.
-(documentation: [Supported branching L89–L93](https://github.com/semantic-release/docs/blob/d4d3420ade2348e15739bc46cd15aaab8d2bf373/src/content/docs/foundation/supported-branching.md#L89-L93))
 Its FAQ also advises against committing the release back to the branch.
-(documentation: [FAQ L22–L31](https://github.com/semantic-release/docs/blob/d4d3420ade2348e15739bc46cd15aaab8d2bf373/src/content/docs/support/FAQ.md#L22-L31))
 git-cliff computes the next version and the changelog.
-(documentation: [git-cliff, Bump version](https://github.com/orhun/git-cliff/blob/60e0be97e945f71148172675be82399d382c9677/website/docs/usage/bump-version.md))
 The commit, the tags and the push would then be a shell loop kept here.
 
 ### Seed tags
 
 Without a tag, cocogitto reads a package's history from the repository's first commit.
 It also starts that package from version 0.0.0.
-(source: [`bump.rs` L190–L194](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L190-L194),
-[`monorepo.rs` L413–L416](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/command/bump/monorepo.rs#L413-L416),
-[`tag.rs` L187–L191](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/git/tag.rs#L187-L191))
-For `prose-discipline`, at 1.3.0, that would release a lower version than the one users hold.
-So each package has one seed tag at `232aaba`, carrying the version its manifest held there:
-`cognitive-load--v0.1.0`, `design-review--v0.1.0`, `prose-discipline--v1.3.0`, `toc-thinking--v0.1.0` and `triz--v0.1.0`.
+For a package past that version, the release would be lower than the one users hold.
+So each package has one seed tag, carrying the version its manifest held at the tagged commit.
 The release workflow refuses to run while any package in `cog.toml` has no reachable tag.
-
-### Breaking changes
-
-[CONTRIBUTING.md](../CONTRIBUTING.md#write-commits) gives the commit types and the versions they release.
-`prose-discipline` is past 1.0.0, so its rename to `house-style`, a `feat!` commit, releases it as 2.0.0.
 
 ### Changelogs
 
 Each package keeps a `CHANGELOG.md` in `src/<name>/`, written by the bump from `tools/templates/changelog.tera`.
 cocogitto's default package template adds an inline-HTML `BREAKING` badge, and credits the author and co-authors on every line.
-(source: [`template.rs` L18](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/changelog/template.rs#L18),
-[`macros.tera` L1–L13](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/changelog/template/macro/macros.tera#L1-L13))
 The template keeps `BREAKING:` as text, and drops the HTML and the author credit, which says who, not what.
 
 ### Merges and commit messages
 
 [CONTRIBUTING.md](../CONTRIBUTING.md#write-commits) gives the rules; these are their reasons.
 A squash merge folds a branch's commits into one commit, and the bump then loses each commit's type and paths.
-So the repository settings allow merge commits only (GitHub API, read 2026-09-25).
+So the repository settings allow merge commits only.
 The bump drops a commit whose message does not parse, and says nothing.
-(source: [`bump.rs` L204–L208](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L204-L208))
 That is why CI checks the messages of pull request commits that touch `src/`, `bundles/`, `plugins/` or a file the builder shares.
 
 ### Trade-offs
@@ -393,9 +346,9 @@ CI runs these checks without a model:
 In the matrix, Claude Code, Codex and Oh-My-Pi install through the catalogues at the root, which point at `bundles/<name>`, and Hermes installs from `plugins/<name>`.
 Claude Code, Codex and Oh-My-Pi must list every skill after the install.
 Hermes cells check that each package is installed and enabled, and no more.
-Hermes 0.21.5 has no model-free command that prints a portable package's skills ([Hermes](clients.md#hermes)).
+Hermes has no model-free command that prints a portable package's skills ([Hermes](clients.md#hermes)).
 The matrix leaves out Hermes on Windows.
-There the installer clones a branch before it checks out the pinned commit, and it failed in run 36183358181 ([Hermes](clients.md#hermes)).
+There the installer clones a branch before it checks out the pinned commit, so the install depends on that branch at run time ([Hermes](clients.md#hermes)).
 Every client installs on the hosted runners with no account signed in ([How each client loads a package](clients.md)).
 For `prose-discipline`, the Claude Code and Codex cells also run the installed hook commands, `sh -c` on every runner and `cmd /C` for Codex's `commandWindows` on Windows.
 They compare what the commands print with the short form in `src/`.
@@ -417,7 +370,6 @@ It is the only workflow here that calls a model.
 
 `release.yml` calls it as a job of the release run.
 A workflow triggered by the tags or the releases would never start, because the release makes both with `GITHUB_TOKEN`.
-(documentation: [GitHub Docs, GITHUB_TOKEN](https://github.com/github/docs/blob/75ea7dd097a5564f27364a5b70eaa1979106eabd/data/reusables/actions/actions-do-not-trigger-workflows.md))
 It can also run by hand on existing tags.
 A re-run of the release job skips the evals, because its bump step then finds no releasable commit.
 So a run by hand is the recovery when a release run created its tags but stopped before the evals job.
@@ -425,13 +377,10 @@ So a run by hand is the recovery when a release run created its tags but stopped
 Each skill has positive and near-miss prompts in `evals/<package>/<skill>/cases.yaml`.
 The folder sits outside the packages, so no installed package carries the prompts.
 A positive prompt runs with the package and again without it, and a near-miss prompt runs with it.
-Each prompt runs three times in each of three clients: Claude Code with `haiku`, Codex with `gpt-6-luna`, and Oh-My-Pi with `openrouter/z-ai/glm-5.3-flash`.
-The three repeats follow the Agent Skills guide on trigger tests.
-(documentation: [Optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions), read 2026-10-08)
+Each prompt runs once per repeat in each of three clients, Claude Code, Codex and Oh-My-Pi, each on the model `tools/evals.py` sets for it.
+The repeats follow the Agent Skills guide on trigger tests.
 The prompts cover each clause of the description once, and no two test the same clause in the same way.
-Ten of each kind, the guide's count, cost 100 sessions per skill and client on every release.
-On `distilled-research--v0.1.1` the positive sessions cost the most: $0.53 of Claude Code's $0.72, and 45.5M of Codex's 52.1M input tokens.
-(running: the records of `distilled-research--v0.1.1` in `ghcr.io/akurganow/pegboard-evals`, 2026-11-07)
+The guide's ten of each kind would cost more on every release, and positive sessions cost the most.
 
 A release runs only the sessions its changes can affect.
 `run` copies a session from the latest complete run of the same skill, client and repeat when the session's inputs are equal and it did not fail.
@@ -451,49 +400,31 @@ A skill may add five positive and five near-miss prompts in `held-out.yaml`.
 They run with the package once per client, on the first repeat, and are not graded.
 Nobody reads them while editing a description, so their load count checks the trigger rate on prompts the description was not tuned on.
 The same guide warns against adding keywords from failed queries to a description, and a held-out set is what shows whether that happened.
-(documentation: [Optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions), read 2026-10-10)
-Oh-My-Pi runs `z-ai/glm-5.3-flash`, because in Oh-My-Pi 18.8.6 it loaded `red-flags` in 3 of 3 sessions.
-`deepseek-v4-flash` loaded it in 1 of 3, and `gemini-3.1-flash-lite` in 0 of 3.
-(running: [run 37847660604](https://github.com/Akurganow/pegboard/actions/runs/37847660604), 2026-10-08)
-Claude Code runs `haiku`, so that every release can afford its run.
-On the same five release tags in Claude Code 2.1.318, `haiku` loaded the on-demand skills on 10–60% of positive prompts per repeat, and `sonnet` on 60–100%.
+Each client runs a small model, so that every release can afford its run.
+Oh-My-Pi runs a cheap model that loads `red-flags` reliably, which not every cheap model does.
+In Claude Code, `haiku` loads the on-demand skills less often than `sonnet`.
 So a Claude Code `improvement` mostly reflects how often a skill loads, and `sonnet` users see larger gains than the records show.
-(running: [haiku, run 41930852622](https://github.com/Akurganow/pegboard/actions/runs/41930852622) and [sonnet, run 41925911197](https://github.com/Akurganow/pegboard/actions/runs/41925911197), 2026-11-04)
 TypeSafe's Jev grades each positive answer against the yes-or-no questions in `rubric.yaml`.
-It is pinned to `jev-1.13.0`, because `jev-latest` moves to each new stable release and its answers can change with it.
-(documentation: [Models](https://docs.typesafe.ai/models.md), read 2026-10-08)
+It is pinned to one release, `JEV_MODEL` in `tools/evals.py`, because `jev-latest` moves to each new stable release and its answers can change with it.
 A question that lists `cases` is asked only of the answers to those positive prompts.
 
-Four of the rubric rules in [CONTRIBUTING.md](../CONTRIBUTING.md#write-a-skills-evals-cases) rest on one run of `design-review--v0.2.0` and `prose-discipline--v2.0.0`.
-(running: [run 37882206779](https://github.com/Akurganow/pegboard/actions/runs/37882206779), 2026-10-09)
-A prompt asks for its result in the reply.
-On the two prompts that asked for a file, Codex and Oh-My-Pi wrote the file and replied with a summary of it, and Claude Code was refused the write and replied with an apology.
-A question every answer passes is dropped.
-`no_filler`, `no_inflation` and `plain_verbs` were yes on all 20 `house-style` answers labelled for them, from both arms.
-Jev's mean for each lay between 0.87 and 0.97, on 90 answers with the package and 90 without.
-No question asks about sentence structure.
-On "never joins two thoughts with a semicolon or a dash", `jev-1.13.0` gave a mean of 0.26 to the 12 answers with neither and 0.24 to the 8 with one.
-On "each sentence the answer writes carries one thought", it gave 0.51 to the 3 answers labelled yes and 0.34 to the 17 labelled no.
+Four of the rubric rules in [CONTRIBUTING.md](../CONTRIBUTING.md#write-a-skills-evals-cases) have these reasons.
+A prompt asks for its result in the reply, because a client asked for a file writes the file and replies with a summary of it, or is refused the write.
+A question every answer passes is dropped, because it measures nothing.
+No question asks about sentence structure, because Jev's scores there do not separate the answers labelled yes from those labelled no.
 Criteria stay only where they lower Jev's error on both halves of a labelled sample.
 `evals/<package>/<skill>/calibration.json` holds each labelled answer with its evidence, its half of the split, and Jev's score with and without the criteria.
-The samples are 144 `house-style` answers and 40 `red-flags` answers from that run.
 
 The without arm removes a different set in each client.
 Claude Code disables this package alone, with `claude plugin disable` and the package name.
-(documentation: [Plugins CLI reference, plugin disable](https://code.claude.com/docs/en/plugins/cli-reference#plugin-disable), read 2026-10-09)
 Codex turns off its `plugins` feature with `--disable plugins`.
-(documentation: [Command line options, `--disable`](https://learn.chatgpt.com/docs/cli/reference.md) and [Configuration reference, `features.plugins`](https://learn.chatgpt.com/docs/config-file/config-reference.md), read 2026-10-09;
-source: [`Feature::Plugins`](https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/features/src/lib.rs#L257-L258))
-With it, Codex 0.161.0 listed only its four built-in skills and none from this package.
-(running: [run 37789029106](https://github.com/Akurganow/pegboard/actions/runs/37789029106), 2026-10-08)
+With it, Codex lists only its built-in skills and none from this package.
 Oh-My-Pi disables every skill with `--no-skills` and every rule with `--no-rules`.
-(documentation: [CLI reference, `--no-skills` and `--no-rules`](https://github.com/can1357/oh-my-pi/blob/40e9368ef0458fd9073329cdff4174895f91bc6b/docs/cli-reference.md#L159-L160))
 So a comparison of `improvement` across clients compares different removals.
 
 Each session records the tools the model called: the skill or file for Claude Code, the whole command for Codex, and the path for Oh-My-Pi.
 They show which of the skill's files the model read.
 A Claude Code session also records the plugins and skills that its `init` event lists.
-(running: Claude Code 2.1.293, [run 37789029106](https://github.com/Akurganow/pegboard/actions/runs/37789029106), 2026-10-08)
 
 Each skill and client gets four numbers per repeat:
 
@@ -513,7 +444,7 @@ Below the figures, one block per skill and client gives the mean of each questio
 The columns are answers where the skill loaded, every graded answer with the package, and every graded answer without it.
 The block also lists how often the skill loaded on each positive prompt, and on each near-miss prompt where it loaded at least once.
 For Claude Code it counts, in each arm, the sessions whose plugin list holds the package.
-In `prose-discipline--v2.0.0`, the package's rules reach two clients without the skill (see [the rules route](#one-rules-file-one-documented-route-per-client)).
+The rules of `prose-discipline` reach two clients without the skill (see [the rules route](#one-rules-file-one-documented-route-per-client)).
 A hook prints them into every Claude Code session, and Oh-My-Pi puts the rules file into every system prompt.
 The hook does the same in a Codex session once the user trusts it ([Codex](clients.md#codex)), and no evals session trusts it.
 A with-package answer in Claude Code or Oh-My-Pi can follow the rules without the model loading `house-style`, and `trigger_hit` counts only that load.
@@ -522,10 +453,9 @@ For them the summary shows `trigger_hit` and `compliance` as `n/a`, and `compare
 Their block leaves out the skill-loaded column and the loads per positive prompt.
 
 The run publishes each repeat's record to `ghcr.io/akurganow/pegboard-evals` as an immutable OCI artifact tagged `<tag>_<skill>_<client>_<stamp>a<attempt>_r<repeat>`.
-Earlier releases' `evals.json` assets stay on their releases as frozen history, and the runner writes no new ones.
-A metric regressed when the three repeats of this release and of the package's previous release do not overlap, and the new ones are worse.
+A metric regressed when every repeat of this release and of the package's previous release has a value for it, the two sets do not overlap, and the new ones are worse.
 The spread between repeats is the tolerance, so the rule has no threshold.
-For each skill and client, `previous_results` selects the package's newest earlier complete run: three non-broken repeats with one `client_version`.
+For each skill and client, `previous_results` selects the package's newest earlier complete run: every repeat, none broken, with one `client_version`.
 Where no such run exists, nothing is compared.
 `release.yml` runs one release at a time, its evals included, so a release's records exist before the next release compares against them.
 A regression opens an issue.
@@ -540,56 +470,38 @@ The step that runs a client's sessions sets that client's key alone, and the run
 A Codex or Oh-My-Pi session has a shell, and the shell can read `/proc/<pid>/environ` of the job's other processes, `tools/evals.py` among them.
 So removing a key from the session's environment does not hide it from the session.
 A `PTRACE_MODE_READ_FSCREDS` check governs that file, and Yama's `ptrace_scope` restricts only attach mode.
-(documentation: [proc_pid_environ(5)](https://man7.org/linux/man-pages/man5/proc_pid_environ.5.html), read 2026-10-25;
-source: [`yama_lsm.c` L349–L356](https://github.com/torvalds/linux/blob/21a7f44fd0765fcc5194130b28767786eba1d1e7/security/yama/yama_lsm.c#L349-L356))
 GitHub's hosted runners give the runner's user passwordless `sudo`, so no separation inside one job would hold.
-(documentation: [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), read 2026-10-25)
-The report job grades the runs one after another.
-In two jobs of run 39507094886, the step that ran forty sessions and graded twenty answers took at most 3 s longer than the sessions.
-(running: [run 39507094886](https://github.com/Akurganow/pegboard/actions/runs/39507094886), 2026-10-20)
+The report job grades the runs one after another, because grading takes seconds.
 Every session makes model calls billed to its key, and so does every Jev request.
 No session has a time or cost limit, because no measurement shows that a limit would prevent a failure.
 GitHub terminates a hosted job at six hours of execution, and that is the only bound.
-(documentation: [GitHub Docs, Actions limits L45](https://github.com/github/docs/blob/7b807926df3ccb7f3d1bcd4ad1c652fb42b0931d/content/actions/reference/limits.md#L45))
 A session or a grade that errors does not fail its job.
 A run job fails when the client does not install or every session errors.
 The grading step fails when every grade of a run errors, and that run is left out of the published records.
 `conformance.yml` runs `python tools/evals.py selftest`, which checks the event parsers and the arithmetic without a model.
-How each client shows a loaded skill is written beside its parser in `tools/evals.py`, with the source it was read from.
+How each client shows a loaded skill is written beside its parser in `tools/evals.py`.
 
 Hermes is not measured.
 The runner reads skill loads from a client's JSON event stream.
 Hermes's stream, `--format stream-json`, implies one-shot mode.
-(documentation: [`reference/cli-commands.md`](https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/reference/cli-commands.md#L123-L130))
 Hermes leaves plugin skills out of the system prompt's skill index, and its `skills_list` tool shows them ([Hermes](clients.md#hermes)).
 In one-shot mode the system prompt's skills section is loading guidance followed by that index, which lists each skill as its name and description.
-(source: [`agent/prompt_builder.py`](https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/agent/prompt_builder.py#L1372-L1382))
 So the one-shot prompt shows the description of no plugin skill.
 The guidance tells the model to load a skill only for knowledge it lacks, such as an API, a tool's commands or a project's conventions.
 It names testing, debugging and review methodology as general process skills not to load for work the model knows how to do.
-(source: [`agent/oneshot_footprint.py`](https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/agent/oneshot_footprint.py#L42-L47))
-`red-flags` reviews a design, and `root-cause` finds the core problem behind many symptoms.
-`extraneous` diagnoses what a reader must hold in mind to do a task.
-`ariz` and `contradiction` resolve a hard problem or a trade-off with TRIZ.
-`house-style` applies a prose standard to anything an agent writes.
-(source: the `description` front matter of the six skills at the tags `cognitive-load--v0.2.0`, `design-review--v0.2.0`, `prose-discipline--v2.0.0`, `toc-thinking--v0.2.0` and `triz--v0.2.0`, read 2026-10-09)
-The five descriptions other than `house-style`'s each name a method, and none describes knowledge of a particular API, a tool's commands or a project's conventions.
-So for those five skills a Hermes trigger rate would measure Hermes's prompt, not the description.
+Apart from `house-style`, the skills here are process skills of that kind.
+So for them a Hermes trigger rate would measure Hermes's prompt, not the description.
 For `house-style` that conclusion rests on the index fact alone, because the one-shot prompt shows no plugin skill's description.
 
-Five alternatives lost.
-In Claude Code 2.1.293, `claude plugin eval` wrote the final reply only as the evidence of an LLM grader.
-That grader runs a judge model of its own.
-(running: [run 37784785554](https://github.com/Akurganow/pegboard/actions/runs/37784785554), 2026-10-08)
-`claude plugin eval` has no custom-code graders, so Jev could not take the judge's place.
-(documentation: [Test plugins with evals](https://code.claude.com/docs/en/plugin-evals), read 2026-10-08)
-Concurrent sessions of one client sharing one configuration were not tested, so each job runs on a runner of its own.
+The runner is this repository's own.
+`claude plugin eval` writes the final reply only as the evidence of an LLM grader, which runs a judge model of its own.
+It has no custom-code graders, so Jev cannot take the judge's place.
+Each job runs on a runner of its own, because concurrent sessions of one client sharing one configuration are untested.
 A separate workflow on `workflow_run` would have to recover the release's tags, and would also start on every push that releases nothing.
 A pinned client version would measure an older client than the one a user installs that day.
 Prompts inside a package would reach every user who installs it, because Claude Code copies the plugin directory into its cache.
-(documentation: [Plugin loading](https://code.claude.com/docs/en/plugins/loading), read 2026-10-08)
 
 ## The repository records no maintainer verification
 
 A sentence about what the maintainer ran describes one machine on one date.
-[How each client loads a package](clients.md) shows what takes its place: every fact cites its kind and source.
+[`.agents/rules/claims.md`](../.agents/rules/claims.md) says what takes its place: the text states the fact, and the commit that writes it names the source.
