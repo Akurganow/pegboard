@@ -28,7 +28,7 @@ which agree, and the agreed reading is kept. The result has 1,248 non-empty
 and 234 empty cells. The figure of 1,263 often quoted for the classic matrix
 was not confirmed: no transcription reached has more than 1,248.
 
-The Foundation's page was read directly on 2026-11-11. It presents itself as
+The Foundation's page was read directly. It presents itself as
 Appendix 1 of Altshuller, *The Algorithm of Invention* (Moscow Worker, 1973).
 The 1973 print was not read, so a claim about the print rests on the page.
 The page holds 1,247 non-empty and 235 empty off-diagonal cells, two of the

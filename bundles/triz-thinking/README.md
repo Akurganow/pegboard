@@ -113,8 +113,8 @@ one file read, such as `matrix/09.md`.
 
 The matrix is the classic 39-by-39 table with 1,248 non-empty cells, settled
 by majority from several public transcriptions. [The Altshuller Foundation's
-page](https://www.altshuller.ru/triz/technique2.asp) of the table, read on
-2026-11-11, presents itself as Appendix 1 of the 1973 edition of «Алгоритм изобретения». The 1973 print was not read.
+page](https://www.altshuller.ru/triz/technique2.asp) of the table presents
+itself as Appendix 1 of the 1973 edition of «Алгоритм изобретения». The 1973 print was not read.
 `matrix/provenance.md` lists every reading of each disputed cell.
 
 ## Boundaries
