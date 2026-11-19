@@ -453,7 +453,7 @@ For them the summary shows `trigger_hit` and `compliance` as `n/a`, and `compare
 Their block leaves out the skill-loaded column and the loads per positive prompt.
 
 The run publishes each repeat's record to `ghcr.io/akurganow/pegboard-evals` as an immutable OCI artifact tagged `<tag>_<skill>_<client>_<stamp>a<attempt>_r<repeat>`.
-A metric regressed when the repeats of this release and of the package's previous release do not overlap, and the new ones are worse.
+A metric regressed when every repeat of this release and of the package's previous release has a value for it, the two sets do not overlap, and the new ones are worse.
 The spread between repeats is the tolerance, so the rule has no threshold.
 For each skill and client, `previous_results` selects the package's newest earlier complete run: every repeat, none broken, with one `client_version`.
 Where no such run exists, nothing is compared.
