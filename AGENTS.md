@@ -58,10 +58,8 @@ so read them there before going near any of the three:
 
 A file of imports only: `@AGENTS.md`, then one `@.agents/rules/<file>.md`
 line per rule file. Claude Code reads `CLAUDE.md` and expands each `@path`
-into the text of that file, so this file and every rule stay one text each
-([memory](https://code.claude.com/docs/en/memory.md), "Import additional
-files", documentation). Claude Code reads nothing under `.agents/` on its own
-(same page, "When Claude Code reads AGENTS.md"), so a new rule file loads in
-Claude Code only once it has its line here. Imports replaced symlinks because
-the Anthropic directory's Validate does not check a symlinked file and warns
-on each one.
+into the text of that file, so this file and every rule stay one text each.
+Claude Code reads nothing under `.agents/` on its own, so a new rule file
+loads in Claude Code only once it has its line here. `CLAUDE.md` imports the
+files and symlinks none, because the Anthropic directory's Validate does not
+check a symlinked file and warns on each one.

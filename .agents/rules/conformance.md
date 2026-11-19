@@ -55,11 +55,11 @@ not, so the two are independent assertions of which version this repository
 targets, and the script's `$id` check turns them disagreeing into a failure
 instead of a silent retarget.
 
-None of this was forced from outside. The vendored `const` plus `required`
-assert the exact `$schema` on their own, so the standing requirement that the
-check assert what silently breaks a Hermes install is satisfied whether or not
-the hand check exists — deleting it would have breached nothing. Keeping it is
-right for the reasons above and for no others.
+Nothing outside forces the hand check. The vendored `const` plus `required`
+assert the exact `$schema` on their own, so the standing requirement that
+the check assert what silently breaks a Hermes install is satisfied whether
+or not the hand check exists. Keeping it is right for the reasons above and
+for no others.
 
 The checks below are the only code this repository judges packages with. So
 "do not complicate the code" here is not "never duplicate the schema". It is:
@@ -96,38 +96,20 @@ The rules that decide whether a client loads a package at all:
 - `bundles/<name>/` is one tree with a manifest folder per client:
   `.claude-plugin/`, `.codex-plugin/` and `.cursor-plugin/`. It has no root
   `plugin.json`, and that is why the second build exists. Codex looks for a
-  root manifest in the Agent Plugins format before any manifest folder
-  ([`plugin_namespace.rs` L43–L83](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/utils/plugins/src/plugin_namespace.rs#L43-L83),
-  source), and loads no hooks for a package in that format
-  ([`loader.rs` L984–L996](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/core-plugins/src/loader.rs#L984-L996),
-  source). Both links are at `rust-v0.166.0`. The bundle carries
+  root manifest in the Agent Plugins format before any manifest folder, and
+  loads no hooks for a package in that format. The bundle carries
   prose-discipline's hooks, so it holds no such manifest. A `hooks` entry
-  declared in the Codex manifest replaces the default `hooks/hooks.json`
-  ([`loader.rs` L1220–L1275](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/core-plugins/src/loader.rs#L1220-L1275),
-  source, same revision). Codex therefore reads its own hooks file and never
-  the one Claude Code reads.
+  declared in the Codex manifest replaces the default `hooks/hooks.json`.
+  Codex therefore reads its own hooks file and never the one Claude Code
+  reads.
 - No symlink exists under `bundles/` or `plugins/`, and the check fails on
-  one. Git for Windows disables symbolic links by default
-  ([Git for Windows](https://gitforwindows.org/symbolic-links),
-  documentation). With them off, git checks a link out as a plain file
-  holding the link text
-  ([`core.symlinks`](https://github.com/git/git/blob/c44beea485f0f2feaf460e2ac87fdd5608d63cf0/Documentation/config/core.adoc#L237-L246),
-  documentation). Claude Code documents one manifest location,
-  `.claude-plugin/plugin.json`, and fails on a file that is not JSON
-  ([plugins reference](https://code.claude.com/docs/en/plugins-reference),
-  documentation). Codex hashes an installed package to decide whether the
-  user has approved its hooks, and that hash fails on any entry that is
-  neither a regular file nor a directory
-  ([`plugin_fingerprint.rs` L36–L90](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/hooks/src/engine/plugin_fingerprint.rs#L36-L90),
-  source, `rust-v0.166.0`). Codex's loader also rejects a symlinked root
-  manifest outright — `symlink_metadata` in
-  [`plugin_namespace.rs`](https://github.com/openai/codex/blob/e3e5ad28470f6a225301518c30a66e749a880164/codex-rs/utils/plugins/src/plugin_namespace.rs),
-  pinned by its own `rejects_symlinked_root_plugin_manifest` test. That one
-  is **from source**. The `plugin_namespace.rs` link is a commit permalink,
-  not a branch. A claim about code that moves has to name the revision it
-  was true at. Codex's plugin documentation,
-  [Build plugins](https://developers.openai.com/plugins/build/plugins.md)
-  (documentation, read 2026-09-25), does not mention a symlinked manifest.
+  one. Git for Windows disables symbolic links by default. With them off,
+  git checks a link out as a plain file holding the link text. Claude Code
+  documents one manifest location, `.claude-plugin/plugin.json`, and fails
+  on a file that is not JSON. Codex hashes an installed package to decide
+  whether the user has approved its hooks, and that hash fails on any entry
+  that is neither a regular file nor a directory. Codex's loader also
+  rejects a symlinked root manifest outright.
 - Every package path resolves inside that package's root (§4.1). The
   failure boundary is graded: a root `plugin.json` outside it rejects the
   plugin, while a `SKILL.md` outside it only skips that skill (§7.1) — the
