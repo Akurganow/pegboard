@@ -127,9 +127,7 @@ Source: Kiro documentation, [Create a power](https://kiro.dev/docs/powers/create
 
 Claude Code's documentation says: "Make sure you trust a plugin before
 installing, updating, or using it." It also says a plugin "can execute
-arbitrary code on your machine with your user privileges". Source:
-[Plugin security and trust](https://code.claude.com/docs/en/plugins/security),
-Claude Code documentation, read 2026-09-25.
+arbitrary code on your machine with your user privileges".
 
 Read a plugin's README and files before you install it. `prose-discipline`
 runs a shell command from its hooks when a session or a subagent starts, in

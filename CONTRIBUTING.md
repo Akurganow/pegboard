@@ -15,27 +15,19 @@ Report a vulnerability privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## Write commits
 
-Commits follow Conventional Commits. The type sets the next version:
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). The type sets the next version:
 
 - `fix:` marks a bug fix and releases a patch version.
 - `feat:` marks a new feature and releases a minor version.
 - `feat!:`, `fix!:` or a `BREAKING CHANGE:` footer marks a breaking change and releases a major version from 1.0.0 up.
 
-Source: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), documentation.
-
 cocogitto versions each package from the commits that touched its source,
 `src/<name>/`, or its builds, `bundles/<name>/` and `plugins/<name>/`. It
-writes that package's `CHANGELOG.md`. Source:
-[Automatic versioning for monorepo](https://github.com/cocogitto/website/blob/8fa24cde1ec4598ccee7cdd47de40fa594282de2/src/guide/README.md#automatic-versioning-for-monorepo),
-cocogitto documentation.
+writes that package's `CHANGELOG.md`.
 
 cocogitto never bumps a package below 1.0.0 to 1.0.0, even for a breaking
-change. Source:
-[Auto bump](https://github.com/cocogitto/website/blob/8fa24cde1ec4598ccee7cdd47de40fa594282de2/src/guide/README.md#L614-L615),
-cocogitto documentation. Below 1.0.0 the type alone sets the version: `feat!:`
-releases a minor version and `fix!:` a patch version. Source:
-[`bump.rs`](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L258-L273),
-cocogitto source at 7.0.0, the release that `release.yml` installs.
+change. Below 1.0.0 the type alone sets the version: `feat!:` releases a
+minor version and `fix!:` a patch version.
 
 Put the package name in the scope, as in `fix(triz-thinking): correct one matrix cell`.
 Renaming a skill breaks its users, so it takes `!`, as in
@@ -87,7 +79,7 @@ tools/source.schema.json          schema of source.json
 tools/schemas/                    vendored Agent Plugins manifest schema
 tools/package.json                pins doctoc for tools/regenerate.sh
 tools/package-lock.json           pins doctoc's dependency tree
-docs/clients.md                   how each client loads a package, with sources
+docs/clients.md                   how each client loads a package
 docs/design.md                    why the repository is built this way
 docs/banner.svg                   the README banner, written by scripts/compose-banner.py
 docs/banner/                      the banner's parts and layout, and how to add a tool
@@ -125,12 +117,12 @@ nothing to release.
 The script needs `jq`, Node.js with `npm`, and `shasum` or `sha256sum`. It
 installs doctoc from `tools/package-lock.json` when `tools/node_modules` does
 not match it. That install needs the npm registry. The builder needs `jq`,
-resvg 0.48.1 and POSIX tools, so `bash tools/build.sh` runs alone when no
-README region changes. It refuses any other resvg version, because another
-version renders other PNG bytes, and a commit that carries them releases every
-package. Install resvg 0.48.1 from its
-[release page](https://github.com/linebender/resvg/releases/tag/v0.48.1), or
-build it with `cargo install resvg --version 0.48.1 --locked`.
+resvg and POSIX tools, so `bash tools/build.sh` runs alone when no README
+region changes. It accepts only the resvg version it pins, `RESVG_VERSION`
+in `tools/build.sh`, because another version renders other PNG bytes, and a
+commit that carries them releases every package. Install that version from
+resvg's [release page](https://github.com/linebender/resvg/releases), or
+build it with `cargo install resvg --version <version> --locked`.
 
 Each package's listing icon is `src/<name>/icon.svg`. Change the SVG and run
 the builder, which renders `bundles/<name>/.claude-plugin/icon.png` at 1024 by 1024 px.
@@ -218,14 +210,12 @@ claude plugin validate --profile directory bundles/<name>
 
 `--strict` fails on a warning, such as an unknown manifest field. The directory
 profile runs some of the checks the Anthropic plugin directory applies before
-it accepts a submission, and needs Claude Code 2.1.305 or later. The
+it accepts a submission, and an older Claude Code has no `--profile` option. The
 directory's own Validate blocks files that the profile passes
 ([Anthropic plugin directory](docs/clients.md#anthropic-plugin-directory)). CI fails on any
 finding of that profile, so a bundle without its icon fails with
-`ICON_MISSING`. Source: [Plugins CLI reference](https://code.claude.com/docs/en/plugins/cli-reference),
-Claude Code documentation, read 2026-11-04, for `--strict`; running
-`claude plugin validate --help` on Claude Code 2.1.305, for `--profile`. CI
-also runs the Agent Skills and Hermes validators on `plugins/<name>`. It installs every package into each client that
+`ICON_MISSING`. CI also runs the Agent Skills and Hermes validators on
+`plugins/<name>`. It installs every package into each client that
 [`integration.yml`](.github/workflows/integration.yml) lists.
 
 ## Propose a new package
@@ -246,9 +236,7 @@ also runs the Agent Skills and Hermes validators on `plugins/<name>`. It install
 
 In a package README, link a file outside the package by its full GitHub URL,
 and a file inside it by a relative path. A package installs alone, and the
-Hermes catalogue renders its README at the pinned commit. Source:
-[`plugin-catalog/README.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/plugin-catalog/README.md#L86),
-Hermes documentation.
+Hermes catalogue renders its README at the pinned commit.
 
 The seed tag carries the version in the package's `source.json`.
 [`release.yml`](.github/workflows/release.yml) refuses to release any package
@@ -256,9 +244,7 @@ while a `cog.toml` package has no such tag reachable from `main`.
 
 Name each skill so that it stays distinct without the plugin name. Never
 repeat the plugin name in it. Oh-My-Pi shows the bare skill name and drops a
-later skill with the same name. Source:
-[`docs/skills.md`](https://github.com/can1357/oh-my-pi/blob/a33cc26824e3c91edd9fa42d681f10dceb4ac2f0/docs/skills.md#L98),
-Oh-My-Pi documentation.
+later skill with the same name.
 
 ### Write a skill's evals cases
 
@@ -283,10 +269,8 @@ A skill's folder holds `cases.yaml` and `rubric.yaml`, and may hold
   answer means. `cases` lists the ids of the positive prompts the question
   applies to. A question without `cases` applies to every positive prompt.
 
-The Agent Skills guide sets the shape of a trigger test. Source:
-[Optimizing skill descriptions](https://agentskills.io/skill-creation/optimizing-descriptions),
-Agent Skills documentation, read 2026-10-09. These rules follow the guide, add
-this repository's own, and apply to every skill:
+The Agent Skills guide sets the shape of a trigger test. These rules follow
+the guide, add this repository's own, and apply to every skill:
 
 - **Positive prompts** cover every situation the skill's `description` lists
   at least once. One prompt may cover several.
@@ -318,10 +302,7 @@ this repository's own, and apply to every skill:
 
 Jev grades each positive answer on the questions that apply to its prompt. The
 "One step" rule below rests on the failure modes that TypeSafe documents for
-`jev-1.13`. Source:
-[Jev 1.13 jaggedness](https://docs.typesafe.ai/model-jaggedness/jev-1.13.md),
-TypeSafe documentation, read 2026-10-09. The measurements behind the other
-rules are in
+Jev. The reasons for the other rules are in
 [About this repository's design](docs/design.md#behavioural-evals-run-after-each-release).
 
 - **One question per expected finding:** the point a right answer to that
@@ -336,17 +317,15 @@ rules are in
 - **A statement that is true of a right answer**, such as "The answer cites a
   chapter of the book."
 - **One step.** Jev answers less reliably through extra levels of indirection
-  and does not count reliably (sections "Indirection" and "Counting"). So a
-  question is not conditional ("each finding that rests on X ..."), positional
-  ("ends with ..."), a bundle of several facts, or a count.
+  and does not count reliably. So a question is not conditional ("each finding
+  that rests on X ..."), positional ("ends with ..."), a bundle of several
+  facts, or a count.
 - **Criteria where the boundary is unclear.** TypeSafe documents `criteria`
-  for a subtle yes-or-no boundary. Source:
-  [Noul](https://docs.typesafe.ai/primitives/noul.md), TypeSafe documentation,
-  read 2026-10-09. Keep criteria only where they lower Jev's mean error against
-  labelled answers, on a second set of answers as well as the first. The
-  skill's `calibration.json` holds each labelled answer, its label with the
-  evidence, its half of the split, and Jev's score with and without the
-  criteria.
+  for a subtle yes-or-no boundary. Keep criteria only where they lower Jev's
+  mean error against labelled answers, on a second set of answers as well as
+  the first. The skill's `calibration.json` holds each labelled answer, its
+  label with the evidence, its half of the split, and Jev's score with and
+  without the criteria.
 - **No checks of sentence structure.** A question about semicolons, dashes or
   one thought per sentence stays out, because Jev's answers to such questions
   do not follow the labels.
