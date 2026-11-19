@@ -662,9 +662,8 @@ It shows no "Page updated" date.
 - The same report blocks `bundles/prose-discipline/rules/prose-discipline.mdc`, under "Files outside the allowed list accepted only from Verified organizations".
   The list it gives is Markdown, text, JSON, YAML, and PNG, JPEG, GIF, WebP and ICO images.
   (running: the same report)
-- That report read the repository root.
-  So it also blocked `devDependencies` in `tools/package.json`, and held the catalogue name `pegboard` for a reviewer.
-  (running: the same report)
+- `claude plugin validate --profile directory` on Claude Code 2.1.305 reports no finding for the same two files.
+  (running: [run 44414917490](https://github.com/Akurganow/pegboard/actions/runs/44414917490) at `4e72ee1`, 2026-11-18)
 - The checklist states neither Verified-only rule, and no page read says how an organization becomes Verified.
   The pages read were the checklist, Submit your plugin, Publish to the directory, Plugin structure and testing, Plugin feature support across platforms and Connector verification.
   (documentation: the pages under [claude.com/docs](https://claude.com/docs/llms.txt), read 2026-11-18)

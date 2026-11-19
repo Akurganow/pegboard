@@ -218,8 +218,10 @@ claude plugin validate --profile directory bundles/<name>
 ```
 
 `--strict` fails on a warning, such as an unknown manifest field. The directory
-profile runs the checks the Anthropic plugin directory applies before it
-accepts a submission, and needs Claude Code 2.1.305 or later. CI fails on any
+profile runs some of the checks the Anthropic plugin directory applies before
+it accepts a submission, and needs Claude Code 2.1.305 or later. The
+directory's own Validate blocks files that the profile passes
+([Anthropic plugin directory](docs/clients.md#anthropic-plugin-directory)). CI fails on any
 finding of that profile, so a bundle without its icon fails with
 `ICON_MISSING`. Source: [Plugins CLI reference](https://code.claude.com/docs/en/plugins/cli-reference),
 Claude Code documentation, read 2026-11-04, for `--strict`; running
