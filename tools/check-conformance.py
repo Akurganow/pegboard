@@ -212,7 +212,7 @@ def check_manifest(plugin_root: Path, validator) -> dict | None:
     # Codex's loader refuses a symlinked root manifest outright --
     # find_plugin_manifest_path() calls symlink_metadata() and returns None
     # for a symlink, pinned by rejects_symlinked_root_plugin_manifest. From
-    # source, not documentation: Codex publishes no plugins document at all.
+    # source, not documentation.
     # Permalinked, because a branch URL dates nothing:
     # https://github.com/openai/codex/blob/e3e5ad28470f6a225301518c30a66e749a880164/codex-rs/utils/plugins/src/plugin_namespace.rs
     if manifest_path.is_symlink():
@@ -335,7 +335,7 @@ def check_skill_frontmatter(skill_dir: Path, skill_md: Path) -> None:
     # `hermes_cli/agent_plugins.py` returns an error for each of these and the
     # skill is dropped with a diagnostic while its siblings still load — so a
     # check that verifies only `name` and `description` passes packages that
-    # the mandatory client silently loads short of a skill.
+    # Hermes silently loads short of a skill.
     if "license" in data and not isinstance(data["license"], str):
         # Agent Skills: `license` is "License name or reference to a bundled
         # license file".
