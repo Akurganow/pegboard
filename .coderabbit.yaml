@@ -1,6 +1,5 @@
-# CodeRabbit skips a pull request with more files than its limit, and "the
-# count is the files left after path filters" (documentation:
-# https://docs.coderabbit.ai/ide/review, "File limits", read 2026-11-11).
+# CodeRabbit skips a pull request with more files than its limit, and its
+# documentation says "the count is the files left after path filters".
 # bundles/ and plugins/ are generated copies of src/.
 reviews:
   path_filters:
