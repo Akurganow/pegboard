@@ -16,8 +16,7 @@ interface is what a reader must learn to use a unit without reading it:
 - a function's signature and docstring;
 - a shell function's arguments and exit status;
 - a script's arguments (`tools/regenerate.sh` and `tools/build.sh` take none);
-- a tool's subcommands (`tools/evals.py` has `matrix`, `run`, `grade`,
-  `report`, `validate` and `selftest`);
+- a tool's subcommands (`tools/evals.py` takes one, as `main` lists them);
 - a workflow's `workflow_call` inputs, secrets and job `outputs`.
 
 ## Name the symptom
