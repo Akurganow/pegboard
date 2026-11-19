@@ -377,11 +377,10 @@ So a run by hand is the recovery when a release run created its tags but stopped
 Each skill has positive and near-miss prompts in `evals/<package>/<skill>/cases.yaml`.
 The folder sits outside the packages, so no installed package carries the prompts.
 A positive prompt runs with the package and again without it, and a near-miss prompt runs with it.
-Each prompt runs three times in each of three clients: Claude Code with `haiku`, Codex with `gpt-6-luna`, and Oh-My-Pi with `openrouter/z-ai/glm-5.3-flash`.
-The three repeats follow the Agent Skills guide on trigger tests.
+Each prompt runs once per repeat in each of three clients, Claude Code, Codex and Oh-My-Pi, each on the model `tools/evals.py` sets for it.
+The repeats follow the Agent Skills guide on trigger tests.
 The prompts cover each clause of the description once, and no two test the same clause in the same way.
-Ten of each kind, the guide's count, cost 100 sessions per skill and client on every release.
-On `distilled-research--v0.1.1` the positive sessions cost the most: $0.53 of Claude Code's $0.72, and 45.5M of Codex's 52.1M input tokens.
+The guide's ten of each kind would cost more on every release, and positive sessions cost the most.
 
 A release runs only the sessions its changes can affect.
 `run` copies a session from the latest complete run of the same skill, client and repeat when the session's inputs are equal and it did not fail.
@@ -401,32 +400,25 @@ A skill may add five positive and five near-miss prompts in `held-out.yaml`.
 They run with the package once per client, on the first repeat, and are not graded.
 Nobody reads them while editing a description, so their load count checks the trigger rate on prompts the description was not tuned on.
 The same guide warns against adding keywords from failed queries to a description, and a held-out set is what shows whether that happened.
-Oh-My-Pi runs `z-ai/glm-5.3-flash`, because in Oh-My-Pi 18.8.6 it loaded `red-flags` in 3 of 3 sessions.
-`deepseek-v4-flash` loaded it in 1 of 3, and `gemini-3.1-flash-lite` in 0 of 3.
-Claude Code runs `haiku`, so that every release can afford its run.
-On the same five release tags in Claude Code 2.1.318, `haiku` loaded the on-demand skills on 10–60% of positive prompts per repeat, and `sonnet` on 60–100%.
+Each client runs a small model, so that every release can afford its run.
+Oh-My-Pi runs a cheap model that loads `red-flags` reliably, which not every cheap model does.
+In Claude Code, `haiku` loads the on-demand skills less often than `sonnet`.
 So a Claude Code `improvement` mostly reflects how often a skill loads, and `sonnet` users see larger gains than the records show.
 TypeSafe's Jev grades each positive answer against the yes-or-no questions in `rubric.yaml`.
-It is pinned to `jev-1.13.0`, because `jev-latest` moves to each new stable release and its answers can change with it.
+It is pinned to one release, `JEV_MODEL` in `tools/evals.py`, because `jev-latest` moves to each new stable release and its answers can change with it.
 A question that lists `cases` is asked only of the answers to those positive prompts.
 
-Four of the rubric rules in [CONTRIBUTING.md](../CONTRIBUTING.md#write-a-skills-evals-cases) rest on one run of `design-review--v0.2.0` and `prose-discipline--v2.0.0`.
-A prompt asks for its result in the reply.
-On the two prompts that asked for a file, Codex and Oh-My-Pi wrote the file and replied with a summary of it, and Claude Code was refused the write and replied with an apology.
-A question every answer passes is dropped.
-`no_filler`, `no_inflation` and `plain_verbs` were yes on all 20 `house-style` answers labelled for them, from both arms.
-Jev's mean for each lay between 0.87 and 0.97, on 90 answers with the package and 90 without.
-No question asks about sentence structure.
-On "never joins two thoughts with a semicolon or a dash", `jev-1.13.0` gave a mean of 0.26 to the 12 answers with neither and 0.24 to the 8 with one.
-On "each sentence the answer writes carries one thought", it gave 0.51 to the 3 answers labelled yes and 0.34 to the 17 labelled no.
+Four of the rubric rules in [CONTRIBUTING.md](../CONTRIBUTING.md#write-a-skills-evals-cases) have these reasons.
+A prompt asks for its result in the reply, because a client asked for a file writes the file and replies with a summary of it, or is refused the write.
+A question every answer passes is dropped, because it measures nothing.
+No question asks about sentence structure, because Jev's scores there do not separate the answers labelled yes from those labelled no.
 Criteria stay only where they lower Jev's error on both halves of a labelled sample.
 `evals/<package>/<skill>/calibration.json` holds each labelled answer with its evidence, its half of the split, and Jev's score with and without the criteria.
-The samples are 144 `house-style` answers and 40 `red-flags` answers from that run.
 
 The without arm removes a different set in each client.
 Claude Code disables this package alone, with `claude plugin disable` and the package name.
 Codex turns off its `plugins` feature with `--disable plugins`.
-With it, Codex 0.161.0 listed only its four built-in skills and none from this package.
+With it, Codex lists only its built-in skills and none from this package.
 Oh-My-Pi disables every skill with `--no-skills` and every rule with `--no-rules`.
 So a comparison of `improvement` across clients compares different removals.
 
@@ -452,7 +444,7 @@ Below the figures, one block per skill and client gives the mean of each questio
 The columns are answers where the skill loaded, every graded answer with the package, and every graded answer without it.
 The block also lists how often the skill loaded on each positive prompt, and on each near-miss prompt where it loaded at least once.
 For Claude Code it counts, in each arm, the sessions whose plugin list holds the package.
-In `prose-discipline--v2.0.0`, the package's rules reach two clients without the skill (see [the rules route](#one-rules-file-one-documented-route-per-client)).
+The rules of `prose-discipline` reach two clients without the skill (see [the rules route](#one-rules-file-one-documented-route-per-client)).
 A hook prints them into every Claude Code session, and Oh-My-Pi puts the rules file into every system prompt.
 The hook does the same in a Codex session once the user trusts it ([Codex](clients.md#codex)), and no evals session trusts it.
 A with-package answer in Claude Code or Oh-My-Pi can follow the rules without the model loading `house-style`, and `trigger_hit` counts only that load.
@@ -461,10 +453,9 @@ For them the summary shows `trigger_hit` and `compliance` as `n/a`, and `compare
 Their block leaves out the skill-loaded column and the loads per positive prompt.
 
 The run publishes each repeat's record to `ghcr.io/akurganow/pegboard-evals` as an immutable OCI artifact tagged `<tag>_<skill>_<client>_<stamp>a<attempt>_r<repeat>`.
-Earlier releases' `evals.json` assets stay on their releases as frozen history, and the runner writes no new ones.
-A metric regressed when the three repeats of this release and of the package's previous release do not overlap, and the new ones are worse.
+A metric regressed when the repeats of this release and of the package's previous release do not overlap, and the new ones are worse.
 The spread between repeats is the tolerance, so the rule has no threshold.
-For each skill and client, `previous_results` selects the package's newest earlier complete run: three non-broken repeats with one `client_version`.
+For each skill and client, `previous_results` selects the package's newest earlier complete run: every repeat, none broken, with one `client_version`.
 Where no such run exists, nothing is compared.
 `release.yml` runs one release at a time, its evals included, so a release's records exist before the next release compares against them.
 A regression opens an issue.
@@ -480,8 +471,7 @@ A Codex or Oh-My-Pi session has a shell, and the shell can read `/proc/<pid>/env
 So removing a key from the session's environment does not hide it from the session.
 A `PTRACE_MODE_READ_FSCREDS` check governs that file, and Yama's `ptrace_scope` restricts only attach mode.
 GitHub's hosted runners give the runner's user passwordless `sudo`, so no separation inside one job would hold.
-The report job grades the runs one after another.
-In two jobs of run 39507094886, the step that ran forty sessions and graded twenty answers took at most 3 s longer than the sessions.
+The report job grades the runs one after another, because grading takes seconds.
 Every session makes model calls billed to its key, and so does every Jev request.
 No session has a time or cost limit, because no measurement shows that a limit would prevent a failure.
 GitHub terminates a hosted job at six hours of execution, and that is the only bound.
@@ -489,7 +479,7 @@ A session or a grade that errors does not fail its job.
 A run job fails when the client does not install or every session errors.
 The grading step fails when every grade of a run errors, and that run is left out of the published records.
 `conformance.yml` runs `python tools/evals.py selftest`, which checks the event parsers and the arithmetic without a model.
-How each client shows a loaded skill is written beside its parser in `tools/evals.py`, with the source it was read from.
+How each client shows a loaded skill is written beside its parser in `tools/evals.py`.
 
 Hermes is not measured.
 The runner reads skill loads from a client's JSON event stream.
@@ -499,19 +489,14 @@ In one-shot mode the system prompt's skills section is loading guidance followed
 So the one-shot prompt shows the description of no plugin skill.
 The guidance tells the model to load a skill only for knowledge it lacks, such as an API, a tool's commands or a project's conventions.
 It names testing, debugging and review methodology as general process skills not to load for work the model knows how to do.
-`red-flags` reviews a design, and `root-cause` finds the core problem behind many symptoms.
-`extraneous` diagnoses what a reader must hold in mind to do a task.
-`ariz` and `contradiction` resolve a hard problem or a trade-off with TRIZ.
-`house-style` applies a prose standard to anything an agent writes.
-The five descriptions other than `house-style`'s each name a method, and none describes knowledge of a particular API, a tool's commands or a project's conventions.
-So for those five skills a Hermes trigger rate would measure Hermes's prompt, not the description.
+Apart from `house-style`, the skills here are process skills of that kind.
+So for them a Hermes trigger rate would measure Hermes's prompt, not the description.
 For `house-style` that conclusion rests on the index fact alone, because the one-shot prompt shows no plugin skill's description.
 
-Five alternatives lost.
-In Claude Code 2.1.293, `claude plugin eval` wrote the final reply only as the evidence of an LLM grader.
-That grader runs a judge model of its own.
-`claude plugin eval` has no custom-code graders, so Jev could not take the judge's place.
-Concurrent sessions of one client sharing one configuration were not tested, so each job runs on a runner of its own.
+The runner is this repository's own.
+`claude plugin eval` writes the final reply only as the evidence of an LLM grader, which runs a judge model of its own.
+It has no custom-code graders, so Jev cannot take the judge's place.
+Each job runs on a runner of its own, because concurrent sessions of one client sharing one configuration are untested.
 A separate workflow on `workflow_run` would have to recover the release's tags, and would also start on every push that releases nothing.
 A pinned client version would measure an older client than the one a user installs that day.
 Prompts inside a package would reach every user who installs it, because Claude Code copies the plugin directory into its cache.
