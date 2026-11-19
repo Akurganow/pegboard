@@ -269,10 +269,8 @@ A skill's folder holds `cases.yaml` and `rubric.yaml`, and may hold
   answer means. `cases` lists the ids of the positive prompts the question
   applies to. A question without `cases` applies to every positive prompt.
 
-The Agent Skills guide,
-[Optimizing skill descriptions](https://agentskills.io/skill-creation/optimizing-descriptions),
-sets the shape of a trigger test. These rules follow the guide, add this
-repository's own, and apply to every skill:
+The Agent Skills guide sets the shape of a trigger test. These rules follow
+the guide, add this repository's own, and apply to every skill:
 
 - **Positive prompts** cover every situation the skill's `description` lists
   at least once. One prompt may cover several.
