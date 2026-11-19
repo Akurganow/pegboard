@@ -67,13 +67,12 @@ Problem" and "A Solution to the Core Problem Conundrum").
 
 The critique of single root causes:
 
-- Cook, *How Complex Systems Fail*, point 7 (online text, read 2026-11-11): "Post-accident attribution
-  to a 'root cause' is fundamentally wrong."
-- Allspaw, "Each necessary, but only jointly sufficient", Kitchen Soap, 2012-02-10 (blog post, read
-  2026-11-11): "for complex systems: there is no root cause."
-- Google, *Site Reliability Engineering*, chapter 15, "Postmortem Culture" (online text, read
-  2026-11-11): a postmortem records "the root cause(s)", and "all contributing root cause(s)" are to be
-  understood.
+- Cook, *How Complex Systems Fail*, point 7 (online text): "Post-accident attribution to a 'root
+  cause' is fundamentally wrong."
+- Allspaw, "Each necessary, but only jointly sufficient", Kitchen Soap, 2012-02-10 (blog post): "for
+  complex systems: there is no root cause."
+- Google, *Site Reliability Engineering*, chapter 15, "Postmortem Culture" (online text): a postmortem
+  records "the root cause(s)", and "all contributing root cause(s)" are to be understood.
 
 The skill's reading, not a published source: the *and* connector, separate arrows for independent
 causes, and separate root causes when branches do not meet answer the critique. A root cause still
