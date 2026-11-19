@@ -125,8 +125,7 @@ commit.
   fires only once the digest has been updated too.
 - **An evals runner of our own.** `tools/evals.py` exists beside the client's
   eval command, `claude plugin eval`. The records are its module docstring and
-  `docs/design.md`, the section "Behavioural evals run after each release" and
-  its paragraph "Five alternatives lost".
+  `docs/design.md`, the section "Behavioural evals run after each release".
 - **Seams for the selftest.** `grade(..., send=)`, `run_job(..., session=)`,
   `grade_sessions(..., grader=)`, `grade_runs(..., load=, grader=)`,
   `report_tag(..., file=)` and `check_folder(..., load=)` take a callable that
@@ -162,9 +161,8 @@ commit.
   are the comment above the `evals` job in `release.yml` and `docs/design.md`,
   "Behavioural evals run after each release".
 - **A hash in a shell function.** `hermes_namespace` in `tools/regenerate.sh`
-  computes a namespace, and its comment cites where the form was read. The
-  record is `docs/design.md`, "One rules file, one documented route per
-  client".
+  computes a namespace, and its comment gives the form. The record is
+  `docs/design.md`, "One rules file, one documented route per client".
 - **Ready-made tools in the regeneration script.** `jq` and `doctoc` do work a
   shell function could write. The record is `docs/design.md`, "One source for
   every copy". `run_doctoc` pins `doctoc` through `tools/package-lock.json`.
