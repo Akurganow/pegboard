@@ -23,8 +23,8 @@ contract_version: 4
 ## Fence
 
 - The conformance check (`python tools/check-conformance.py`), the evals runner selftest and folder check (`python tools/evals.py selftest`, `python tools/evals.py validate`), the regeneration diff (`bash tools/regenerate.sh`, which runs `tools/build.sh` and so its limits on the prose-discipline short form) run on a pull request or a push to main that changes a path the workflow reads, in the `check` job: .github/workflows/conformance.yml
-- A pull request commit that touches src/, bundles/ or plugins/ must be a conventional commit, in the `commits` job: .github/workflows/conformance.yml
-- A pull request commit that changes src/, LICENSE, tools/build.sh or tools/regions.sh must carry the builds it produces: .github/workflows/conformance.yml
+- A pull request commit that touches src/, bundles/ or plugins/ must be a conventional commit, in the `commits` job: .github/workflows/commits.yml
+- A pull request commit that changes src/, LICENSE, tools/build.sh or tools/regions.sh must carry the builds it produces: .github/workflows/commits.yml
 - The client validators run on a pull request or a push to main that changes a path the workflow reads: `claude plugin validate` on each bundles/<name> and on .claude-plugin/marketplace.json, and `skills-ref validate`, `hermes plugins validate` and `hermes plugins doctor --ci` on each plugins/<name>: .github/workflows/integration.yml
 - Every package installs into Claude Code, Codex and Oh-My-Pi on Linux, macOS and Windows, and into Hermes on Linux and macOS, on a pull request or a push to main that changes a path the workflow reads: .github/workflows/integration.yml
 - The fence does not run a skill against a model on a pull request. .github/workflows/evals.yml runs after a release or by hand.

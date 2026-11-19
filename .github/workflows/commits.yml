@@ -1,0 +1,160 @@
+name: commits
+
+# Checks each commit of a pull request, because each reaches main as written
+# and the release reads it. A commit touching a path the release reads must be
+# conventional, and a commit that changes src/ or a shared file must carry the
+# builds it produces. The release bump silently skips a package commit that
+# does not parse (source, and measured in a rehearsal bump with cog 7.0.0:
+# https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L204-L208).
+# A commit that touches no path the release reads releases nothing, so its
+# message may be free-form.
+#
+# No path list: GitHub filters a pull request by its whole diff, and a commit
+# whose change a later commit undoes is not in that diff.
+on:
+  pull_request:
+
+# A newer push to a pull request cancels the run of the older one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# bash with pipefail: a failed command inside a pipe or a substitution fails
+# the step instead of passing an empty value on.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  commits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # fetch-depth: 0 brings the base commit and every commit of the range.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # The same sha256-pinned cocogitto 7.0.0 archive release.yml installs.
+      - name: Install cocogitto
+        env:
+          COG_URL: https://github.com/cocogitto/cocogitto/releases/download/7.0.0/cocogitto-7.0.0-x86_64-unknown-linux-musl.tar.gz
+          COG_SHA256: e03938ff2c4c86d71c00c0f3284dbbe95c5ca76fe34a51f33e945c23010d59bb
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o cocogitto.tar.gz "$COG_URL"
+          printf '%s  %s\n' "$COG_SHA256" cocogitto.tar.gz | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf cocogitto.tar.gz --strip-components=1 -C "$HOME/.local/bin" x86_64-unknown-linux-musl/cog
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/cog" --version | grep -F '7.0.0'
+
+      # A failing cog check that names no commit is a failure, so an unread
+      # output format cannot pass the step.
+      - name: Refuse a non-conventional commit that touches a path the release reads
+        env:
+          RANGE: ${{ github.event.pull_request.base.sha }}..${{ github.sha }}
+          NO_COLOR: "1"
+        run: |
+          status=0
+          out=$(cog check "$RANGE" 2>&1) || status=$?
+          printf '%s\n' "$out"
+          if [ "$status" -eq 0 ]; then
+            echo "Every commit in $RANGE is conventional."
+            exit 0
+          fi
+          esc=$(printf '\033')
+          shas=$(printf '%s\n' "$out" | sed "s/$esc\[[0-9;]*m//g" | sed -n 's/^Errored commit: \([0-9a-f]\{7,40\}\).*/\1/p')
+          if [ -z "$shas" ]; then
+            echo "::error::cog check exited $status but named no commit; read its output above."
+            exit 1
+          fi
+          bad=0
+          for sha in $shas; do
+            paths=$(git diff-tree --no-commit-id --name-only -r "$sha" | grep -E '^(src/|bundles/|plugins/|LICENSE|tools/build\.sh|tools/regions\.sh)' || true)
+            if [ -n "$paths" ]; then
+              echo "::error::Commit $sha is not conventional and touches a path the release reads, so the release bump would skip it."
+              printf '  %s\n' $paths
+              bad=1
+            fi
+          done
+          [ "$bad" -eq 0 ] && echo "Every non-conventional commit in $RANGE leaves the release paths untouched."
+          exit "$bad"
+
+      # The builder needs jq, which the check job installs for the same reason.
+      - name: Install jq
+        run: command -v jq >/dev/null || { sudo apt-get update && sudo apt-get install -y jq; }
+
+      # The builder renders every icon with resvg and accepts only the version it
+      # names (RESVG_VERSION in tools/build.sh). This is that version's sha256-pinned
+      # Linux release archive, which holds the one binary.
+      - name: Install resvg
+        env:
+          RESVG_URL: https://github.com/linebender/resvg/releases/download/v0.48.1/resvg-linux-x86_64.tar.gz
+          RESVG_SHA256: fa8c26495a187e592c501db15bf9e8a9fdc051d4b2b336b39703d5b59f912b9d
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o resvg.tar.gz "$RESVG_URL"
+          printf '%s  %s\n' "$RESVG_SHA256" resvg.tar.gz | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf resvg.tar.gz -C "$HOME/.local/bin" resvg
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/resvg" --version | grep -Fx '0.48.1'
+
+      # A commit that changes src/ or a shared file must carry the builds
+      # tools/build.sh writes from it. Without this, its builds land in a later
+      # commit, and the release counts that commit's builds, so the earlier
+      # commit releases nothing. Rendered icons are left out, as in the check job.
+      - name: Build each commit that changes src/ or a shared file
+        env:
+          RANGE: ${{ github.event.pull_request.base.sha }}..${{ github.sha }}
+        run: |
+          status=0
+          for sha in $(git rev-list --reverse "$RANGE"); do
+            changed=$(git diff-tree --no-commit-id --name-only -r "$sha")
+            grep -qE '^(src/|LICENSE$|tools/build\.sh$|tools/regions\.sh$)' <<<"$changed" || continue
+            git checkout --quiet --force "$sha"
+            git clean -fdq
+            bash tools/build.sh
+            drift=$(git status --porcelain -- . ':(exclude)bundles/*/.claude-plugin/icon.png')
+            if [ -n "$drift" ]; then
+              echo "::error::Commit $sha changes src/ or a shared file, and tools/build.sh writes a different tree from it. Run bash tools/build.sh on that commit and commit the builds with it."
+              printf '%s\n' "$drift"
+              status=1
+            fi
+          done
+          exit "$status"
+
+      # Probe, protected by .agents/rules/tests.md, "Protected", item 1. It commits a
+      # change to tools/build.sh without its builds. The step fails when the per-commit
+      # check above would pass that commit.
+      - name: Probe the per-commit check with a builder change and no builds
+        run: |
+          scratch=$(mktemp -d)
+          tar --exclude=.git --exclude=node_modules -cf - . | tar -xf - -C "$scratch"
+          cd "$scratch"
+          git init --quiet
+          bash tools/build.sh
+          git add --all
+          git -c user.name=probe -c user.email=probe@invalid commit --quiet -m "base"
+          bash tools/build.sh
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::The probe base is not clean after tools/build.sh, so the probe proves nothing."
+            exit 1
+          fi
+          # The builder writes a file the base commit does not carry.
+          printf '%s\n' 'printf probe > probe-output.txt' >> tools/build.sh
+          git -c user.name=probe -c user.email=probe@invalid commit --quiet -am "change the builder"
+          changed=$(git diff-tree --no-commit-id --name-only -r HEAD)
+          if ! grep -qE '^(src/|LICENSE$|tools/build\.sh$|tools/regions\.sh$)' <<<"$changed"; then
+            echo "::error::The per-commit trigger does not select a commit that changes tools/build.sh."
+            exit 1
+          fi
+          bash tools/build.sh
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "::error::The per-commit check would pass a commit that changes tools/build.sh without its builds."
+            exit 1
+          fi

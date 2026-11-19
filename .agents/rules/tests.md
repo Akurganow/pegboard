@@ -16,13 +16,13 @@ Three groups, and nothing else:
 - **The eval suites.** `evals/<package>/<skill>/` holds `cases.yaml`,
   `held-out.yaml`, `rubric.yaml` and, for a calibrated rubric,
   `calibration.json`. `.github/workflows/evals.yml` runs them against real
-  clients after a release. `python tools/evals.py validate` loads them in the
-  same job and checks that each folder has its skill, nothing more. No
+  clients after a release. `python tools/evals.py validate` loads them beside
+  the selftest and checks that each folder has its skill, nothing more. No
   program under `tools/` reads `calibration.json`. It is the evidence behind a
   rubric's criteria.
-- **The assertion steps** of `.github/workflows/conformance.yml` and
-  `.github/workflows/integration.yml`: the steps whose job is to refuse
-  something, such as a skill a client does not list.
+- **The assertion steps** of `conformance.yml`, `commits.yml` and
+  `integration.yml` under `.github/workflows/`: the steps whose job is to
+  refuse something, such as a skill a client does not list.
 
 `tools/check-conformance.py` is the check, not a test. `.agents/rules/conformance.md`
 governs it.

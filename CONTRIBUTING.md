@@ -46,7 +46,7 @@ Pull requests merge with a merge commit, so each commit reaches `main` as
 written. CI refuses a pull request with a non-conventional commit that touches
 `src/`, `bundles/`, `plugins/`, `LICENSE`, `tools/build.sh` or
 `tools/regions.sh`, because the release would skip that commit. The `commits` job in
-[`conformance.yml`](.github/workflows/conformance.yml) runs that check.
+[`commits.yml`](.github/workflows/commits.yml) runs that check.
 
 Never edit `version` in a `source.json` or in a manifest, and never edit a
 package's `CHANGELOG.md`. [`release.yml`](.github/workflows/release.yml) writes
