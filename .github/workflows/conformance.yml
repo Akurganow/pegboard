@@ -447,16 +447,16 @@ jobs:
           echo "::endgroup::"
           exit "$status"
 
-      # The directory profile runs the checks the plugin directory applies before
-      # it accepts a submission. The plain command runs fewer. The profile exits 1
+      # The directory profile runs some of the checks the plugin directory applies
+      # before it accepts a submission. The plain command runs fewer. The profile exits 1
       # on a finding that blocks a submission, and on a check it cannot make, such
       # as a hooks file that is not valid JSON (running: the help of
       # `claude plugin validate`, Claude Code 2.1.305). This step fails on either,
       # and on any other finding, so a bundle without its icon fails with ICON_MISSING.
       # The directory also runs a safety scan and a policy review that this command
-      # does not (running: its output, Claude Code 2.1.305), so a passing step does
-      # not clear a submission. The directory's own Validate therefore runs by hand
-      # on bundles/prose-discipline before a pull request leaves draft.
+      # does not (running: its output, Claude Code 2.1.305), and its Validate blocks
+      # files this step passes (docs/clients.md, "Anthropic plugin directory"). So a
+      # passing step does not clear a submission.
       - name: claude plugin validate --profile directory, per bundle
         run: |
           status=0

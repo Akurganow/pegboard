@@ -633,7 +633,7 @@ Kiro is closed source, so no source was read, and CI installs nothing into Kiro.
 
 ## Anthropic plugin directory
 
-The pre-submission checklist was read as Markdown on 2026-11-04.
+The pre-submission checklist was read as Markdown on 2026-11-18.
 It shows no "Page updated" date.
 
 - The portal's Validate runs every directory check.
@@ -647,10 +647,26 @@ It shows no "Page updated" date.
   (running: the portal's Validate on `bundles/prose-discipline` at `fd262d6`, 2026-11-04)
 - The plugin folder "can be the repository root or a subfolder".
   (documentation: [Pre-submission checklist](https://claude.com/docs/plugins/pre-submission-checklist))
-- The rule for hook commands, unchanged: "In the command of a hook or an MCP server, write each path in full from `${CLAUDE_PLUGIN_ROOT}`, with no other variable, command substitution, wildcard, or inline program such as `python3 -c`". The result if you do not: "Blocks when the plugin folder is a subfolder of the repository".
+- A repository with several plugins is submitted one plugin folder at a time.
+  With a plugin path set, "the directory reads and scans only that folder".
+  (documentation: [Pre-submission checklist, Repository and folder layout](https://claude.com/docs/plugins/pre-submission-checklist);
+  [Submit your plugin](https://claude.com/docs/plugins/submit), read 2026-11-18)
+- The rule for hook commands: "In the command of a hook or an MCP server, write each path in full from `${CLAUDE_PLUGIN_ROOT}`, with no other variable, command substitution, wildcard, or inline program such as `python3 -c`". The result if you do not: "Blocks for another variable, a command substitution, a wildcard, or an inline program".
   (documentation: [Pre-submission checklist, Review what the plugin runs and connects to](https://claude.com/docs/plugins/pre-submission-checklist))
 - A companion row asks to keep launchers and package installs out of each script that a hook runs, and a hook that runs a non-shell file from the plugin is held for a reviewer.
   (documentation: [Pre-submission checklist](https://claude.com/docs/plugins/pre-submission-checklist))
-- The text does not say whether a literal `echo '<text>'` or `printf '%s' '<json>'` counts as an inline program.
-  It names no such command as allowed or disallowed, and the hooks here use no variable and no path.
-  The validator is not published.
+- Validate blocks a command hook from an organization that is not Verified.
+  The finding is "Hooks of type `command` accepted only from Verified organizations", and its text says the rule covers hooks of every type.
+  It named `bundles/prose-discipline/hooks/hooks.json`, whose two commands are a literal `echo` and a literal `printf`.
+  (running: the portal's Validate on the repository root at `a5870d6`, 2026-11-18)
+- The same report blocks `bundles/prose-discipline/rules/prose-discipline.mdc`, under "Files outside the allowed list accepted only from Verified organizations".
+  The list it gives is Markdown, text, JSON, YAML, and PNG, JPEG, GIF, WebP and ICO images.
+  (running: the same report)
+- `claude plugin validate --profile directory` on Claude Code 2.1.305 reports no finding for the same two files.
+  (running: [run 44414917490](https://github.com/Akurganow/pegboard/actions/runs/44414917490) at `4e72ee1`, 2026-11-18)
+- The checklist states neither Verified-only rule, and no page read says how an organization becomes Verified.
+  The pages read were the checklist, Submit your plugin, Publish to the directory, Plugin structure and testing, Plugin feature support across platforms and Connector verification.
+  (documentation: the pages under [claude.com/docs](https://claude.com/docs/llms.txt), read 2026-11-18)
+- [anthropics/claude-plugins-official#7024](https://github.com/anthropics/claude-plugins-official/issues/7024) asks how an organization becomes Verified.
+  (issue, open on 2026-11-18)
+- The validator is not published.
