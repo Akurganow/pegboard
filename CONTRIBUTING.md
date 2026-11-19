@@ -185,7 +185,7 @@ It must exit 0.
 
 ### Run the evals selftest and folder check
 
-The selftest of [`tools/evals.py`](tools/evals.py) needs only Python 3.12:
+The selftest of [`tools/evals.py`](tools/evals.py) needs only Python:
 
 ```
 python3 tools/evals.py selftest
