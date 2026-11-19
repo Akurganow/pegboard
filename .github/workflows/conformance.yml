@@ -96,7 +96,7 @@ jobs:
       # runs it on the Node major pinned here.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "22"
+          node-version: "26"
 
       # `ubuntu-latest` moves between images, and jq is not promised on
       # every one. The builder needs it.
