@@ -11,13 +11,13 @@ Three groups, and nothing else:
 
 - **The runner's selftest.** `python tools/evals.py selftest` runs the
   `_selftest_*` functions in `tools/evals.py` over the recorded event streams
-  in `tools/evals-fixtures/`. `.github/workflows/conformance.yml` runs it on
-  every pull request, and it calls no model.
+  in `tools/evals-fixtures/`. `.github/workflows/conformance.yml` runs it on a
+  pull request that changes a path it reads, and it calls no model.
 - **The eval suites.** `evals/<package>/<skill>/` holds `cases.yaml`,
   `held-out.yaml`, `rubric.yaml` and, for a calibrated rubric,
   `calibration.json`. `.github/workflows/evals.yml` runs them against real
-  clients after a release. `python tools/evals.py validate` loads them on every
-  pull request and checks that each folder has its skill, nothing more. No
+  clients after a release. `python tools/evals.py validate` loads them in the
+  same job and checks that each folder has its skill, nothing more. No
   program under `tools/` reads `calibration.json`. It is the evidence behind a
   rubric's criteria.
 - **The assertion steps** of `.github/workflows/conformance.yml` and

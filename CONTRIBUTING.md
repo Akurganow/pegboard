@@ -99,7 +99,8 @@ cog.toml                          release configuration, one entry per package
 
 ## Run the checks
 
-CI runs these checks on every pull request. Run them before you push.
+CI runs these checks on a pull request that changes a path they read. Run them
+before you push.
 
 ### Edit the source, then regenerate
 
@@ -169,8 +170,8 @@ vendored schema in `tools/schemas/`, and each `src/<name>/source.json` against
 - what skill front matter says
 - that no symlink sits under `bundles/` or `plugins/`
 
-CI runs it on every pull request and on pushes to `main`, as
-[`conformance.yml`](.github/workflows/conformance.yml) defines.
+CI runs it on a pull request or a push to `main` that changes a path it reads,
+as [`conformance.yml`](.github/workflows/conformance.yml) defines.
 
 The check needs the Python packages `jsonschema` and `pyyaml`. Install the
 versions that [`conformance.yml`](.github/workflows/conformance.yml) pins,

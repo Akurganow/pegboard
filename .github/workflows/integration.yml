@@ -12,10 +12,26 @@ name: integration
 # (source: https://github.com/actions/runner-images/blob/ebade26c60adcb867918b31c8f8caa37343a3d39/images/windows/scripts/build/Install-Git.ps1).
 # A Windows job here proves loading on that image, not on a default Git for
 # Windows checkout.
+#
+# Both events start a run only when a path a job here reads has changed: a
+# build, a catalogue, or a file the hook check reads. conformance.yml says what
+# a run that does not start means.
 on:
   push:
     branches: [main]
+    paths: &read
+      - bundles/**
+      - plugins/**
+      - src/**
+      - .claude-plugin/**
+      - .agents/plugins/**
+      - .omp-plugin/**
+      - .cursor-plugin/**
+      - tools/regions.sh
+      - .gitattributes
+      - .github/workflows/integration.yml
   pull_request:
+    paths: *read
   workflow_dispatch:
 
 permissions:

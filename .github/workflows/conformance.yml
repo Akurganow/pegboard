@@ -14,10 +14,33 @@ name: conformance
 # `push` is restricted to `main`. Without that restriction a pull request from
 # a branch in this repository triggers the workflow twice — once for the push
 # to the branch and once for the pull request — for one identical result.
+#
+# Both events start a run only when a path a job here reads has changed. A
+# change to any other file, such as a page under docs/, starts none, because
+# no job would read it. If `main` comes to require a check of this workflow, a
+# pull request that starts no run stays blocked (documentation:
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax,
+# "on.<push|pull_request|pull_request_target>.<paths|paths-ignore>").
 on:
   push:
     branches: [main]
+    paths: &read
+      - src/**
+      - bundles/**
+      - plugins/**
+      - evals/**
+      - tools/**
+      - .claude-plugin/**
+      - .agents/plugins/**
+      - .omp-plugin/**
+      - .cursor-plugin/**
+      - README.md
+      - LICENSE
+      - cog.toml
+      - .gitattributes
+      - .github/workflows/conformance.yml
   pull_request:
+    paths: *read
 
 permissions:
   contents: read

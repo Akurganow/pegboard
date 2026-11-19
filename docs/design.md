@@ -376,7 +376,7 @@ That is why CI checks the messages of pull request commits that touch `src/`, `b
 ### Trade-offs
 
 The release runs beside the conformance run on the same push, not after it.
-The same checks run on each pull request before its merge.
+The same checks run on a pull request that changes a path they read, before its merge.
 A release can still publish a commit whose check on `main` then fails.
 
 ## CI checks structure and installation
