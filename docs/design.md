@@ -41,7 +41,7 @@ Keeping the source in `plugins/<name>/` would let a client read hand-written fil
 
 `bundles/<name>/` holds a manifest folder per client and no root `plugin.json`.
 `plugins/<name>/` holds a root `plugin.json` in Agent Plugins 1.0.0 format and nothing vendor-specific.
-Every package gets both, including the four without hooks, so the catalogues and the documentation carry no per-package case.
+Every package gets both, including those without hooks, so the catalogues and the documentation carry no per-package case.
 The builder branches on one package only: it writes the hooks and the rule of `prose-discipline`.
 
 Codex is the reason for two.
