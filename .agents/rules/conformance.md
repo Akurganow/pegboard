@@ -12,7 +12,7 @@ It imports `jsonschema`, which validates each `plugins/<name>/plugin.json`
 against the schema vendored in `tools/schemas/` and each
 `src/<name>/source.json` against `tools/source.schema.json`, and `yaml`,
 which reads `SKILL.md` front matter. `.github/workflows/conformance.yml`
-installs both and runs this same check in CI, so a change that breaks it does
+installs both and runs this check in CI, so a change that breaks it does
 not merge. A schema cannot compare a value with the folder that holds it, so
 the check also requires `name` in `source.json` to equal the folder name.
 Without that, a catalogue lists `./bundles/<folder>` while the manifest there
@@ -164,11 +164,9 @@ writes is a version somebody moves by hand.
 
 ## Text only
 
-No executables and no compiled artefacts are stored in the tree. Text,
-comments and commit messages are in English. A quotation or an eval prompt
-may be in another language. The two builds are generated text, and
-prose-discipline's hooks in them are literal output commands, not scripts.
-One exception: each bundle's listing icon,
+No executables and no compiled artefacts are stored in the tree. The two
+builds are generated text, and prose-discipline's hooks in them are literal
+output commands, not scripts. One exception: each bundle's listing icon,
 `bundles/<name>/.claude-plugin/icon.png`. The Anthropic directory accepts a PNG or a
 JPEG and no SVG, so the shipped icon cannot be text. Its source is text,
 `src/<name>/icon.svg`, and the builder renders it on every run with the one
@@ -188,6 +186,9 @@ which `.github/workflows/evals.yml` runs after a release.
 `conformance.yml` runs its selftest, which calls no model, and its `validate`
 subcommand, which checks that every folder under `evals/` has its skill and
 loads.
+
+Text, comments and commit messages are in English. A quotation or an eval
+prompt may be in another language.
 
 `scripts/` holds maintainer tools that no check, workflow or catalogue reads.
 Its one program, `scripts/compose-banner.py`, writes the README banner,
