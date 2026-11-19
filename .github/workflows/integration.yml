@@ -6,17 +6,40 @@ name: integration
 # bundles/. Hermes gets a copy of plugins/. Claude Code, Codex and Oh-My-Pi must
 # list every skill. Hermes must show each package installed and enabled. The
 # prose-discipline hook commands of Claude Code and Codex must print the short
-# form. No step calls a model.
+# form. Claude Code, skills-ref and Hermes also validate the builds. No step
+# calls a model.
 #
 # The windows-latest image installs Git with symlinks enabled
 # (source: https://github.com/actions/runner-images/blob/ebade26c60adcb867918b31c8f8caa37343a3d39/images/windows/scripts/build/Install-Git.ps1).
 # A Windows job here proves loading on that image, not on a default Git for
 # Windows checkout.
+#
+# Both events start a run only when a path a job here reads has changed: a
+# build, a catalogue, or a file the hook check reads. conformance.yml says what
+# a run that does not start means.
 on:
   push:
     branches: [main]
+    paths: &read
+      - bundles/**
+      - plugins/**
+      - src/**
+      - .claude-plugin/**
+      - .agents/plugins/**
+      - .omp-plugin/**
+      - .cursor-plugin/**
+      - tools/regions.sh
+      - .gitattributes
+      - .github/workflows/integration.yml
   pull_request:
+    paths: *read
   workflow_dispatch:
+
+# A newer push to a pull request cancels the run of the older one. Each push
+# to main keeps its run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -343,3 +366,149 @@ jobs:
     steps:
       - name: Report the Cursor checks as not run
         run: echo "::notice::Cursor checks not run - no documented command installs a plugin from a catalogue, and the CLI's API-key route needs CURSOR_API_KEY."
+
+  # The validators Claude Code, the Agent Skills project and Hermes publish. They
+  # read the builds and the Claude catalogue, as the install matrix does.
+  validate-claude:
+    runs-on: ubuntu-latest
+    # bash with pipefail: a failed command inside a pipe or a substitution fails
+    # the step instead of passing an empty value on.
+    defaults:
+      run:
+        shell: bash
+    timeout-minutes: 20
+    # Keeps the pinned version the one that runs
+    # (documentation: https://code.claude.com/docs/en/setup, "Disable auto-updates").
+    env:
+      DISABLE_AUTOUPDATER: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The npm package needs Node.js 22 or later
+      # (documentation: https://code.claude.com/docs/en/setup, "Install with npm").
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+
+      # 2.1.305 is the version whose `claude plugin validate --help` lists
+      # `--profile directory`, which the step below needs. 2.1.278, 2.1.293,
+      # 2.1.301, 2.1.303 and 2.1.304 do not (running: the help of each npm release).
+      - name: Install Claude Code
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.305
+          claude --version
+
+      # --strict treats the warnings as errors, so an unrecognised field or a
+      # missing metadata field fails the run.
+      # (documentation: https://code.claude.com/docs/en/plugins/cli-reference, "plugin validate").
+      - name: claude plugin validate --strict, per bundle and catalogue
+        run: |
+          status=0
+          for dir in bundles/*/; do
+            echo "::group::claude plugin validate --strict ${dir%/}"
+            claude plugin validate --strict "${dir%/}" || status=1
+            echo "::endgroup::"
+          done
+          echo "::group::claude plugin validate --strict .claude-plugin/marketplace.json"
+          claude plugin validate --strict .claude-plugin/marketplace.json || status=1
+          echo "::endgroup::"
+          exit "$status"
+
+      # The directory profile runs some of the checks the plugin directory applies
+      # before it accepts a submission. The plain command runs fewer. The profile exits 1
+      # on a finding that blocks a submission, and on a check it cannot make, such
+      # as a hooks file that is not valid JSON (running: the help of
+      # `claude plugin validate`, Claude Code 2.1.305). This step fails on either,
+      # and on any other finding, so a bundle without its icon fails with ICON_MISSING.
+      # The directory also runs a safety scan and a policy review that this command
+      # does not (running: its output, Claude Code 2.1.305), and its Validate blocks
+      # files this step passes (docs/clients.md, "Anthropic plugin directory"). So a
+      # passing step does not clear a submission.
+      - name: claude plugin validate --profile directory, per bundle
+        run: |
+          status=0
+          for dir in bundles/*/; do
+            name=${dir%/}
+            echo "::group::claude plugin validate --profile directory $name"
+            rc=0
+            out=$(claude plugin validate --profile directory --json "$name") || rc=$?
+            printf '%s\n' "$out"
+            blocking=$(jq -r '.directory.findings[]? | "\(.code) \(.file): \(.message)"' <<<"$out")
+            if [ -n "$blocking" ] || [ "$rc" -ne 0 ]; then
+              printf '%s\n' "$blocking"
+              echo "::error::$name fails the plugin directory check (exit $rc)."
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit "$status"
+
+  validate-skills:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # skills-ref documents only a source install, so it is installed from its
+      # repository at a pinned commit (version 0.1.0). Documentation:
+      # https://github.com/agentskills/agentskills/blob/69ef37e9424c0a7ea9dd2293b559e43ec8176379/skills-ref/README.md
+      - name: Install skills-ref
+        run: >-
+          python -m pip install --disable-pip-version-check
+          "skills-ref @ git+https://github.com/agentskills/agentskills@69ef37e9424c0a7ea9dd2293b559e43ec8176379#subdirectory=skills-ref"
+
+      - name: skills-ref validate, per skill
+        run: |
+          status=0
+          for dir in plugins/*/skills/*/; do
+            skills-ref validate "${dir%/}" || status=1
+          done
+          exit "$status"
+
+  validate-hermes:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The project's own installer, fetched and checked out at the pinned
+      # commit. --skip-setup and --skip-browser skip the wizard and Playwright.
+      # Documentation for --skip-browser; the script's usage text (source) for the rest:
+      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/getting-started/installation.md#L138-L140
+      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/scripts/install.sh#L172-L180
+      - name: Install Hermes
+        run: |
+          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://raw.githubusercontent.com/NousResearch/hermes-agent/$HERMES_COMMIT/scripts/install.sh" \
+            | bash -s -- --commit "$HERMES_COMMIT" --skip-setup --skip-browser
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # A here-string, not a pipe: grep -q exits on the first match, and
+      # pipefail would report the writer's broken pipe as a failure.
+      - name: Check the Hermes version
+        run: |
+          version=$(hermes --version)
+          printf '%s\n' "$version"
+          grep -qF 'v0.21.5' <<<"$version"
+
+      - name: hermes plugins validate and doctor, per package
+        run: |
+          status=0
+          for dir in plugins/*/; do
+            echo "::group::hermes plugins validate ${dir%/}"
+            hermes plugins validate "${dir%/}" || status=1
+            echo "::endgroup::"
+            echo "::group::hermes plugins doctor ${dir%/} --ci"
+            hermes plugins doctor "${dir%/}" --ci || status=1
+            echo "::endgroup::"
+          done
+          exit "$status"

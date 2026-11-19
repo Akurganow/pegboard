@@ -138,7 +138,7 @@ commit.
 - **Guards with the reason beside them.**
   - `within_limit` and the `ISSUE_LIMIT` comment in `tools/evals.py`;
   - `doctoc_install_is_stale` in `tools/regenerate.sh`;
-  - the `jq` install steps in `conformance.yml` and `release.yml`;
+  - the `jq` install steps in `conformance.yml`, `commits.yml` and `release.yml`;
   - the limits in `check_short_form` in `tools/build.sh`, each of which names
     the failure it prevents;
   - the `RESVG_VERSION` check in `tools/build.sh`, whose comment names the

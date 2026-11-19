@@ -1,23 +1,48 @@
 name: conformance
 
-# Runs the repository's checks and the validators Claude Code, Agent Skills and
-# Hermes publish. The checks are Agent Plugins 1.0.0 conformance of plugins/,
-# the metadata of each src/ package, and that no symlink sits under a generated
-# directory. Claude Code validates each bundle and the Claude catalogue. Every
-# generated file must equal what the builder writes, and the builder must refuse
-# each input its limits name. The evals runner's selftest runs, and every evals
-# folder must have a matching skill and load. On a pull request, every commit
-# touching a path the release reads must be conventional, and every commit that
-# changes src/ or a shared file must carry the builds it produces. Hosted Linux
-# runners, no services, no model calls.
+# Runs the repository's checks. They are Agent Plugins 1.0.0 conformance of
+# plugins/, the metadata of each src/ package, and that no symlink sits under a
+# generated directory. Every generated file must equal what the builder writes,
+# and the builder must refuse each input its limits name. The evals runner's
+# selftest runs, and every evals folder must have a matching skill and load.
+# Hosted Linux runners, no services, no model calls.
 #
 # `push` is restricted to `main`. Without that restriction a pull request from
 # a branch in this repository triggers the workflow twice — once for the push
 # to the branch and once for the pull request — for one identical result.
+#
+# Both events start a run only when a path a job here reads has changed. A
+# change to any other file, such as a page under docs/, starts none, because
+# no job would read it. If `main` comes to require a check of this workflow, a
+# pull request that starts no run stays blocked (documentation:
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax,
+# "on.<push|pull_request|pull_request_target>.<paths|paths-ignore>").
 on:
   push:
     branches: [main]
+    paths: &read
+      - src/**
+      - bundles/**
+      - plugins/**
+      - evals/**
+      - tools/**
+      - .claude-plugin/**
+      - .agents/plugins/**
+      - .omp-plugin/**
+      - .cursor-plugin/**
+      - README.md
+      - LICENSE
+      - .gitattributes
+      - .gitignore
+      - .github/workflows/conformance.yml
   pull_request:
+    paths: *read
+
+# A newer push to a pull request cancels the run of the older one. Each push
+# to main keeps its run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -271,273 +296,3 @@ jobs:
           printf '%s\n' "$out"
           grep -qF "must equal the folder name 'triz-thinking'" <<<"$out" ||
             { echo "::error::The conformance check failed, but not on the source name."; exit 1; }
-
-  # Pull requests only. The release bump silently skips a package commit that does
-  # not parse (source, and measured in a rehearsal bump with cog 7.0.0:
-  # https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L204-L208).
-  # A commit that touches no path the release reads releases nothing, so its message may be free-form.
-  commits:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      # fetch-depth: 0 brings the base commit and every commit of the range.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-
-      # The same sha256-pinned cocogitto 7.0.0 archive release.yml installs.
-      - name: Install cocogitto
-        env:
-          COG_URL: https://github.com/cocogitto/cocogitto/releases/download/7.0.0/cocogitto-7.0.0-x86_64-unknown-linux-musl.tar.gz
-          COG_SHA256: e03938ff2c4c86d71c00c0f3284dbbe95c5ca76fe34a51f33e945c23010d59bb
-        run: |
-          cd "$RUNNER_TEMP"
-          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o cocogitto.tar.gz "$COG_URL"
-          printf '%s  %s\n' "$COG_SHA256" cocogitto.tar.gz | sha256sum -c -
-          mkdir -p "$HOME/.local/bin"
-          tar -xzf cocogitto.tar.gz --strip-components=1 -C "$HOME/.local/bin" x86_64-unknown-linux-musl/cog
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/cog" --version | grep -F '7.0.0'
-
-      # A failing cog check that names no commit is a failure, so an unread
-      # output format cannot pass the step.
-      - name: Refuse a non-conventional commit that touches a path the release reads
-        env:
-          RANGE: ${{ github.event.pull_request.base.sha }}..${{ github.sha }}
-          NO_COLOR: "1"
-        run: |
-          status=0
-          out=$(cog check "$RANGE" 2>&1) || status=$?
-          printf '%s\n' "$out"
-          if [ "$status" -eq 0 ]; then
-            echo "Every commit in $RANGE is conventional."
-            exit 0
-          fi
-          esc=$(printf '\033')
-          shas=$(printf '%s\n' "$out" | sed "s/$esc\[[0-9;]*m//g" | sed -n 's/^Errored commit: \([0-9a-f]\{7,40\}\).*/\1/p')
-          if [ -z "$shas" ]; then
-            echo "::error::cog check exited $status but named no commit; read its output above."
-            exit 1
-          fi
-          bad=0
-          for sha in $shas; do
-            paths=$(git diff-tree --no-commit-id --name-only -r "$sha" | grep -E '^(src/|bundles/|plugins/|LICENSE|tools/build\.sh|tools/regions\.sh)' || true)
-            if [ -n "$paths" ]; then
-              echo "::error::Commit $sha is not conventional and touches a path the release reads, so the release bump would skip it."
-              printf '  %s\n' $paths
-              bad=1
-            fi
-          done
-          [ "$bad" -eq 0 ] && echo "Every non-conventional commit in $RANGE leaves the release paths untouched."
-          exit "$bad"
-
-      # The builder needs jq, which the check job installs for the same reason.
-      - name: Install jq
-        run: command -v jq >/dev/null || { sudo apt-get update && sudo apt-get install -y jq; }
-
-      # The builder renders every icon with resvg and accepts only the version it
-      # names (RESVG_VERSION in tools/build.sh). This is that version's sha256-pinned
-      # Linux release archive, which holds the one binary.
-      - name: Install resvg
-        env:
-          RESVG_URL: https://github.com/linebender/resvg/releases/download/v0.48.1/resvg-linux-x86_64.tar.gz
-          RESVG_SHA256: fa8c26495a187e592c501db15bf9e8a9fdc051d4b2b336b39703d5b59f912b9d
-        run: |
-          cd "$RUNNER_TEMP"
-          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o resvg.tar.gz "$RESVG_URL"
-          printf '%s  %s\n' "$RESVG_SHA256" resvg.tar.gz | sha256sum -c -
-          mkdir -p "$HOME/.local/bin"
-          tar -xzf resvg.tar.gz -C "$HOME/.local/bin" resvg
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/resvg" --version | grep -Fx '0.48.1'
-
-      # A commit that changes src/ or a shared file must carry the builds
-      # tools/build.sh writes from it. Without this, its builds land in a later
-      # commit, and the release counts that commit's builds, so the earlier
-      # commit releases nothing. Rendered icons are left out, as in the check job.
-      - name: Build each commit that changes src/ or a shared file
-        env:
-          RANGE: ${{ github.event.pull_request.base.sha }}..${{ github.sha }}
-        run: |
-          status=0
-          for sha in $(git rev-list --reverse "$RANGE"); do
-            changed=$(git diff-tree --no-commit-id --name-only -r "$sha")
-            grep -qE '^(src/|LICENSE$|tools/build\.sh$|tools/regions\.sh$)' <<<"$changed" || continue
-            git checkout --quiet --force "$sha"
-            git clean -fdq
-            bash tools/build.sh
-            drift=$(git status --porcelain -- . ':(exclude)bundles/*/.claude-plugin/icon.png')
-            if [ -n "$drift" ]; then
-              echo "::error::Commit $sha changes src/ or a shared file, and tools/build.sh writes a different tree from it. Run bash tools/build.sh on that commit and commit the builds with it."
-              printf '%s\n' "$drift"
-              status=1
-            fi
-          done
-          exit "$status"
-
-      # Probe, protected by .agents/rules/tests.md, "Protected", item 1. It commits a
-      # change to tools/build.sh without its builds. The step fails when the per-commit
-      # check above would pass that commit.
-      - name: Probe the per-commit check with a builder change and no builds
-        run: |
-          scratch=$(mktemp -d)
-          tar --exclude=.git --exclude=node_modules -cf - . | tar -xf - -C "$scratch"
-          cd "$scratch"
-          git init --quiet
-          bash tools/build.sh
-          git add --all
-          git -c user.name=probe -c user.email=probe@invalid commit --quiet -m "base"
-          bash tools/build.sh
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "::error::The probe base is not clean after tools/build.sh, so the probe proves nothing."
-            exit 1
-          fi
-          # The builder writes a file the base commit does not carry.
-          printf '%s\n' 'printf probe > probe-output.txt' >> tools/build.sh
-          git -c user.name=probe -c user.email=probe@invalid commit --quiet -am "change the builder"
-          changed=$(git diff-tree --no-commit-id --name-only -r HEAD)
-          if ! grep -qE '^(src/|LICENSE$|tools/build\.sh$|tools/regions\.sh$)' <<<"$changed"; then
-            echo "::error::The per-commit trigger does not select a commit that changes tools/build.sh."
-            exit 1
-          fi
-          bash tools/build.sh
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "::error::The per-commit check would pass a commit that changes tools/build.sh without its builds."
-            exit 1
-          fi
-
-  validate-claude:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # Keeps the pinned version the one that runs
-    # (documentation: https://code.claude.com/docs/en/setup, "Disable auto-updates").
-    env:
-      DISABLE_AUTOUPDATER: "1"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # The npm package needs Node.js 22 or later
-      # (documentation: https://code.claude.com/docs/en/setup, "Install with npm").
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: "22"
-
-      # 2.1.305 is the version whose `claude plugin validate --help` lists
-      # `--profile directory`, which the step below needs. 2.1.278, 2.1.293,
-      # 2.1.301, 2.1.303 and 2.1.304 do not (running: the help of each npm release).
-      - name: Install Claude Code
-        run: |
-          npm install -g @anthropic-ai/claude-code@2.1.305
-          claude --version
-
-      # --strict treats the warnings as errors, so an unrecognised field or a
-      # missing metadata field fails the run.
-      # (documentation: https://code.claude.com/docs/en/plugins/cli-reference, "plugin validate").
-      - name: claude plugin validate --strict, per bundle and catalogue
-        run: |
-          status=0
-          for dir in bundles/*/; do
-            echo "::group::claude plugin validate --strict ${dir%/}"
-            claude plugin validate --strict "${dir%/}" || status=1
-            echo "::endgroup::"
-          done
-          echo "::group::claude plugin validate --strict .claude-plugin/marketplace.json"
-          claude plugin validate --strict .claude-plugin/marketplace.json || status=1
-          echo "::endgroup::"
-          exit "$status"
-
-      # The directory profile runs some of the checks the plugin directory applies
-      # before it accepts a submission. The plain command runs fewer. The profile exits 1
-      # on a finding that blocks a submission, and on a check it cannot make, such
-      # as a hooks file that is not valid JSON (running: the help of
-      # `claude plugin validate`, Claude Code 2.1.305). This step fails on either,
-      # and on any other finding, so a bundle without its icon fails with ICON_MISSING.
-      # The directory also runs a safety scan and a policy review that this command
-      # does not (running: its output, Claude Code 2.1.305), and its Validate blocks
-      # files this step passes (docs/clients.md, "Anthropic plugin directory"). So a
-      # passing step does not clear a submission.
-      - name: claude plugin validate --profile directory, per bundle
-        run: |
-          status=0
-          for dir in bundles/*/; do
-            name=${dir%/}
-            echo "::group::claude plugin validate --profile directory $name"
-            rc=0
-            out=$(claude plugin validate --profile directory --json "$name") || rc=$?
-            printf '%s\n' "$out"
-            blocking=$(jq -r '.directory.findings[]? | "\(.code) \(.file): \(.message)"' <<<"$out")
-            if [ -n "$blocking" ] || [ "$rc" -ne 0 ]; then
-              printf '%s\n' "$blocking"
-              echo "::error::$name fails the plugin directory check (exit $rc)."
-              status=1
-            fi
-            echo "::endgroup::"
-          done
-          exit "$status"
-
-  validate-skills:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.12"
-
-      # skills-ref documents only a source install, so it is installed from its
-      # repository at a pinned commit (version 0.1.0). Documentation:
-      # https://github.com/agentskills/agentskills/blob/69ef37e9424c0a7ea9dd2293b559e43ec8176379/skills-ref/README.md
-      - name: Install skills-ref
-        run: >-
-          python -m pip install --disable-pip-version-check
-          "skills-ref @ git+https://github.com/agentskills/agentskills@69ef37e9424c0a7ea9dd2293b559e43ec8176379#subdirectory=skills-ref"
-
-      - name: skills-ref validate, per skill
-        run: |
-          status=0
-          for dir in plugins/*/skills/*/; do
-            skills-ref validate "${dir%/}" || status=1
-          done
-          exit "$status"
-
-  validate-hermes:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      HERMES_COMMIT: f97608f178d1ffeca59860195ab7da295f7c8e5f # Hermes v0.21.5, tag v2026.9.24
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # The project's own installer, fetched and checked out at the pinned
-      # commit. --skip-setup and --skip-browser skip the wizard and Playwright.
-      # Documentation for --skip-browser; the script's usage text (source) for the rest:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/getting-started/installation.md#L138-L140
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/scripts/install.sh#L172-L180
-      - name: Install Hermes
-        run: |
-          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://raw.githubusercontent.com/NousResearch/hermes-agent/$HERMES_COMMIT/scripts/install.sh" \
-            | bash -s -- --commit "$HERMES_COMMIT" --skip-setup --skip-browser
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      # A here-string, not a pipe: grep -q exits on the first match, and
-      # pipefail would report the writer's broken pipe as a failure.
-      - name: Check the Hermes version
-        run: |
-          version=$(hermes --version)
-          printf '%s\n' "$version"
-          grep -qF 'v0.21.5' <<<"$version"
-
-      - name: hermes plugins validate and doctor, per package
-        run: |
-          status=0
-          for dir in plugins/*/; do
-            echo "::group::hermes plugins validate ${dir%/}"
-            hermes plugins validate "${dir%/}" || status=1
-            echo "::endgroup::"
-            echo "::group::hermes plugins doctor ${dir%/} --ci"
-            hermes plugins doctor "${dir%/}" --ci || status=1
-            echo "::endgroup::"
-          done
-          exit "$status"
