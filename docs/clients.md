@@ -94,9 +94,8 @@ The reasons built on these facts are in [About this repository's design](design.
 
 ### Measured on hosted runners
 
-- Claude Code 2.1.278 added this marketplace and installed every package on Ubuntu, macOS and Windows.
-  It printed `Successfully added marketplace: ai-plugins` and `Successfully installed plugin: <name>@ai-plugins (scope: user)`.
-- `claude plugin details <name>@ai-plugins` printed a `Skills (N)` line with the bare skill names.
+- Claude Code adds this marketplace and installs every package on Ubuntu, macOS and Windows.
+- `claude plugin details <name>@<marketplace>` prints a `Skills (N)` line with the bare skill names.
 
 ## Codex
 
@@ -181,11 +180,9 @@ The reasons built on these facts are in [About this repository's design](design.
 
 ### Measured on hosted runners
 
-- Codex 0.155.1 added this marketplace and every package on Ubuntu, macOS and Windows.
-  It printed ``Added plugin `<name>` from marketplace `ai-plugins`.`` for each package.
-- `codex debug prompt-input` listed each skill as `- <plugin>:<skill>: ` followed by its description.
-- The run checks no plugin hook, because the loader drops such hooks, as above.
-  It reports that check as not run.
+- Codex adds this marketplace and every package on Ubuntu, macOS and Windows.
+- `codex debug prompt-input` lists each skill as `- <plugin>:<skill>: ` followed by its description.
+- CI runs the installed hook commands outside Codex, so it shows what they print and not that Codex delivers it.
 
 ## Oh-My-Pi
 
@@ -232,9 +229,8 @@ The reasons built on these facts are in [About this repository's design](design.
 
 ### Measured on hosted runners
 
-- Oh-My-Pi 18.2.8 added this marketplace and installed every package on Ubuntu, macOS and Windows.
-  It printed `✔ Installed <name> from ai-plugins (<version>)` for each package.
-- `omp read skill://<skill>:raw` resolved each skill by its bare name and printed `name: <skill>`.
+- Oh-My-Pi adds this marketplace and installs every package on Ubuntu, macOS and Windows.
+- `omp read skill://<skill>:raw` resolves each skill by its bare name and prints `name: <skill>`.
 
 ## Hermes
 
@@ -288,11 +284,11 @@ The reasons built on these facts are in [About this repository's design](design.
 
 ### Measured on hosted runners
 
-- Hermes 0.21.5 installed on Ubuntu and macOS, and every package installed and enabled.
-  `hermes plugins show <name>` printed `Key: <name>` and `Status: enabled` for each package.
-- `hermes plugins validate` printed `✓ security scan — safe` for every package, `howp` included.
-- On the windows-latest runner, the pinned checkout failed: `Your local changes to the following files would be overwritten by checkout`.
-- The integration matrix excludes Hermes on the windows-latest runner, so run 36189587613 has no such job.
+- Hermes installs on Ubuntu and macOS, and every package installs and is enabled.
+  `hermes plugins show <name>` prints `Key: <name>` and `Status: enabled` for each package.
+- `hermes plugins validate` prints `✓ security scan — safe` for every package.
+- On Windows, the installer clones a branch before it checks out the pinned commit, and the checkout can fail with `Your local changes to the following files would be overwritten by checkout`.
+- The integration matrix excludes Hermes on the windows-latest runner.
 
 ## Cursor
 
