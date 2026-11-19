@@ -9,12 +9,9 @@ runs no client. `report` publishes each repeat to GitHub Container Registry
 (`ghcr.io/<owner>/pegboard-evals`) and files an issue when a metric
 regresses against the latest complete run.
 
-The runner is this repository's own. In Claude Code 2.1.293, `claude plugin
-eval` wrote the final reply only as the evidence of an LLM grader (running,
-2026-10-08: https://github.com/Akurganow/pegboard/actions/runs/37784785554).
-That grader runs a judge model of its own. `claude plugin eval` has no
-custom-code grader, so Jev could not take the judge's place (documentation:
-https://code.claude.com/docs/en/plugin-evals).
+The runner is this repository's own. `claude plugin eval` writes the final
+reply only as the evidence of an LLM grader, which runs a judge model of its
+own. It has no custom-code grader, so Jev cannot take the judge's place.
 A skill may add `held-out.yaml`: five positive and five near-miss prompts that
 run with the package on repeat 1 only and are never graded. Nobody reads them
 while editing a description, so their load count checks the trigger rate on
@@ -67,8 +64,7 @@ METRICS = ("trigger_hit", "false_fire", "compliance", "improvement")
 NOT_APPLICABLE_ALWAYS_ON = ("trigger_hit", "compliance")
 
 JEV_URL = "https://api.typesafe.ai/v1/systemone"
-# Pinned because the `jev-latest` alias moves with each Jev release
-# (documentation: https://docs.typesafe.ai/models.md).
+# Pinned because the `jev-latest` alias moves with each Jev release.
 JEV_MODEL = "jev-1.13.0"
 JEV_RETRY_STATUSES = (429, 529)
 JEV_ATTEMPTS = 6
@@ -113,22 +109,16 @@ class Claude:
         self.package, self.skill = package, skill
 
     # Read lets the skill open its reference files. With only Skill allowed,
-    # Claude Code 2.1.293 denied the skill's Read call (running, 2026-10-08:
-    # https://github.com/Akurganow/pegboard/actions/runs/37784785554).
-    # WebSearch and WebFetch need approval, and a bare tool name allows every
-    # call of that tool (documentation, read 2026-11-11:
-    # https://code.claude.com/docs/en/permissions.md, "Permission system" and
-    # "Match all uses of a tool"). Without them Claude's answers in the
-    # distilled-research--v0.2.0 records report web search and fetch as denied,
-    # while Codex and Oh-My-Pi reached the web in the same run.
+    # Claude Code denies the skill's Read call. WebSearch and WebFetch need
+    # approval, and a bare tool name allows every call of that tool. Without
+    # them Claude's answers report web search and fetch as denied, while Codex
+    # and Oh-My-Pi reach the web in the same run.
     def command(self, prompt: str, arm: str) -> list[str]:
         return ["claude", "-p", prompt, "--model", self.model, "--output-format", "stream-json",
                 "--verbose", "--allowedTools", "Skill", "Read", "WebSearch", "WebFetch"]
 
     # `claude plugin disable` and `enable` change the plugin's state across sessions,
-    # so `run_job` disables it once and restores it in `finally` (documentation:
-    # https://code.claude.com/docs/en/plugins/cli-reference#plugin-disable,
-    # https://code.claude.com/docs/en/plugins/cli-reference#plugin-enable).
+    # so `run_job` disables it once and restores it in `finally`.
     def switch_to_without(self) -> None:
         subprocess.run(["claude", "plugin", "disable", f"{self.package}@{MARKETPLACE}"], check=True,
                        env=client_env(self.name))
@@ -137,10 +127,9 @@ class Claude:
         subprocess.run(["claude", "plugin", "enable", f"{self.package}@{MARKETPLACE}"], check=True,
                        env=client_env(self.name))
 
-    # Claude Code 2.1.293 shows a loaded skill as a Skill tool call whose `skill`
+    # Claude Code shows a loaded skill as a Skill tool call whose `skill`
     # input holds "<package>:<skill>". Its init event lists `skills` and `plugins`,
-    # each plugin with a `source` of "<package>@<marketplace>" (running, 2026-10-08:
-    # https://github.com/Akurganow/pegboard/actions/runs/37789029106).
+    # each plugin with a `source` of "<package>@<marketplace>".
     def parse(self, events: list[dict]) -> Parsed:
         fired, answer, cost, model, error, loaded, tools = False, None, None, None, None, None, []
         for e in events:
@@ -174,10 +163,8 @@ class Codex:
     def __init__(self, package: str, skill: str):
         self.package, self.skill = package, skill
 
-    # On GitHub's ubuntu-latest the read-only sandbox failed every command with
-    # "bwrap: loopback: Failed RTM_NEWADDR", so Codex never read SKILL.md
-    # (running: Codex 0.161.0, 2026-10-08,
-    # https://github.com/Akurganow/pegboard/actions/runs/37786134780).
+    # On GitHub's ubuntu-latest the read-only sandbox fails every command with
+    # "bwrap: loopback: Failed RTM_NEWADDR", so Codex never reads SKILL.md.
     def command(self, prompt: str, arm: str) -> list[str]:
         cmd = ["codex", "exec", "--json", "--skip-git-repo-check", "--sandbox", "danger-full-access",
                "-m", self.model]
@@ -191,14 +178,10 @@ class Codex:
     def switch_back(self) -> None:
         pass
 
-    # Codex has no skill item kind (source: ThreadItemDetails in
-    # https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/exec/src/exec_events.rs#L107-L133).
-    # A skill load is a shell read of its SKILL.md in the plugin cache (running:
-    # https://github.com/Akurganow/pegboard/actions/runs/37786134780).
+    # Codex has no skill item kind.
+    # A skill load is a shell read of its SKILL.md in the plugin cache.
     # A top-level "error" event also announces each retry, so only "turn.failed"
-    # marks a failed turn (source:
-    # https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/exec/src/event_processor_with_jsonl_output.rs#L447-L457,
-    # https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/app-server/src/bespoke_event_handling.rs#L1054-L1066).
+    # marks a failed turn.
     # One turn carries several agent_message items: the fixture has a preamble, a
     # context note, a question and the review. The answer joins them all, because
     # the last one alone can point at text above it. A stream that stops before
@@ -239,13 +222,10 @@ class Omp:
         self.package, self.skill = package, skill
 
     # `--no-rules` removes a package's rules as `--no-skills` removes its skills, so
-    # the without arm drops the whole package (documentation:
-    # https://github.com/can1357/oh-my-pi/blob/40e9368ef0458fd9073329cdff4174895f91bc6b/docs/cli-reference.md#L159-L160).
-    # Oh-My-Pi thinks at `high` unless told otherwise (documentation:
-    # https://github.com/can1357/oh-my-pi/blob/cde91bb38674d365e8c3916d05d2292273bb8554/docs/settings.md#L495).
-    # On three red-flags cases `low` took 116 s against 472 s at `high`, and loaded
-    # the skill every time (running, Oh-My-Pi 18.8.6, 2026-10-08:
-    # https://github.com/Akurganow/pegboard/actions/runs/37860528358).
+    # the without arm drops the whole package.
+    # Oh-My-Pi thinks at `high` unless told otherwise.
+    # On red-flags cases `low` took a quarter of the time `high` took, and loaded
+    # the skill every time.
     def command(self, prompt: str, arm: str) -> list[str]:
         cmd = ["omp", "-p", "--mode", "json", "--no-session", "--no-title", "--auto-approve",
                "--model", self.model, "--thinking", "low"]
@@ -260,13 +240,10 @@ class Omp:
         pass
 
     # Oh-My-Pi loads a skill by reading skill://<name>, a file under it, or either
-    # with a selector such as ":raw" (documentation:
-    # https://github.com/can1357/oh-my-pi/blob/40e9368ef0458fd9073329cdff4174895f91bc6b/docs/skills.md#L182-L183,
-    # https://github.com/can1357/oh-my-pi/blob/40e9368ef0458fd9073329cdff4174895f91bc6b/docs/tools/read.md#L33).
+    # with a selector such as ":raw".
     # A failed assistant message can come before a retry that succeeds, so the
     # last one decides the error, and the answer joins the text of the messages
-    # that did not fail (source:
-    # https://github.com/can1357/oh-my-pi/blob/40e9368ef0458fd9073329cdff4174895f91bc6b/packages/coding-agent/src/session/agent-session.ts#L4323-L4324).
+    # that did not fail.
     def parse(self, events: list[dict]) -> Parsed:
         fired, texts, cost, model, last, tools = False, [], 0.0, None, None, []
         base = f"skill://{self.skill}"
@@ -376,8 +353,7 @@ def check_cases(skill_dir: Path, cases, rubric, held_out=None) -> tuple[dict, di
     return cases, questions
 
 
-# Criteria describe what a yes and a no mean (documentation:
-# https://docs.typesafe.ai/primitives/noul.md, read 2026-10-09). YAML reads an
+# Criteria describe what a yes and a no mean. YAML reads an
 # unquoted `true:` key as a boolean, so only the quoted keys pass.
 def is_question(q) -> bool:
     if isinstance(q, str):
@@ -413,11 +389,9 @@ def client_env(client: str) -> dict:
 # Each session runs in a new empty directory outside the checkout, so no skill
 # under a checkout's `.agents/skills` loads into the session. Codex
 # loads skills from `.agents/skills` between the working directory and the
-# repository root (documentation, read 2026-10-08:
-# https://learn.chatgpt.com/docs/build-skills, "Where Codex loads local skills").
+# repository root.
 # Oh-My-Pi has an `agents` provider for `.agent[s]/skills` with toggles of its own.
-# Disabling the Claude, Codex and Pi providers does not turn it off (documentation:
-# https://github.com/can1357/oh-my-pi/blob/40e9368ef0458fd9073329cdff4174895f91bc6b/docs/skills.md#L122).
+# Disabling the Claude, Codex and Pi providers does not turn it off.
 def run_session(adapter, case: dict, kind: str, arm: str) -> dict:
     with tempfile.TemporaryDirectory() as cwd:
         started = time.monotonic()
@@ -469,8 +443,7 @@ def jev_question(q) -> dict:
 
 
 # The answer is never split, and Jev limits the state plus the longest question
-# to 32k tokens (documentation: https://docs.typesafe.ai/models.md, read
-# 2026-10-08). A request Jev rejects raises `JevError`, and `grade_sessions`
+# to 32k tokens. A request Jev rejects raises `JevError`, and `grade_sessions`
 # records the session as not graded.
 def grade(request_text: str, answer: str, questions: dict, send=jev_request) -> dict:
     body = {
@@ -885,8 +858,7 @@ def push_record(owner: str, bearer: str, record: dict, created: str, source: str
             "org.opencontainers.image.created": created,
             "org.opencontainers.image.version": record["tag"],
             # A package whose first push names its repository inherits that
-            # repository's access, so the workflow's GITHUB_TOKEN may push to it
-            # (documentation: https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility#about-inheritance-of-access-permissions).
+            # repository's access, so the workflow's GITHUB_TOKEN may push to it.
             "org.opencontainers.image.source": source,
         },
     }
