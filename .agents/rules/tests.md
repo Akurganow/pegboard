@@ -43,14 +43,14 @@ how a case behaved against real clients. `tools/evals.py` writes them
 (`cmd_run`, `run_session`, `grade_runs`, `cmd_report`, `push_record`).
 
 - **Fields.** Each artifact holds one run record per skill, client and repeat.
-  A run records `tag`, `package`, `skill`, `client`, `repeat`, `run`,
-  `run_id`, `client_version`, `model`, `jev_model`, `cases_sha256`,
-  `rubric_sha256`, `always_on`, `questions` and `sessions`. A session records
-  `case`, `kind`, `arm`, `fired`, `answer`, `cost_usd`, `error`, `nouls`
-  (Jev's score per question id), `inputs` and `client_version`. A session
-  copied from an earlier run also records `carried_from`, the tag it ran on.
-  It measures that tag's client, not the record's, so `improvement` can
-  mix two client versions.
+  A run records `tag`, `package`, `skill`, `client`, `repeat`, `run`, `run_id`,
+  `client_version`, `model`, `jev_model`, `cases_sha256`, `rubric_sha256`,
+  `always_on`, `questions` and `sessions`. A session records, among others,
+  `case`, `kind`, `arm`, `fired`, `answer`, `cost_usd`, `error`, `nouls` (Jev's
+  score per question id), `inputs` and `client_version`. A session copied from
+  an earlier run also records `carried_from`, the tag it ran on. It measures
+  that tag's client, not the record's, so `improvement` can mix two client
+  versions.
 - **Comparable.** Two runs are comparable when both hashes are equal and
   both recorded the same `model`. `compare` applies the same rule. A record
   measures the folder at the analysed commit when its hashes equal the
@@ -74,12 +74,12 @@ how a case behaved against real clients. `tools/evals.py` writes them
 
 Editing `cases.yaml` or `rubric.yaml` has a price that is not a lost mutation.
 The next release's `compare` returns "not comparable", so that release has no
-regression check. The release after it compares again. Every release also
-repeats the model sessions. So an alternative that touches a folder lists all
-its edits to `cases.yaml` and `rubric.yaml` at once, and states the price.
-`held-out.yaml` is outside the comparison and pays
-nothing. `calibration.json` records the `sha256` of the rubric it scored, so a
-rubric edit leaves it describing the old text. The alternative says so.
+regression check. The release after it compares again. A changed prompt reruns
+its sessions. So an alternative that touches a folder lists all its edits to
+`cases.yaml` and `rubric.yaml` at once, and states the price. `held-out.yaml` is
+outside the comparison and pays nothing. `calibration.json` records the `sha256`
+of the rubric it scored, so a rubric edit leaves it describing the old text. The
+alternative says so.
 
 ## Protected: never a finding
 
