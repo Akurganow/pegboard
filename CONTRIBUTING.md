@@ -58,6 +58,7 @@ so that every manifest carries the new version.
 ```
 src/<name>/                       the hand-written source; no client reads it
   source.json                     name, version, description and the other metadata
+  icon.svg                        the listing icon, which the builder renders to a PNG
   README.md                       what the plugin does and how to use it
   CHANGELOG.md                    written by the release
   skills/<skill>/SKILL.md         a skill, Agent Skills format
@@ -95,9 +96,6 @@ evals/<name>/<skill>/             prompts and Jev questions for one skill's eval
 cog.toml                          release configuration, one entry per package
 .github/                          CI workflows and issue forms
 ```
-
-Edit `src/` only. [Run the checks](#run-the-checks) says how the builds
-follow.
 
 ## Run the checks
 
