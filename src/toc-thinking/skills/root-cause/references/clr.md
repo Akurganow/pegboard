@@ -110,10 +110,10 @@ Ask for a predicted effect that shows on its own: skipped checks in the log, a m
 A link is a hypothesis, and its predicted effect is the test. `SKILL.md`, "Scrutiny becomes checks",
 gives the procedure. Three published statements shape it.
 
-- Zeller, *The Debugging Book*, "Introduction to Debugging", "The Scientific Method" (online text, read
-  2026-11-11): from a hypothesis, "formulate a *prediction* that can *support* or *refute* the
-  hypothesis. Ideally, the prediction would distinguish the hypothesis from likely alternatives." Then
-  test it: "If the prediction holds, confidence in the hypothesis increases; otherwise, it decreases."
+- Zeller, *The Debugging Book*, "Introduction to Debugging", "The Scientific Method" (online text):
+  from a hypothesis, "formulate a *prediction* that can *support* or *refute* the hypothesis. Ideally,
+  the prediction would distinguish the hypothesis from likely alternatives." Then test it: "If the
+  prediction holds, confidence in the hypothesis increases; otherwise, it decreases."
 - TOCICO, *predicted effect reservation*: it can prove or disprove an entity or relationship "very
   difficult, perhaps even impossible to prove by direct observation". Its example: if a car's battery
   charge is low, the lights must be very dim, and bright lights show the charge is not low.
@@ -124,4 +124,4 @@ gives the procedure. Three published statements shape it.
 
 Check facts, not the story of the incident: an account written after a failure selects the facts that
 fit it. Cook calls hindsight bias "the primary obstacle to accident investigation" (*How Complex
-Systems Fail*, point 8, read 2026-11-11). Read the log of the time, not the memory of it.
+Systems Fail*, point 8). Read the log of the time, not the memory of it.

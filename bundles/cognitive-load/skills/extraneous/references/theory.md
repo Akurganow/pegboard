@@ -190,7 +190,7 @@ not always learning it. This skill's reading: they are often trying to
 finish a task with the least understanding that suffices. No study of that
 case was found.
 
-The essay behind `patterns.md` ([full text](https://github.com/zakirullin/cognitive-load/tree/d2d60d2311c3854f16d87bf34f38c829667be2a4)) says of its own use of the term:
+The essay behind `patterns.md` says of its own use of the term:
 
 > We are going to use "cognitive load" in an informal sense; sometimes it
 > lines up with the specific scientific concept of Cognitive Load, but we

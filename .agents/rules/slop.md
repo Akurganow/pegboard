@@ -84,6 +84,8 @@ Never a finding:
 - **A section number beside every claim about the specification.**
 - **The vendored schema.** `tools/schemas/` is a verbatim copy; its text
   belongs to its publisher.
+- **A skill's bibliography.** `src/<name>/skills/<skill>/references/sources.md`
+  is the skill's content and keeps its links, revisions and read dates.
 - **The instructions.** `.agents/**`, except `.agents/plugins/`. Read, never
   judged. `.agents/plugins/marketplace.json` is the Codex catalogue, a
   generated copy and no instruction, so it is judged through its source like

@@ -10,7 +10,7 @@ The numbers are a convention with a source, not a measured optimum. GOV.UK asks 
 
 ## Why the guard against choppy text exists
 
-Anthropic's guide for Claude Fable 5.2 warns that a hard limit, such as 20 words per instruction, can make prose choppy. It recommends STE without numbers. The eval records of release prose-discipline--v2.2.1 (2026-11-06) show the drift. With the plugin, the share of sentences under six words rose in all three clients: from 15% to 21% in Claude, 11% to 16% in Codex and 16% to 18% in Oh-My-Pi. At most 7% of sentences passed 25 words, so the ceiling rarely bound. Anthropic's guide for Fable 5 gives the goal: choose clear over short.
+Anthropic's guide for Claude Fable 5.2 warns that a hard limit, such as 20 words per instruction, can make prose choppy. It recommends STE without numbers. Without this guard, this package's evals showed the drift: with the plugin, the share of sentences under six words rose in every client measured. Anthropic's guide for Fable 5 gives the goal: choose clear over short.
 
 ## The rules, each with its reason
 
