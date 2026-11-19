@@ -164,9 +164,11 @@ writes is a version somebody moves by hand.
 
 ## Text only
 
-No executables and no compiled artefacts are stored in the tree. The two
-builds are generated text, and prose-discipline's hooks in them are literal
-output commands, not scripts. One exception: each bundle's listing icon,
+No executables and no compiled artefacts are stored in the tree. Text,
+comments and commit messages are in English. A quotation or an eval prompt
+may be in another language. The two builds are generated text, and
+prose-discipline's hooks in them are literal output commands, not scripts.
+One exception: each bundle's listing icon,
 `bundles/<name>/.claude-plugin/icon.png`. The Anthropic directory accepts a PNG or a
 JPEG and no SVG, so the shipped icon cannot be text. Its source is text,
 `src/<name>/icon.svg`, and the builder renders it on every run with the one
