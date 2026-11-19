@@ -79,7 +79,7 @@ tools/source.schema.json          schema of source.json
 tools/schemas/                    vendored Agent Plugins manifest schema
 tools/package.json                pins doctoc for tools/regenerate.sh
 tools/package-lock.json           pins doctoc's dependency tree
-docs/clients.md                   how each client loads a package, with sources
+docs/clients.md                   how each client loads a package
 docs/design.md                    why the repository is built this way
 docs/banner.svg                   the README banner, written by scripts/compose-banner.py
 docs/banner/                      the banner's parts and layout, and how to add a tool
