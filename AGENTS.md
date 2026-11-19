@@ -24,7 +24,7 @@ rule bears on every change.
 | File | Owns |
 | :-- | :-- |
 | `agent-plugins-review.md` | the sources of record for the marketplace's claims and the agent configuration |
-| `claims.md` | what a sentence about a client may rest on, and that it cites where it was read |
+| `claims.md` | what a sentence about a client may rest on, and what a document does not hold |
 | `conformance.md` | the check, what the check is allowed to be, source and builds, package shape, versions |
 | `design-vocabulary.md` | the words for a design objection, and the shapes in this tree that already answer one |
 | `slop.md` | what generator residue looks like here, and what is protected from that judgement |
