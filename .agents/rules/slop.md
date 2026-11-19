@@ -57,12 +57,13 @@ the later in the list below wins — its measurement is the stronger evidence.
    never fire, written out in full.
 5. **`residue`** — what the process left behind: changelog in comments or
    prose ("now", "updated", "since the rewrite" with nothing the reader can
-   use after it), attribution of a tool, a paragraph describing the change
-   that introduced it instead of the thing, a section kept for a plugin or
-   a surface that is gone, a reference file nothing links. Measurement:
-   `git log -S` for the commit that brought it and the commit that made it
-   moot — or, for what was moot on arrival, the introducing commit alone
-   and the statement that nothing ever used it.
+   use after it), a revision, a read date or a run number kept as proof, a
+   value restated from the file that owns it, attribution of a tool, a
+   paragraph describing the change that introduced it instead of the thing,
+   a section kept for a plugin or a surface that is gone, a reference file
+   nothing links. Measurement: `git log -S` for the commit that brought it
+   and the commit that made it moot — or, for what was moot on arrival, the
+   introducing commit alone and the statement that nothing ever used it.
 
 ## What is protected
 
@@ -78,9 +79,8 @@ Never a finding:
   `plugins/<name>/`, and `src/<name>/CHANGELOG.md`, are machine-written.
   `.github/workflows/release.yml` writes them, and they are never judged
   here. Each manifest is judged through its source, `source.json`.
-- **A cited source and its date.** The per-fact source and its kind, a date
-  and a tag beside a measurement. To an outside eye these read as hedging;
-  each is a fact.
+- **The version comment beside a pinned action.** Renovate writes it with
+  the pin.
 - **A section number beside every claim about the specification.**
 - **The vendored schema.** `tools/schemas/` is a verbatim copy; its text
   belongs to its publisher.
@@ -97,12 +97,11 @@ a skill's front matter say. It decides against the published schema and
 against the clause quoted beside each hand check. Three client validators in
 `.github/workflows/integration.yml` fence the same packages: `claude plugin
 validate`, `skills-ref validate`, and `hermes plugins validate` with
-`hermes plugins doctor --ci`. Nothing keys
-on vocabulary, and nothing should — words have legitimate readings. A hedge
-filter would first catch the sourced, dated sentences `claims.md` requires.
-Anything the check or a validator names cannot exist on a green `main`; a
-finding of it is a misread. The same holds for a generated copy that differs
-from its source: CI runs `tools/regenerate.sh` and fails on any difference.
-Slop is judged strictly above all of them: text that passes every check and
-still says nothing. A tell that recurs and could be named by a pattern is a
-proposal to the maintainer, not a check added on the spot.
+`hermes plugins doctor --ci`. Nothing keys on vocabulary, and nothing should —
+words have legitimate readings. Anything the check or a validator names cannot
+exist on a green `main`; a finding of it is a misread. The same holds for a
+generated copy that differs from its source: CI runs `tools/regenerate.sh` and
+fails on any difference. Slop is judged strictly above all of them: text that
+passes every check and still says nothing. A tell that recurs and could be
+named by a pattern is a proposal to the maintainer, not a check added on the
+spot.

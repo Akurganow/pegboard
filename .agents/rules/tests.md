@@ -55,12 +55,12 @@ how a case behaved against real clients. `tools/evals.py` writes them
   both recorded the same `model`. `compare` applies the same rule. A record
   measures the folder at the analysed commit when its hashes equal the
   `sha256` of `cases.yaml` and `rubric.yaml` there.
-- **The unit is the metric range over the three repeats** of one complete run
+- **The unit is the metric range over the repeats** of one complete run
   of one skill on one client. `docs/design.md`, "Behavioural evals run after
   each release", says the spread between repeats is the tolerance. A swing
   inside the spread is no exhibit.
-- **A per-prompt load count is a lead.** A prompt has three sessions per
-  client, so its count can move from 0 of 3 to 3 of 3 with nothing changed.
+- **A per-prompt load count is a lead.** A prompt has one session per repeat
+  on each client, so its count can move from none to all with nothing changed.
 - **A claim that a test is unstable** needs three things. They are two
   comparable releases, an empty `git diff` of `src/<package>/skills` between
   their tags, and equal `model`, `jev_model` and session `client_version`.
@@ -87,7 +87,7 @@ alternative says so.
    name that must not count as a load, and an input a function must refuse.
    The assertion that it does is the probe.
 2. A test or step turned off with a stated reason beside it. Examples are the
-   matrix exclusion that cites its failed run, and the notice step that
+   matrix exclusion that states its failure, and the notice step that
    reports a check as not run. It is `environment-coupled` only when skipping
    it leaves its contract with no CI signal.
 3. The platform, tested on purpose. The install matrix and the archive
@@ -108,8 +108,8 @@ alternative says so.
    - the Jev model is pinned;
    - the latest client is installed;
    - held-out prompts are never graded;
-   - the prompts cover each clause once, and three repeats follow the Agent
-     Skills guide;
+   - the prompts cover each clause once, and the repeat count follows the
+     Agent Skills guide;
    - a session whose inputs did not change is copied from the previous run;
    - the without arm removes a different set in each client.
 

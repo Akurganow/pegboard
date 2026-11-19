@@ -3,8 +3,8 @@
 The sites are the sources of record. Where a repository publishes the same
 text, that copy stands in when the site is blocked. Read a single file from
 `https://raw.githubusercontent.com/<owner>/<repo>/<ref>/<path>`, and clone a
-repository `--depth 1` only when the whole tree is needed. Cite a copy by
-file and commit.
+repository `--depth 1` only when the whole tree is needed. A finding cites a
+copy by file and commit.
 
 - Agent Plugins spec: https://agent-plugins.org/specification and
   https://agent-plugins.org/schemas; repository
@@ -40,9 +40,7 @@ file and commit.
   https://learn.chatgpt.com/docs/build-skills,
   https://learn.chatgpt.com/docs/hooks.md and
   https://developers.openai.com/plugins/build/plugins.md. The repository
-  https://github.com/openai/codex held no copy: its `docs/` held fifteen
-  files at `dda2278`, and none mentioned plugins (from source:
-  https://github.com/openai/codex/tree/dda227891d27b6e0f3f244eda149a98d098969ad/docs).
+  https://github.com/openai/codex publishes no copy.
 - Hermes plugin documentation:
   https://hermes-agent.nousresearch.com/docs/developer-guide/plugins;
   repository https://github.com/NousResearch/hermes-agent, files
