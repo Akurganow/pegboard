@@ -1,4 +1,4 @@
-# Region helpers, sourced and never run. tools/regenerate.sh and the coming
+# Region helpers, sourced and never run. tools/regenerate.sh and
 # tools/build.sh source this file, so the marker rules live only here.
 #
 # A region inside a hand-written file sits between two lines,

@@ -97,7 +97,7 @@ Documentation pages in this subsection were read on 2026-11-04.
 - `.codex-plugin/` and `.cursor-plugin/` folders beside `.claude-plugin/` raised no warning.
   (running: `claude plugin validate --strict` on Claude Code 2.1.308, 2026-11-04)
 - `icon` is the path to an image file inside the plugin, such as `./logo.png`: "Icon for the plugin's listing in Anthropic's directory. Claude Code doesn't read it".
-  In a catalogue entry `claude plugin validate` reports it as an unknown field, so it is set in `plugin.json` only.
+  In a catalogue entry `claude plugin validate` reports it as an unknown field.
   (documentation: [Plugins reference](https://code.claude.com/docs/en/plugins-reference), read 2026-11-04)
 - The default hooks file is `hooks/hooks.json` at the plugin root.
   A `hooks` manifest field names further files, and Claude Code merges them with the default.

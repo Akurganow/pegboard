@@ -41,7 +41,7 @@ Keeping the source in `plugins/<name>/` would let a client read hand-written fil
 
 `bundles/<name>/` holds a manifest folder per client and no root `plugin.json`.
 `plugins/<name>/` holds a root `plugin.json` in Agent Plugins 1.0.0 format and nothing vendor-specific.
-Every package gets both, including the four without hooks, so the catalogues and the documentation carry no per-package case.
+Every package gets both, including those without hooks, so the catalogues and the documentation carry no per-package case.
 The builder branches on one package only: it writes the hooks and the rule of `prose-discipline`.
 
 Codex is the reason for two.
@@ -130,22 +130,18 @@ A generic name such as `review` collides in Oh-My-Pi with any other source that 
 
 A skill name is therefore distinctive without the plugin prefix, and never repeats the plugin name.
 It is one word, or one compound such as `root-cause`, so it stays short in Oh-My-Pi's bare list and still names its method.
-The directories under `src/*/skills/` hold the names in use, except `howp`'s, which no longer sit in this tree:
+The directories under `src/*/skills/` hold the names in use:
 
 | Package | Skills |
 | :-- | :-- |
 | cognitive-load | `extraneous` |
 | design-review | `red-flags` |
 | distilled-research | `triangulate`, `vet-sources` |
-| howp | `forecast`, `interests` |
 | prose-discipline | `house-style` |
 | toc-thinking | `root-cause` |
 | triz-thinking | `contradiction`, `ariz` |
 
 A package holds a second skill when one skill carried two jobs with different triggers.
-In `howp`, `interests` interviews the person and writes the two files they own, once per interest.
-`forecast` keeps the binary, the cycle and the procedures that run on every cycle.
-`interview` lost as that skill's name, because it is the likeliest bare name for an unrelated skill.
 In `triz-thinking`, `ariz` walks ARIZ-85C, a nine-part algorithm that the matrix route never opens.
 `contradiction` keeps the matrix route, and hands a problem it did not crack to `ariz`.
 In `distilled-research`, `vet-sources` rates a list of sources on its own, in the main thread.
@@ -310,7 +306,7 @@ It documents release tags of the form `<plugin-name>--v<version>` ([Claude Code]
 A version moved by hand gets forgotten, and users then keep an old copy.
 A release should follow the commit that earned it, with no release pull request to merge.
 
-[cocogitto](https://github.com/cocogitto/cocogitto) releases every package but `howp`.
+[cocogitto](https://github.com/cocogitto/cocogitto) releases every package.
 `cog bump --auto` derives each package's next version from the conventional commits that touched its paths.
 A package's paths are `src/<name>/` and, through `include` in `cog.toml`, `bundles/<name>/**` and `plugins/<name>/**`.
 (source: [`settings/mod.rs` L367–L372](https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/settings/mod.rs#L367-L372))
@@ -383,18 +379,6 @@ The release runs beside the conformance run on the same push, not after it.
 The same checks run on each pull request before its merge.
 A release can still publish a commit whose check on `main` then fails.
 
-The release step runs `gh release create` without `--latest`, so GitHub picks the repository's Latest release by date and version.
-(source: [`create.go` L218](https://github.com/cli/cli/blob/9b031151a825bda919203c5202876a725d637368/pkg/cmd/release/create/create.go#L218))
-A package release can take the Latest label from a `howp` release.
-Nothing downloads by that label: `plugins/howp/binaries.json` names each archive by its tag.
-
-### howp
-
-The private repository that builds `hp` releases `howp`, and cocogitto leaves it out.
-Only that release job knows the version, the digests and the binary's help text.
-It writes the files [CONTRIBUTING.md](../CONTRIBUTING.md#write-commits) lists, such as `plugins/howp/skills/forecast/references/commands.md`.
-A second writer would move `version` with no binary behind it.
-
 ## CI checks structure and installation
 
 CI runs these checks without a model:
@@ -437,7 +421,6 @@ A workflow triggered by the tags or the releases would never start, because the 
 It can also run by hand on existing tags.
 A re-run of the release job skips the evals, because its bump step then finds no releasable commit.
 So a run by hand is the recovery when a release run created its tags but stopped before the evals job.
-howp is not measured here, because another repository builds, checks and releases it.
 
 Each skill has positive and near-miss prompts in `evals/<package>/<skill>/cases.yaml`.
 The folder sits outside the packages, so no installed package carries the prompts.
@@ -610,34 +593,3 @@ Prompts inside a package would reach every user who installs it, because Claude 
 
 A sentence about what the maintainer ran describes one machine on one date.
 [How each client loads a package](clients.md) shows what takes its place: every fact cites its kind and source.
-
-## howp's host list and signature
-
-`howp` downloads and runs `hp`, a binary built from sources that are not public.
-
-The manifest's `extensions["io.github.akurganow.ai-plugins"].network.hosts` is the one list of hosts the package reaches.
-The README's host list is generated from it.
-It names every host the skill's steps name, so an allowlist built from it alone lets every step through.
-That includes `release-assets.githubusercontent.com`, which GitHub lists as needed to download release assets.
-(documentation: [Self-hosted runners reference, accessible domains by function](https://docs.github.com/en/actions/reference/runners/self-hosted-runners#accessible-domains-by-function))
-It also includes `raw.githubusercontent.com`, where the skill can read the package's manifest files.
-
-The skill checks each archive's SHA-256 against `plugins/howp/binaries.json`.
-A digest proves the archive is the recorded one, not who built it.
-The release [`howp-v0.3.7`](https://github.com/Akurganow/pegboard/releases/tag/howp-v0.3.7) carries `SHA256SUMS` and `SHA256SUMS.sigstore.json`, a Sigstore bundle over the table (release assets, read 2026-09-26).
-The certificate in that bundle names `https://github.com/Akurganow/how-possible/.github/workflows/release.yml@refs/heads/main` as the signer and `https://token.actions.githubusercontent.com` as the issuer (the bundle's certificate, read 2026-09-26).
-Those are the two values a GitHub Actions workflow gets under keyless signing.
-The identity is the workflow file at a branch, and no long-lived key exists.
-(documentation: [OIDC in Fulcio L40–L43](https://github.com/sigstore/docs/blob/842c30981f1bf5061fe0d370512db4de8cdf3b33/content/en/certificate_authority/oidc-in-fulcio.md#L40-L43); [Signing blobs L10–L12](https://github.com/sigstore/docs/blob/842c30981f1bf5061fe0d370512db4de8cdf3b33/content/en/cosign/signing/signing_with_blobs.md#L10-L12))
-The `howp-archive` job of `.github/workflows/integration.yml` downloads the table and the bundle of the release `binaries.json` names.
-It runs `cosign verify-blob` against that identity and issuer, then compares the digest the table lists for the archive with the one in `binaries.json`.
-(documentation: [Verifying blobs L34–L35](https://github.com/sigstore/docs/blob/842c30981f1bf5061fe0d370512db4de8cdf3b33/content/en/cosign/verifying/verify.md#L34-L35))
-A release without a bundle, or with a table another identity signed, fails that job.
-So the digests the skill trusts are the ones CI has checked against a signed table.
-The skill itself keeps its SHA-256 check and never calls cosign.
-
-Two alternatives lost.
-GitHub artifact attestations would come from the build, which runs in a private repository because the sources are not public.
-In a private repository, attestations need a GitHub Enterprise Cloud plan.
-(documentation: [GitHub Docs, attestations availability](https://github.com/github/docs/blob/dec1018594fb5061bb1554dcafea7968fb10ff96/data/reusables/gated-features/attestations.md))
-cosign inside the skill would need cosign on every user's machine.

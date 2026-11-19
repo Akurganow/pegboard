@@ -51,11 +51,10 @@ contract_version: 4
 - plugins
 - src/cognitive-load/CHANGELOG.md
 - src/design-review/CHANGELOG.md
+- src/distilled-research/CHANGELOG.md
 - src/prose-discipline/CHANGELOG.md
 - src/toc-thinking/CHANGELOG.md
 - src/triz-thinking/CHANGELOG.md
-- plugins/howp/binaries.json
-- plugins/howp/skills/forecast/references/commands.md
 - tools/schemas
 - tools/evals-fixtures
 - tools/package-lock.json

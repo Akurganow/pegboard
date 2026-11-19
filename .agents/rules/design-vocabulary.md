@@ -16,8 +16,7 @@ interface is what a reader must learn to use a unit without reading it:
 - a function's signature and docstring;
 - a shell function's arguments and exit status;
 - a script's arguments (`tools/regenerate.sh` and `tools/build.sh` take none);
-- a tool's subcommands (`tools/evals.py` has `matrix`, `run`, `report`,
-  `validate` and `selftest`);
+- a tool's subcommands (`tools/evals.py` takes one, as `main` lists them);
 - a workflow's `workflow_call` inputs, secrets and job `outputs`.
 
 ## Name the symptom
@@ -81,7 +80,7 @@ The `design-review` package states the first four with chapter references, in
 - **Already present means present where the code runs.** A dependency counts
   when the code's own environment provides it. A proof of misfit names the file
   that provides it. The files are:
-  - the `pip install` line of `.github/workflows/conformance.yml`;
+  - the `pip install` lines in `.github/workflows/`;
   - `tools/package.json`;
   - the tool lists at the top of `tools/regenerate.sh` and `tools/build.sh`;
   - an `import` in the program itself.
@@ -132,7 +131,7 @@ commit.
   `grade_sessions(..., grader=)`, `grade_runs(..., load=, grader=)`,
   `report_tag(..., file=)` and `check_folder(..., load=)` take a callable that
   production never replaces. The selftest passes a fake to each, and
-  `_fixture_tree` points `PLUGINS_DIR` and `EVALS_DIR` at a temporary tree.
+  `_fixture_tree` points `SOURCES_DIR` and `EVALS_DIR` at a temporary tree.
   The `conformance.yml` comment records that the selftest calls no model, and a
   comment above `check_folder` records its seam. These parameters have a
   non-default caller.
