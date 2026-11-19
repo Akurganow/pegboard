@@ -454,7 +454,7 @@ jobs:
 
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.12"
+          python-version: "3.15"
 
       # skills-ref documents only a source install, so it is installed from its
       # repository at a pinned commit (version 0.1.0). Documentation:
