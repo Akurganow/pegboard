@@ -11,16 +11,12 @@ The check is `tools/check-conformance.py`, and it must exit 0.
 It imports `jsonschema`, which validates each `plugins/<name>/plugin.json`
 against the schema vendored in `tools/schemas/` and each
 `src/<name>/source.json` against `tools/source.schema.json`, and `yaml`,
-which reads `SKILL.md` front matter. Both have to be importable by whatever
-runs the script. A schema cannot compare a value with the folder that holds
-it, so the check also requires `name` in `source.json` to equal the folder
-name. Without that, a catalogue lists `./bundles/<folder>` while the manifest
-there installs under another name. **How they
-get there is not recorded here, and neither is the invocation**: those are
-facts about an environment, and they belong to whoever runs the check there.
-An environment that writes its own down is
-`.github/workflows/conformance.yml`, which is also where CI runs this same
-check, so a change that breaks it does not merge.
+which reads `SKILL.md` front matter. `.github/workflows/conformance.yml`
+installs both and runs this same check in CI, so a change that breaks it does
+not merge. A schema cannot compare a value with the folder that holds it, so
+the check also requires `name` in `source.json` to equal the folder name.
+Without that, a catalogue lists `./bundles/<folder>` while the manifest there
+installs under another name.
 
 Run it before saying a package conforms; "it looks right" is not a result the
 check produced.
