@@ -40,6 +40,12 @@ on:
   pull_request:
     paths: *read
 
+# A newer push to a pull request cancels the run of the older one. Each push
+# to main keeps its run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
