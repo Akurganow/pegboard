@@ -41,12 +41,6 @@ looks right" is not a result the check produced.
 
 `LAWMAN.md` is the constitution the Lawman roles read here.
 
-## Content states the action, not the instrument
-
-A sentence here says what has to be done. Which tool does it is a fact about
-an environment and belongs to whoever runs there — which is why no rule file
-names an installer, an interpreter, or a route to GitHub.
-
 ## What no change does
 
 Three prohibitions bite hardest and are the easiest to breach without meaning

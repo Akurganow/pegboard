@@ -11,16 +11,12 @@ The check is `tools/check-conformance.py`, and it must exit 0.
 It imports `jsonschema`, which validates each `plugins/<name>/plugin.json`
 against the schema vendored in `tools/schemas/` and each
 `src/<name>/source.json` against `tools/source.schema.json`, and `yaml`,
-which reads `SKILL.md` front matter. Both have to be importable by whatever
-runs the script. A schema cannot compare a value with the folder that holds
-it, so the check also requires `name` in `source.json` to equal the folder
-name. Without that, a catalogue lists `./bundles/<folder>` while the manifest
-there installs under another name. **How they
-get there is not recorded here, and neither is the invocation**: those are
-facts about an environment, and they belong to whoever runs the check there.
-An environment that writes its own down is
-`.github/workflows/conformance.yml`, which is also where CI runs this same
-check, so a change that breaks it does not merge.
+which reads `SKILL.md` front matter. `.github/workflows/conformance.yml`
+installs both and runs this check in CI, so a change that breaks it does
+not merge. A schema cannot compare a value with the folder that holds it, so
+the check also requires `name` in `source.json` to equal the folder name.
+Without that, a catalogue lists `./bundles/<folder>` while the manifest there
+installs under another name.
 
 Run it before saying a package conforms; "it looks right" is not a result the
 check produced.
@@ -190,6 +186,9 @@ which `.github/workflows/evals.yml` runs after a release.
 `conformance.yml` runs its selftest, which calls no model, and its `validate`
 subcommand, which checks that every folder under `evals/` has its skill and
 loads.
+
+Text, comments and commit messages are in English. A quotation or an eval
+prompt may be in another language.
 
 `scripts/` holds maintainer tools that no check, workflow or catalogue reads.
 Its one program, `scripts/compose-banner.py`, writes the README banner,

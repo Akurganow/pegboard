@@ -6,13 +6,10 @@ act on, and the standing rule is that a claim names where it was read.
 
 ## The rule
 
-- **Documentation first, source only where it does not answer.**
-  An order rather than a choice, and the owner set it: a pass that works
-  source-first is invalid and its conclusions are not used, however right
-  they turn out to be. "The documentation is unreachable" is a claim to be
-  tested, not accepted — and a vendor whose site is blocked usually publishes
-  the same pages as Markdown in its own repository, which is documentation
-  and is read first.
+- **Documentation first, source only where it does not answer.** "The
+  documentation is unreachable" is a claim to be tested, not accepted — and
+  a vendor whose site is blocked usually publishes the same pages as
+  Markdown in its own repository, which is documentation and is read first.
 - **Cite the source, in the text, and say which kind it is.** A statement
   about a client's behaviour cites that client's documentation or its source,
   by link, at the place the statement is made — not in a commit message, not
