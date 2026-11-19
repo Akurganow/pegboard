@@ -18,7 +18,8 @@ is written.
   statement names the source and the revision read. It says which kind the
   source is: documentation, source, or a run of the client's own code. A
   link stands in a document only where the reader follows it to act, such as
-  a client's install page.
+  a client's install page. A skill's own bibliography, its
+  `references/sources.md`, is the skill's content and keeps its sources.
 - **Never invent a command.** Where a client's install command could not be
   verified, none is stated and the reason is given. Declining to answer is a
   correct answer here; a plausible command that does not exist is worse than
