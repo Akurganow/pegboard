@@ -32,7 +32,7 @@ The reasons built on these facts are in [About this repository's design](design.
 ### Always-on instructions
 
 - A `CLAUDE.md` at the plugin root is not loaded as context.
-  The page directs instructions into a skill.
+  The manifest reference directs instructions into a skill.
 - The component list names no `rules/` directory.
 - For `SessionStart`, Claude Code adds plain-text stdout to the context.
   Stdout that starts with `{` and ends with `}` is parsed as JSON instead.
@@ -43,7 +43,7 @@ The reasons built on these facts are in [About this repository's design](design.
 - The Hooks page advises writing hook context as factual statements, not imperative system instructions.
   Text framed as out-of-band system commands can trigger Claude's prompt-injection defences, and Claude then shows it to the user instead.
 - `SubagentStart` adds its `additionalContext` to a subagent's context before the first prompt.
-  The page documents no plain-stdout route for this event.
+  The Hooks page documents no plain-stdout route for this event.
 - When the hook runs again for the same subagent, Claude Code injects its context only if the earlier copy is gone.
   Auto-compaction discards that copy, so the next run's context arrives again.
 - A command hook without `args` runs in shell form: `sh -c` on macOS and Linux, Git Bash on Windows.
@@ -330,7 +330,7 @@ CI installs nothing into Cursor, so these facts rest on its documentation alone.
 - Team marketplace, on Teams and Enterprise plans: **Dashboard**, **Plugins & MCPs**, **Team Marketplaces**, **Add Marketplace**, **Import from Repo**, then the repository URL.
   Import accepts GitHub, GitLab, Bitbucket and Azure DevOps URLs.
   Developers install from **Customize**.
-- The page does not say which catalogue file **Import from Repo** reads.
+- Cursor's Plugins page does not say which catalogue file **Import from Repo** reads.
   The reference names `.cursor-plugin/marketplace.json` for a multi-plugin repository, and no page mentions `.claude-plugin/marketplace.json`.
 - Local: put either plugin format in `~/.cursor/plugins/local`, then restart Cursor or run **Developer: Reload Window**.
   On Enterprise, **Allow Local Plugin Imports** is off by default.
