@@ -121,7 +121,7 @@ Source: Kiro documentation, [Create a power](https://kiro.dev/docs/powers/create
 
 <!-- install:end -->
 
-[docs/clients.md](docs/clients.md) lists the facts that differ between clients, each with its source.
+[docs/clients.md](docs/clients.md) lists the facts that differ between clients.
 
 ## Trust
 
@@ -149,7 +149,7 @@ reach a host the agent would skip. Its
 
 ## Documentation
 
-- [How each client loads a package](docs/clients.md): what each client reads, with sources.
+- [How each client loads a package](docs/clients.md): what each client reads.
 - [About this repository's design](docs/design.md): why the builds, the catalogues and the conformance check are shaped as they are.
 - [CONTRIBUTING.md](CONTRIBUTING.md#run-the-checks): how to regenerate the builds and run the conformance check.
 - [Agent Plugins 1.0.0](https://agent-plugins.org/specification): the specification that `plugins/<name>` follows.
