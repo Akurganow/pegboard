@@ -410,8 +410,8 @@ def client_env(client: str) -> dict:
     return env
 
 
-# Each session runs in a new empty directory outside the checkout, so the
-# repository's own skills under `.agents/skills` stay out of the session. Codex
+# Each session runs in a new empty directory outside the checkout, so no skill
+# under a checkout's `.agents/skills` loads into the session. Codex
 # loads skills from `.agents/skills` between the working directory and the
 # repository root (documentation, read 2026-10-08:
 # https://learn.chatgpt.com/docs/build-skills, "Where Codex loads local skills").
