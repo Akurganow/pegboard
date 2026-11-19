@@ -12,7 +12,7 @@ nothing executable. The Agent Skills project does publish a reference
 validator, `skills-ref`, but its own README says "This library is intended
 for demonstration purposes only. It is not meant to be used in production",
 and it is distributed from a source tree rather than a package index, so
-this script does not depend on it. `conformance.yml` still runs it on every
+this script does not depend on it. `integration.yml` still runs it on every
 skill, installed from a pinned commit, as a second check.
 
 So the split here is: everything the official schema can decide is decided
@@ -211,10 +211,7 @@ def check_manifest(plugin_root: Path, validator) -> dict | None:
     # manifest is the real file, never a link.
     # Codex's loader refuses a symlinked root manifest outright --
     # find_plugin_manifest_path() calls symlink_metadata() and returns None
-    # for a symlink, pinned by rejects_symlinked_root_plugin_manifest. From
-    # source, not documentation.
-    # Permalinked, because a branch URL dates nothing:
-    # https://github.com/openai/codex/blob/e3e5ad28470f6a225301518c30a66e749a880164/codex-rs/utils/plugins/src/plugin_namespace.rs
+    # for a symlink, pinned by rejects_symlinked_root_plugin_manifest.
     if manifest_path.is_symlink():
         fail(where, "plugin.json at the plugin root is a symlink; it must be the real file")
         return None
@@ -429,15 +426,6 @@ def check_no_symlinks(root: Path) -> None:
     plugin fingerprint, and Git for Windows checks any symlink out as a plain
     file holding the link text unless symlinks are enabled. A generated tree
     holds copies, so a link there is a build that did not copy.
-
-    Sources:
-    - Codex, source, for the fingerprint refusing an entry that is neither a
-      file nor a directory, and the installer copying only those two kinds:
-      https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/hooks/src/engine/plugin_fingerprint.rs#L83-L87
-      https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/core-plugins/src/store.rs#L737-L760
-    - Git for Windows, documentation: https://gitforwindows.org/symbolic-links
-    - the git manual, `core.symlinks`, documentation:
-      https://github.com/git/git/blob/c44beea485f0f2feaf460e2ac87fdd5608d63cf0/Documentation/config/core.adoc#L237-L246
     """
     if root.is_symlink():
         fail(str(root.relative_to(REPO_ROOT)), "is a symlink; generated directories hold real files")
