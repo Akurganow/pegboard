@@ -71,7 +71,7 @@ The reasons built on these facts are in [About this repository's design](design.
 - `claude plugin validate` documents `--strict` and `--json`.
   The CLI reference does not document `--profile`.
 - `--profile directory` exits 1 when the plugin directory would refuse a submission on a check the command runs.
-  Claude Code 2.1.305 is the first published version whose help lists it, and 2.1.304 lacks it.
+  Older releases of Claude Code lack it.
 - The directory profile reports findings with `code`, `severity`, `blocking` and `hold`.
 
 ### Windows and PowerShell
@@ -138,9 +138,7 @@ The reasons built on these facts are in [About this repository's design](design.
 - An unknown top-level key in `hooks.json` fails the parse.
   The parser ignores an unknown key inside a handler.
 - The loader returns no hooks for a package in Agent Plugins format, against the documentation above.
-  Codex 0.155.1, tagged `rust-v0.155.1`, has the same check.
-- [openai/codex#39895](https://github.com/openai/codex/issues/39895) and [openai/codex#47925](https://github.com/openai/codex/issues/47925) report the same.
-- In Codex 0.155.1, `plugin_hooks` is a removed compatibility flag for plugin-bundled hooks.
+- `plugin_hooks` is a removed compatibility flag for plugin-bundled hooks.
   The config parser skips a `plugin_hooks` toggle.
 
 ### Catalogue and bundle manifest
@@ -155,7 +153,7 @@ The reasons built on these facts are in [About this repository's design](design.
   The top level reads `name`, `plugins` and `interface.displayName`, so `owner` and `description` are ignored.
 - Codex tries `.codex-plugin/plugin.json`, then `.claude-plugin/plugin.json`, then `.cursor-plugin/plugin.json`.
   The first that exists decides, and a root Agent Plugins `plugin.json` outranks all three.
-- Codex 0.155.1 reads `.codex-plugin/plugin.json`.
+- Codex reads `.codex-plugin/plugin.json`.
 - The manifest parser reads `name`, `version`, `description`, `keywords`, `skills`, `mcpServers`, `apps`, `hooks`, `interface` and `extensions`.
   It drops every other key without a message, `author`, `homepage`, `repository`, `license` and `category` among them.
 - The submission documentation says to omit `$schema` from a standalone Codex compatibility manifest.
@@ -271,7 +269,7 @@ The reasons built on these facts are in [About this repository's design](design.
 - The agent's `skills_list` tool shows the qualified name.
 - A package skill gets no slash command, because Hermes builds slash commands from skill directories only.
   The agent loads a package skill with the `skill_view` tool and its qualified name.
-- In Hermes 0.21.5, neither `hermes plugins show`, `hermes plugins list --json` nor `hermes skills list` prints a portable package's skill names.
+- Neither `hermes plugins show`, `hermes plugins list --json` nor `hermes skills list` prints a portable package's skill names.
   `hermes plugins show` prints name, version, description, `Status`, `Source`, `Key`, `Emits` and `Listens`.
 - `hermes plugins list --json` carries `name`, `status`, `version`, `description`, `source` and `removed`.
   `hermes skills list` reads skill directories only.
@@ -298,9 +296,7 @@ The reasons built on these facts are in [About this repository's design](design.
 
 ## Cursor
 
-Documentation pages below were read on 2026-11-04.
-No Cursor client ran for these facts, and CI installs nothing into Cursor.
-The pages show no commit, so each link is dated by that read.
+CI installs nothing into Cursor, so these facts rest on its documentation alone.
 
 ### Manifest and catalogue
 
@@ -347,8 +343,7 @@ The pages show no commit, so each link is dated by that read.
 
 ## OpenClaw
 
-Links are permalinks at commit `db6ac58`, which is `db6ac584cf205ea9a72de7ae83a4e65199b926a4`.
-No OpenClaw client ran for these facts, and CI installs nothing into OpenClaw.
+CI installs nothing into OpenClaw, so these facts rest on its documentation and source alone.
 
 - OpenClaw reads `.claude-plugin/marketplace.json`, then `marketplace.json` at the marketplace root.
 - For a marketplace on GitHub or git, a plugin entry must stay inside the cloned repository, and OpenClaw accepts relative path sources.
@@ -365,14 +360,11 @@ No OpenClaw client ran for these facts, and CI installs nothing into OpenClaw.
   The documentation never mentions a root `rules/`, and the only `rules` lookup in the manifest reader is for `.cursor/rules`.
 - A bundle's skill roots load as normal OpenClaw skills, in every bundle format.
   A Codex bundle lists `skills/` as content.
-- The hooks answer comes from reading source, not from running OpenClaw.
 - So `prose-discipline` gets its skills from OpenClaw, and no hook or rule.
 
 ## Kiro
 
-Pages below are Kiro documentation, read as Markdown on 2026-11-04.
-Each page shows "Page updated" and no commit.
-Kiro is closed source, so no source was read, and CI installs nothing into Kiro.
+Kiro is closed source, and CI installs nothing into Kiro, so these facts rest on its documentation alone.
 
 - Powers follow the Agent Plugins specification.
   Kiro supports the Agent Plugins format (`plugin.json`) and the legacy `POWER.md` format.
@@ -401,11 +393,10 @@ Kiro is closed source, so no source was read, and CI installs nothing into Kiro.
 - A companion row asks to keep launchers and package installs out of each script that a hook runs, and a hook that runs a non-shell file from the plugin is held for a reviewer.
 - Validate blocks a command hook from an organization that is not Verified.
   The finding is "Hooks of type `command` accepted only from Verified organizations", and its text says the rule covers hooks of every type.
-  It named `bundles/prose-discipline/hooks/hooks.json`, whose two commands are a literal `echo` and a literal `printf`.
-- The same report blocks `bundles/prose-discipline/rules/prose-discipline.mdc`, under "Files outside the allowed list accepted only from Verified organizations".
+  It names `bundles/prose-discipline/hooks/hooks.json`, whose two commands are a literal `echo` and a literal `printf`.
+- Validate also blocks `bundles/prose-discipline/rules/prose-discipline.mdc`, under "Files outside the allowed list accepted only from Verified organizations".
   The list it gives is Markdown, text, JSON, YAML, and PNG, JPEG, GIF, WebP and ICO images.
-- `claude plugin validate --profile directory` on Claude Code 2.1.305 reports no finding for the same two files.
+- `claude plugin validate --profile directory` reports no finding for the same two files.
 - The checklist states neither Verified-only rule, and no page read says how an organization becomes Verified.
   The pages read were the checklist, Submit your plugin, Publish to the directory, Plugin structure and testing, Plugin feature support across platforms and Connector verification.
-- [anthropics/claude-plugins-official#7024](https://github.com/anthropics/claude-plugins-official/issues/7024) asks how an organization becomes Verified.
 - The validator is not published.
