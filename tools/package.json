@@ -2,6 +2,6 @@
   "name": "pegboard-tools",
   "private": true,
   "devDependencies": {
-    "doctoc": "2.2.1"
+    "doctoc": "2.5.0"
   }
 }
