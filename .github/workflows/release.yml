@@ -1,7 +1,7 @@
 name: release
 
 # Releases each package that has a feat, fix or breaking commit since its last
-# tag, straight on main, with cocogitto (https://docs.cocogitto.io/guide/monorepo).
+# tag, straight on main, with cocogitto.
 # cog.toml names the packages and writes the version into source.json, then
 # builds every manifest from it.
 #
@@ -76,8 +76,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/cog" --version | grep -F '7.0.0'
 
-      # Without a tag, cocogitto reads a package's history from the first commit
-      # (source: https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L190-L194).
+      # Without a tag, cocogitto reads a package's history from the first commit.
       # That would release a version no seed recorded, so a missing seed stops the run.
       - name: Refuse to release a package with no seed tag
         run: |
@@ -140,8 +139,7 @@ jobs:
   # A job of this run, not a workflow of its own. The tags and releases above
   # are made with GITHUB_TOKEN, and events from GITHUB_TOKEN start no workflow
   # run. A called workflow can only lower the GITHUB_TOKEN permissions its caller
-  # passes, so evals.yml may lower these but not raise them
-  # (documentation: https://github.com/github/docs/blob/75ea7dd097a5564f27364a5b70eaa1979106eabd/content/actions/reference/workflows-and-actions/reusing-workflow-configurations.md#L91).
+  # passes, so evals.yml may lower these but not raise them.
   evals:
     needs: release
     if: needs.release.outputs.released == 'true'

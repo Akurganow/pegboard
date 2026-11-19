@@ -14,9 +14,7 @@ name: conformance
 # Both events start a run only when a path a job here reads has changed. A
 # change to any other file, such as a page under docs/, starts none, because
 # no job would read it. If `main` comes to require a check of this workflow, a
-# pull request that starts no run stays blocked (documentation:
-# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax,
-# "on.<push|pull_request|pull_request_target>.<paths|paths-ignore>").
+# pull request that starts no run stays blocked.
 on:
   push:
     branches: [main]

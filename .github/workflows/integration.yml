@@ -9,8 +9,7 @@ name: integration
 # form. Claude Code, skills-ref and Hermes also validate the builds. No step
 # calls a model.
 #
-# The windows-latest image installs Git with symlinks enabled
-# (source: https://github.com/actions/runner-images/blob/ebade26c60adcb867918b31c8f8caa37343a3d39/images/windows/scripts/build/Install-Git.ps1).
+# The windows-latest image installs Git with symlinks enabled.
 # A Windows job here proves loading on that image, not on a default Git for
 # Windows checkout.
 #
@@ -96,14 +95,12 @@ jobs:
     env:
       CLIENT: ${{ matrix.client }}
       PAIRS: ${{ needs.packages.outputs.pairs }}
-      # Keeps Claude Code at the pinned version
-      # (documentation: https://code.claude.com/docs/en/setup, "Disable auto-updates").
+      # Keeps Claude Code at the pinned version.
       DISABLE_AUTOUPDATER: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Claude Code's npm package needs Node.js 22 or later
-      # (documentation: https://code.claude.com/docs/en/setup, "Install with npm").
+      # Claude Code's npm package needs Node.js 22 or later.
       - if: matrix.client == 'claude' || matrix.client == 'codex'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -153,10 +150,7 @@ jobs:
 
       # Hermes documents installing a package from a repository. To test this checkout,
       # each package is copied into the user plugin directory, ~/.hermes/plugins, here under $HERMES_HOME.
-      # A portable package sits there too and stays disabled until enabled. Documentation:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/developer-guide/plugins/index.md#L62-L71
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/user-guide/features/plugins.md#L127
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/developer-guide/plugins/index.md#L748
+      # A portable package sits there too and stays disabled until enabled.
       # The root catalogues name ./bundles/<name> for each package. Hermes reads no
       # catalogue here, so it gets the Agent Plugins build in plugins/<name>.
       - name: Add the marketplace and install every package
@@ -185,13 +179,11 @@ jobs:
               hermes plugins list ;;
           esac
 
-      # claude plugin details prints a component inventory (documentation:
-      # https://code.claude.com/docs/en/plugins/cli-reference, "plugin details").
-      # codex debug prompt-input renders the model-visible prompt (documentation:
-      # https://learn.chatgpt.com/docs/developer-commands); running it shows the skill catalogue there.
+      # claude plugin details prints a component inventory.
+      # codex debug prompt-input renders the model-visible prompt; running it
+      # shows the skill catalogue there.
       # omp read is documented only by its own --help in 18.2.8 (running).
-      # It resolves skill://<name> to that skill's SKILL.md (documentation):
-      # https://github.com/can1357/oh-my-pi/blob/6204b7508014bcdf12d95f0b3fd470905fd99344/docs/skills.md#L169
+      # It resolves skill://<name> to that skill's SKILL.md.
       # Each pattern matches the line naming the skill, because a package's name
       # or description can contain the skill name.
       - name: Assert every skill is listed
@@ -377,15 +369,13 @@ jobs:
       run:
         shell: bash
     timeout-minutes: 20
-    # Keeps the pinned version the one that runs
-    # (documentation: https://code.claude.com/docs/en/setup, "Disable auto-updates").
+    # Keeps the pinned version the one that runs.
     env:
       DISABLE_AUTOUPDATER: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # The npm package needs Node.js 22 or later
-      # (documentation: https://code.claude.com/docs/en/setup, "Install with npm").
+      # The npm package needs Node.js 22 or later.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "26"
@@ -400,7 +390,6 @@ jobs:
 
       # --strict treats the warnings as errors, so an unrecognised field or a
       # missing metadata field fails the run.
-      # (documentation: https://code.claude.com/docs/en/plugins/cli-reference, "plugin validate").
       - name: claude plugin validate --strict, per bundle and catalogue
         run: |
           status=0
@@ -483,9 +472,6 @@ jobs:
 
       # The project's own installer, fetched and checked out at the pinned
       # commit. --skip-setup and --skip-browser skip the wizard and Playwright.
-      # Documentation for --skip-browser; the script's usage text (source) for the rest:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/getting-started/installation.md#L138-L140
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/scripts/install.sh#L172-L180
       - name: Install Hermes
         run: |
           curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://raw.githubusercontent.com/NousResearch/hermes-agent/$HERMES_COMMIT/scripts/install.sh" \

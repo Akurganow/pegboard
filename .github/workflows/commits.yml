@@ -4,10 +4,8 @@ name: commits
 # and the release reads it. A commit touching a path the release reads must be
 # conventional, and a commit that changes src/ or a shared file must carry the
 # builds it produces. The release bump silently skips a package commit that
-# does not parse (source, and measured in a rehearsal bump with cog 7.0.0:
-# https://github.com/cocogitto/cocogitto/blob/055a9fa8db8ac8ce50074d50162b48b92e9d0c47/crates/cocogitto/src/conventional/bump.rs#L204-L208).
-# A commit that touches no path the release reads releases nothing, so its
-# message may be free-form.
+# does not parse. A commit that touches no path the release reads releases
+# nothing, so its message may be free-form.
 #
 # No path list: GitHub filters a pull request by its whole diff, and a commit
 # whose change a later commit undoes is not in that diff.
