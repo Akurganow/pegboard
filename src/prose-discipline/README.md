@@ -103,14 +103,6 @@ and Claude Code adds that text to the context. The hook also runs on a resume, a
 so the rules come back after `/clear` or a compaction removes them. The
 `SubagentStart` hook hands each subagent the same text as `additionalContext`.
 
-Sources, all Claude Code documentation:
-
-- [Hooks](https://code.claude.com/docs/en/hooks), the `SessionStart` and
-  `SubagentStart` sections: the `SessionStart` matchers, and plain stdout and
-  `additionalContext` as context.
-- [Hooks guide](https://code.claude.com/docs/en/hooks-guide), "Re-inject
-  context after compaction".
-
 ### Codex
 
 The Codex manifest, `.codex-plugin/plugin.json`, declares
@@ -122,49 +114,12 @@ and every release changes `version` in the manifests, so it asks again after
 each release. Codex also lists every installed skill and tells the model to
 use one whose description matches the task.
 
-Sources:
-
-- Codex documentation,
-  [plugin packaging](https://developers.openai.com/plugins/build/plugins):
-  legacy packages declare `hooks` in `.codex-plugin/plugin.json`, loading an
-  enabled plugin's hooks, and hook trust.
-- Codex documentation, [hooks](https://learn.chatgpt.com/docs/hooks):
-  the `SessionStart` and `SubagentStart` events, `commandWindows`, and a new
-  review after a plugin update.
-- Codex source,
-  [`loader.rs` L1220–L1275](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/core-plugins/src/loader.rs#L1220-L1275):
-  a declared `hooks` entry replaces the default `hooks/hooks.json`.
-- Codex source,
-  [`plugin_trust.rs`](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/hooks/src/engine/plugin_trust.rs#L29-L69)
-  and [`plugin_fingerprint.rs`](https://github.com/openai/codex/blob/6ff1e1ca3b30fc8b914720681fcf5fe62e95f856/codex-rs/hooks/src/engine/plugin_fingerprint.rs#L13-L91),
-  at `rust-v0.166.0`: trust is bound to a hash of every file in the installed
-  plugin.
-- Codex source,
-  [`catalog_prompt.rs`](https://github.com/openai/codex/blob/549455f3ec5a7f2a0489894543a0e49f307142a6/codex-rs/ext/skills/src/catalog_prompt.rs#L3-L8):
-  the skill trigger rule.
-- Codex source,
-  [`startup_hooks_review.rs`](https://github.com/openai/codex/blob/694d8d45bd3d440fa4f4cbf22667ac6c17a13758/codex-rs/tui/src/startup_hooks_review.rs#L228-L271):
-  the startup prompt that asks you to trust new or changed hooks.
-
 ### Oh-My-Pi
 
 Oh-My-Pi reads `rules/prose-discipline.mdc` from the bundle that a
 marketplace install copies. The file's `alwaysApply: true` puts its full text
 into the system prompt of every request. The file names no agents, so
 subagents get it too.
-
-Sources:
-
-- Oh-My-Pi documentation,
-  [`docs/context-files.md`](https://github.com/can1357/oh-my-pi/blob/ba56afb26280a6a3195c329fa66a3f8fb52f82eb/docs/context-files.md#L74):
-  marketplace plugins contribute rules.
-- Oh-My-Pi documentation,
-  [`docs/rulebook-matching-pipeline.md`](https://github.com/can1357/oh-my-pi/blob/ba56afb26280a6a3195c329fa66a3f8fb52f82eb/docs/rulebook-matching-pipeline.md#L248-L262):
-  `alwaysApply` puts the full rule into the system prompt, and a rule with
-  no `agents` applies to every agent.
-- Oh-My-Pi source,
-  [`claude-plugins.ts`](https://github.com/can1357/oh-my-pi/blob/ba56afb26280a6a3195c329fa66a3f8fb52f82eb/packages/coding-agent/src/discovery/claude-plugins.ts#L266-L285):
-  the loader for a plugin's `rules/` directory.
 
 ### Cursor
 
@@ -175,10 +130,6 @@ parses `hooks/hooks.json`, where the bundle holds Claude Code's hooks file.
 The documentation does not say whether Cursor accepts that file, and nothing
 here ran it. CI does not install the plugin into Cursor.
 
-Source: Cursor documentation,
-[Plugins reference](https://cursor.com/docs/reference/plugins), component
-discovery and rules, read 2026-11-04.
-
 ### OpenClaw
 
 OpenClaw loads this plugin's skill and nothing else. It picks the Codex
@@ -186,21 +137,6 @@ manifest when a bundle holds several, detects `hooks/hooks.json` without
 running it, reads a Codex manifest's `hooks` value as a list of hook
 directories, so `hooks/codex.json` loads nothing, and reads no plugin-root
 `rules/`. CI does not install the plugin into OpenClaw.
-
-Sources, at OpenClaw commit `db6ac58`:
-
-- OpenClaw source,
-  [`bundle-manifest.ts` L388–L397](https://github.com/openclaw/openclaw/blob/db6ac584cf205ea9a72de7ae83a4e65199b926a4/src/plugins/bundle-manifest.ts#L388-L397):
-  the Codex manifest comes first.
-- OpenClaw documentation,
-  [`docs/plugins/bundles.md` L197–L201](https://github.com/openclaw/openclaw/blob/db6ac584cf205ea9a72de7ae83a4e65199b926a4/docs/plugins/bundles.md#L197-L201):
-  Claude `hooks/hooks.json` is recognised and not run.
-- OpenClaw source,
-  [`discovery.ts` L178–L180](https://github.com/openclaw/openclaw/blob/db6ac584cf205ea9a72de7ae83a4e65199b926a4/src/hooks/discovery.ts#L178-L180):
-  a hook root that is not a directory loads nothing.
-- OpenClaw source,
-  [`bundle-manifest.ts` L170–L175](https://github.com/openclaw/openclaw/blob/db6ac584cf205ea9a72de7ae83a4e65199b926a4/src/plugins/bundle-manifest.ts#L170-L175):
-  the only `rules` lookup is for `.cursor/rules`.
 
 ### Hermes
 
@@ -228,30 +164,7 @@ trailing `-` and `_`. The hash is the
 first eight hex digits of the SHA-256 of that `name`. Hermes builds the
 namespace from that `name` for a package installed directly under the
 plugins directory, and `hermes plugins install` installs it there under the
-manifest `name`. Source: Hermes source,
-[`hermes_cli/plugins_manifest.py` lines 60–69](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugins_manifest.py#L60-L69)
-and [lines 455–467](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugins_manifest.py#L455-L467), and
-[`hermes_cli/plugins_cmd.py` lines 873–876](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugins_cmd.py#L873-L876)
-and [line 210](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugins_cmd.py#L210).
-
-Sources:
-
-- Hermes documentation,
-  [`user-guide/cli.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/website/docs/user-guide/cli.md#L297-L310):
-  `skills.auto_load`.
-- Hermes documentation,
-  [`developer-guide/plugins/index.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/website/docs/developer-guide/plugins/index.md#L71-L77):
-  what a portable package provides, and the form of its namespace.
-- Hermes documentation,
-  [`developer-guide/plugins/index.md`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/website/docs/developer-guide/plugins/index.md#L845):
-  plugin skills are not in the system prompt's skills index.
-- Hermes source,
-  [`agent/skill_commands.py`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/agent/skill_commands.py#L165-L192) and
-  [`tools/skills_tool.py`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/tools/skills_tool.py#L573-L590):
-  `skills.auto_load` resolves a plugin skill by its qualified name.
-- Hermes source,
-  [`agent/skill_commands.py`](https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/agent/skill_commands.py#L653-L681):
-  the auto-load wrapper.
+manifest `name`.
 
 ## What's inside
 
@@ -272,8 +185,7 @@ Sources:
 The hooks print text with a literal `echo` or `printf`. They read no file,
 name no variable and run no script, so they need no `awk` and no runtime. On
 Windows, Claude Code runs shell-form hooks in Git Bash when it is installed,
-and in PowerShell otherwise. Source: Claude Code documentation,
-[hooks](https://code.claude.com/docs/en/hooks), "Exec form and shell form".
+and in PowerShell otherwise.
 The `SubagentStart` command uses `printf`. Whether PowerShell has a `printf`
 is untested, so without Git Bash that command may print nothing, and a
 subagent then gets no rules. Codex runs `cmd.exe` on Windows, and its file
@@ -281,13 +193,9 @@ carries a `commandWindows` for it. The skill still ships.
 
 The builder keeps the short form under 8,000 bytes, because Codex's default
 2,500-token threshold for hook context and Claude Code's 10,000-character cap
-would otherwise cut it ([Codex hooks](https://learn.chatgpt.com/docs/hooks),
-[Claude Code hooks](https://code.claude.com/docs/en/hooks), documentation). It
-keeps the Windows command under 8,191 characters, the command-line limit of
-cmd.exe
-([Microsoft](https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/command-line-string-limitation),
-documentation), and refuses characters that `sh`, PowerShell or cmd.exe would
-read as something other than text.
+would otherwise cut it. It keeps the Windows command under 8,191 characters,
+the command-line limit of cmd.exe, and refuses characters that `sh`,
+PowerShell or cmd.exe would read as something other than text.
 [About this repository's design](https://github.com/Akurganow/pegboard/blob/main/docs/design.md#no-hook-blocks-the-agent)
 gives each reason.
 
@@ -296,7 +204,7 @@ files. It adds no MCP servers and no settings files.
 
 ## What the standard rests on
 
-The limits come from [ASD-STE100 Issue 9](https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf) (2025), read in full: 20 words for a step, 25 for any other sentence, one instruction per sentence, noun clusters of three words, paragraphs of six sentences. This package drops its controlled dictionary and adds rules against choppy text. All sources below were read on 2026-11-11.
+The limits come from [ASD-STE100 Issue 9](https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf) (2025), read in full: 20 words for a step, 25 for any other sentence, one instruction per sentence, noun clusters of three words, paragraphs of six sentences. This package drops its controlled dictionary and adds rules against choppy text.
 
 | Kind | Sources |
 | :-- | :-- |
