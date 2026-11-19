@@ -639,7 +639,7 @@ def compare(old_runs: list[dict], new_runs: list[dict]) -> dict:
     for metric in METRICS:
         old = [v for r in old_runs if (v := metrics(r["sessions"], r.get("always_on", False))[metric]) is not None]
         new = [v for r in new_runs if (v := metrics(r["sessions"], r.get("always_on", False))[metric]) is not None]
-        # A range needs all three repeats on both sides.
+        # A range needs every repeat on both sides.
         if len(old) == REPEATS and len(new) == REPEATS and regressed(metric, old, new):
             found[metric] = (old, new)
     return {"comparable": True, "regressed": found}
