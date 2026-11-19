@@ -169,7 +169,7 @@ def parse_frontmatter(text: str):
     of a line as a document marker.
 
     Splitting on the substring `---` instead — which is what the Agent Skills
-    reference validator `skills-ref` does at `src/skills_ref/parser.py:45`,
+    reference validator `skills-ref` does in `src/skills_ref/parser.py`,
     and what this function did until it was tested — ends the block at the
     first occurrence anywhere, including inside a quoted or folded value. Then
     every rule below runs on a partial document that no client ever sees, and
@@ -210,8 +210,8 @@ def check_manifest(plugin_root: Path, validator) -> dict | None:
     # A loader reality and a repository rule, not a spec rule: the root
     # manifest is the real file, never a link.
     # Codex's loader refuses a symlinked root manifest outright --
-    # find_plugin_manifest_path() calls symlink_metadata() and returns None
-    # for a symlink, pinned by rejects_symlinked_root_plugin_manifest.
+    # find_plugin_manifest_path() calls symlink_metadata() and returns None for
+    # a symlink, pinned by Codex's test rejects_symlinked_root_plugin_manifest.
     if manifest_path.is_symlink():
         fail(where, "plugin.json at the plugin root is a symlink; it must be the real file")
         return None
@@ -422,10 +422,11 @@ def check_no_symlinks(root: Path) -> None:
     """Nothing under a generated directory is a symlink.
 
     Written by hand for the first reason in the carve-out: a JSON Schema
-    cannot see the filesystem. A symlink in a plugin root fails Codex's
-    plugin fingerprint, and Git for Windows checks any symlink out as a plain
-    file holding the link text unless symlinks are enabled. A generated tree
-    holds copies, so a link there is a build that did not copy.
+    cannot see the filesystem. A symlink in a plugin root fails Codex's plugin
+    fingerprint, Codex's installer copies only files and directories, and Git
+    for Windows checks any symlink out as a plain file holding the link text
+    unless symlinks are enabled. A generated tree holds copies, so a link
+    there is a build that did not copy.
     """
     if root.is_symlink():
         fail(str(root.relative_to(REPO_ROOT)), "is a symlink; generated directories hold real files")

@@ -1,4 +1,4 @@
-# cocogitto configuration.
+# cocogitto configuration (https://docs.cocogitto.io/reference/config).
 # Each package under src/ is released on its own, from the conventional
 # commits that touched its source or its shipped builds. include counts
 # bundles/<name>/ and plugins/<name>/ beside the package path, so a commit

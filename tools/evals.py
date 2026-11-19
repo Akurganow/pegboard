@@ -73,7 +73,6 @@ JEV_ATTEMPTS = 6
 # published to the container registry, and an agent with a shell can print its
 # environment. That shell can also read /proc/<pid>/environ of the job's other
 # processes, so the grading key stays out of every job that runs a client.
-# docs/design.md, "Behavioural evals run after each release", gives the sources.
 SECRET_VARS = ("ANTHROPIC_API_KEY", "CODEX_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY", "TYPESAFE_API_KEY")
 
 # `gh ... list` stops at --limit without saying so, so a listing that fills its
@@ -112,7 +111,7 @@ class Claude:
     # Claude Code denies the skill's Read call. WebSearch and WebFetch need
     # approval, and a bare tool name allows every call of that tool. Without
     # them Claude's answers report web search and fetch as denied, while Codex
-    # and Oh-My-Pi reach the web in the same run.
+    # and Oh-My-Pi reach the web.
     def command(self, prompt: str, arm: str) -> list[str]:
         return ["claude", "-p", prompt, "--model", self.model, "--output-format", "stream-json",
                 "--verbose", "--allowedTools", "Skill", "Read", "WebSearch", "WebFetch"]
@@ -163,8 +162,8 @@ class Codex:
     def __init__(self, package: str, skill: str):
         self.package, self.skill = package, skill
 
-    # On GitHub's ubuntu-latest the read-only sandbox fails every command with
-    # "bwrap: loopback: Failed RTM_NEWADDR", so Codex never reads SKILL.md.
+    # On GitHub's ubuntu-latest the read-only sandbox failed every command with
+    # "bwrap: loopback: Failed RTM_NEWADDR", so Codex never read SKILL.md.
     def command(self, prompt: str, arm: str) -> list[str]:
         cmd = ["codex", "exec", "--json", "--skip-git-repo-check", "--sandbox", "danger-full-access",
                "-m", self.model]
@@ -178,14 +177,13 @@ class Codex:
     def switch_back(self) -> None:
         pass
 
-    # Codex has no skill item kind.
-    # A skill load is a shell read of its SKILL.md in the plugin cache.
-    # A top-level "error" event also announces each retry, so only "turn.failed"
-    # marks a failed turn.
-    # One turn carries several agent_message items: the fixture has a preamble, a
-    # context note, a question and the review. The answer joins them all, because
-    # the last one alone can point at text above it. A stream that stops before
-    # turn.completed is an interrupted turn.
+    # Codex has no skill item kind. A skill load is a shell read of its SKILL.md
+    # in the plugin cache. A top-level "error" event also announces each retry,
+    # so only "turn.failed" marks a failed turn. One turn carries several
+    # agent_message items: the fixture has a preamble, a context note, a question
+    # and the review. The answer joins them all, because the last one alone can
+    # point at text above it. A stream that stops before turn.completed is an
+    # interrupted turn.
     def parse(self, events: list[dict]) -> Parsed:
         fired, answers, tokens, error, retried = False, [], None, None, None
         completed, tools = False, []
@@ -222,10 +220,9 @@ class Omp:
         self.package, self.skill = package, skill
 
     # `--no-rules` removes a package's rules as `--no-skills` removes its skills, so
-    # the without arm drops the whole package.
-    # Oh-My-Pi thinks at `high` unless told otherwise.
-    # On red-flags cases `low` took a quarter of the time `high` took, and loaded
-    # the skill every time.
+    # the without arm drops the whole package. Oh-My-Pi thinks at `high` unless told
+    # otherwise. On three red-flags cases `low` took a quarter of the time `high`
+    # took, and loaded the skill every time.
     def command(self, prompt: str, arm: str) -> list[str]:
         cmd = ["omp", "-p", "--mode", "json", "--no-session", "--no-title", "--auto-approve",
                "--model", self.model, "--thinking", "low"]
@@ -240,10 +237,9 @@ class Omp:
         pass
 
     # Oh-My-Pi loads a skill by reading skill://<name>, a file under it, or either
-    # with a selector such as ":raw".
-    # A failed assistant message can come before a retry that succeeds, so the
-    # last one decides the error, and the answer joins the text of the messages
-    # that did not fail.
+    # with a selector such as ":raw". A failed assistant message can come before a
+    # retry that succeeds, so the last one decides the error, and the answer joins
+    # the text of the messages that did not fail.
     def parse(self, events: list[dict]) -> Parsed:
         fired, texts, cost, model, last, tools = False, [], 0.0, None, None, []
         base = f"skill://{self.skill}"
@@ -353,8 +349,8 @@ def check_cases(skill_dir: Path, cases, rubric, held_out=None) -> tuple[dict, di
     return cases, questions
 
 
-# Criteria describe what a yes and a no mean. YAML reads an
-# unquoted `true:` key as a boolean, so only the quoted keys pass.
+# Criteria describe what a yes and a no mean. YAML reads an unquoted `true:` key
+# as a boolean, so only the quoted keys pass.
 def is_question(q) -> bool:
     if isinstance(q, str):
         return True
@@ -387,11 +383,10 @@ def client_env(client: str) -> dict:
 
 
 # Each session runs in a new empty directory outside the checkout, so no skill
-# under a checkout's `.agents/skills` loads into the session. Codex
-# loads skills from `.agents/skills` between the working directory and the
-# repository root.
-# Oh-My-Pi has an `agents` provider for `.agent[s]/skills` with toggles of its own.
-# Disabling the Claude, Codex and Pi providers does not turn it off.
+# under a checkout's `.agents/skills` loads into the session. Codex loads skills
+# from `.agents/skills` between the working directory and the repository root.
+# Oh-My-Pi has an `agents` provider for `.agent[s]/skills` with toggles of its
+# own. Disabling the Claude, Codex and Pi providers does not turn it off.
 def run_session(adapter, case: dict, kind: str, arm: str) -> dict:
     with tempfile.TemporaryDirectory() as cwd:
         started = time.monotonic()
