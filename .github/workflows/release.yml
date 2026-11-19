@@ -5,11 +5,10 @@ name: release
 # cog.toml names the packages and writes the version into source.json, then
 # builds every manifest from it.
 #
-# Loop guard: a push made with GITHUB_TOKEN starts no new workflow run
-# (documentation: https://github.com/github/docs/blob/75ea7dd097a5564f27364a5b70eaa1979106eabd/data/reusables/actions/actions-do-not-trigger-workflows.md),
+# Loop guard: a push made with GITHUB_TOKEN starts no new workflow run,
 # so the version commit and its tags cannot rerun this workflow.
-# The "main" ruleset (ruleset 21664827, read 2026-09-25) forbids only deletion
-# and non-fast-forward pushes, so the fast-forward push below is allowed.
+# The "main" ruleset forbids only deletion and non-fast-forward pushes, so
+# the fast-forward push below is allowed.
 on:
   push:
     branches: [main]
@@ -61,7 +60,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/resvg" --version | grep -Fx '0.48.1'
 
-      # cocogitto 7.0.0's release archive for this runner, pinned by sha256
+      # cocogitto's release archive for this runner, pinned by sha256
       # and checked before use. The digest matches GitHub's record of the upload.
       - name: Install cocogitto
         env:
