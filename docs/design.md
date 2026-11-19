@@ -28,8 +28,7 @@ The failure message names the command that repairs it.
 For each pull request commit that changes `src/` or a file the builder shares, CI also runs the builder on that commit alone.
 cocogitto counts a package's builds toward its release, so builds that land in a later commit would leave the earlier commit with nothing to release.
 
-Three alternatives lost.
-One command per kind of copy leaves a contributor to remember which command follows which edit.
+One command per kind of copy would leave a contributor to remember which command follows which edit.
 A CI job that commits the copies back would put changes on `main` that no pull request showed.
 Keeping the source in `plugins/<name>/` would let a client read hand-written files, and the Hermes install command reads that path.
 
@@ -51,8 +50,8 @@ Each client picks one manifest folder and ignores the rest.
 Claude Code and Oh-My-Pi read `.claude-plugin/plugin.json`, Cursor reads `.cursor-plugin/plugin.json`, and Codex and OpenClaw prefer `.codex-plugin/plugin.json` ([Claude Code](clients.md#claude-code), [Oh-My-Pi](clients.md#oh-my-pi), [Cursor](clients.md#cursor), [Codex](clients.md#codex), [OpenClaw](clients.md#openclaw)).
 So one tree with three manifest folders serves five clients.
 Claude Code's validator raises no warning for the other clients' folders ([Claude Code](clients.md#claude-code)).
-No other source read here says a client rejects a package for them.
-Separate trees per client would add copies for no gain that these sources show.
+No client is known to reject a package for them.
+Separate trees per client would add copies for no known gain.
 
 The Agent Plugins build keeps the path `plugins/<name>/`.
 The Hermes install commands, the `homepage` URLs and the README links stay valid.
@@ -85,7 +84,7 @@ A client that implements Agent Plugins 1.0.0 can load `plugins/<name>` directly.
 
 The specification defines no repository-level catalogue.
 How a client gets from this repository to a plugin root is specific to that client.
-So each install command in the [README](../README.md#install) cites that client's own source.
+So the [README](../README.md#install) gives each client its own install command.
 
 ## Icons are rendered from SVG
 
@@ -96,18 +95,17 @@ The directory accepts a PNG or a JPEG and no SVG ([Anthropic plugin directory](c
 Its source is `src/<name>/icon.svg`, which a diff can show, and the builder renders it on every run like every other build file.
 The Agent Plugins build carries no icon, because the 1.0.0 manifest has no field for one.
 
-The builder accepts one resvg version, 0.48.1, and refuses any other.
+The builder accepts one resvg version, the one it pins, and refuses any other.
 Another version renders other PNG bytes, and a commit that carries them releases every package, because cocogitto counts a package's builds.
 CI installs that version from its release archive, checked by a SHA-256 digest committed in the workflow.
 CI still leaves `bundles/*/.claude-plugin/icon.png` out of both tree comparisons.
-Whether one resvg version writes the same bytes on every system was not measured, and a comparison would fail on a difference nobody made.
+Whether one resvg version writes the same bytes on every system is unknown, and a comparison would fail on a difference nobody made.
 The directory profile in CI fails a bundle whose icon is missing.
 
 The icons follow the plugin list of claude.ai, where every plugin is drawn as one glyph of the app's own icon font in a dark tile.
-The tile colour, the line colour and the stroke width were measured on that page, and each icon draws its own object in that frame.
-Two alternatives lost.
-A hand-drawn PNG as the source makes every change invisible in a diff and needs an image editor.
-A renderer that runs only by hand leaves the builder unable to write the whole bundle.
+The tile colour, the line colour and the stroke width are taken from that page, and each icon draws its own object in that frame.
+A hand-drawn PNG as the source would make every change invisible in a diff and need an image editor.
+A renderer that runs only by hand would leave the builder unable to write the whole bundle.
 
 ## Skill names carry no plugin prefix
 
@@ -169,8 +167,7 @@ Hermes loads no hooks and no `rules/` from a package ([Hermes](clients.md#hermes
 So `skills/house-style/SKILL.md` carries the full rules in a generated region.
 The package README shows the `skills.auto_load` entry, with the qualified name `tools/regenerate.sh` computes from the manifest `name`.
 
-Python lost.
-A Hermes native plugin can add a system-prompt section, but it needs `plugin.yaml` and an `__init__.py` ([Hermes](clients.md#hermes)).
+A Hermes native plugin could add a system-prompt section, but it needs `plugin.yaml` and an `__init__.py` ([Hermes](clients.md#hermes)).
 When a directory holds both manifests, Hermes loads the native one and skips the portable `plugin.json`.
 A native half would stop Hermes from loading the package as Agent Plugins.
 
@@ -251,7 +248,7 @@ The risk is that `SubagentStart` prints nothing there.
 ## Codex declares its hooks in its own manifest
 
 Codex documents plugin hooks under `extensions.com.openai` in a root `plugin.json` ([Codex](clients.md#codex)).
-Its loader returns no hooks for a package in Agent Plugins format, and two open issues report it ([Codex](clients.md#codex)).
+Its loader returns no hooks for a package in Agent Plugins format ([Codex](clients.md#codex)).
 A root manifest in that format also outranks every manifest folder ([Codex](clients.md#codex)).
 
 Codex documents `.codex-plugin/plugin.json` as a compatibility fallback, and says legacy packages can declare `hooks` there ([Codex](clients.md#codex)).
@@ -259,7 +256,7 @@ The loader reads the declared file ([Codex](clients.md#codex)).
 So `bundles/prose-discipline/` has no root `plugin.json`, and its Codex manifest declares `./hooks/codex.json`.
 
 A fallback is the route Codex can drop.
-The integration job installs Codex 0.155.1, which reads the catalogue, the local entry shape, `.codex-plugin/plugin.json` and a declared hooks file ([Codex](clients.md#codex)).
+The integration job installs a pinned Codex, which reads the catalogue, the local entry shape, `.codex-plugin/plugin.json` and a declared hooks file ([Codex](clients.md#codex)).
 It runs the installed hook commands and compares their output with the short form.
 That proves the commands print the text, and not that Codex delivers it, because no job starts a Codex session.
 
@@ -271,11 +268,10 @@ The rules in every Codex session outweigh that prompt.
 
 The directory's Validate blocks a hook and a `.mdc` file from an organization that is not Verified ([Anthropic plugin directory](clients.md#anthropic-plugin-directory)).
 `prose-discipline` ships both, and no page read says how an organization becomes Verified (same section).
-So the package is not submitted, a decision of 2026-11-18.
+So the package is not submitted.
 Claude Code installs it from this repository's catalogue, where the hooks run.
 
-A build without hooks lost.
-The directory and the catalogue would read the same folder, so it needs a third build.
+A build without hooks would be a third build, because the directory and the catalogue read the same folder.
 From it, Claude Code would load the rules only when the skill fires.
 
 ## Releases come from cocogitto, straight to main
@@ -299,7 +295,7 @@ A workflow on each push to `main` runs the bump and publishes one GitHub release
 It pushes with `GITHUB_TOKEN`, and a push made with that token starts no workflow run.
 So the version commit cannot start the release again.
 
-Three other tools lost.
+The other release tools fit worse.
 release-please works through release pull requests.
 A pull request opened with `GITHUB_TOKEN` starts its workflow runs in an approval-required state.
 So every release would wait for a person to approve its checks and merge a second pull request.
@@ -312,15 +308,9 @@ The commit, the tags and the push would then be a shell loop kept here.
 
 Without a tag, cocogitto reads a package's history from the repository's first commit.
 It also starts that package from version 0.0.0.
-For `prose-discipline`, at 1.3.0, that would release a lower version than the one users hold.
-So each package has one seed tag at `232aaba`, carrying the version its manifest held there:
-`cognitive-load--v0.1.0`, `design-review--v0.1.0`, `prose-discipline--v1.3.0`, `toc-thinking--v0.1.0` and `triz--v0.1.0`.
+For a package past that version, the release would be lower than the one users hold.
+So each package has one seed tag, carrying the version its manifest held at the tagged commit.
 The release workflow refuses to run while any package in `cog.toml` has no reachable tag.
-
-### Breaking changes
-
-[CONTRIBUTING.md](../CONTRIBUTING.md#write-commits) gives the commit types and the versions they release.
-`prose-discipline` is past 1.0.0, so its rename to `house-style`, a `feat!` commit, releases it as 2.0.0.
 
 ### Changelogs
 
@@ -332,7 +322,7 @@ The template keeps `BREAKING:` as text, and drops the HTML and the author credit
 
 [CONTRIBUTING.md](../CONTRIBUTING.md#write-commits) gives the rules; these are their reasons.
 A squash merge folds a branch's commits into one commit, and the bump then loses each commit's type and paths.
-So the repository settings allow merge commits only (GitHub API, read 2026-09-25).
+So the repository settings allow merge commits only.
 The bump drops a commit whose message does not parse, and says nothing.
 That is why CI checks the messages of pull request commits that touch `src/`, `bundles/`, `plugins/` or a file the builder shares.
 
@@ -356,9 +346,9 @@ CI runs these checks without a model:
 In the matrix, Claude Code, Codex and Oh-My-Pi install through the catalogues at the root, which point at `bundles/<name>`, and Hermes installs from `plugins/<name>`.
 Claude Code, Codex and Oh-My-Pi must list every skill after the install.
 Hermes cells check that each package is installed and enabled, and no more.
-Hermes 0.21.5 has no model-free command that prints a portable package's skills ([Hermes](clients.md#hermes)).
+Hermes has no model-free command that prints a portable package's skills ([Hermes](clients.md#hermes)).
 The matrix leaves out Hermes on Windows.
-There the installer clones a branch before it checks out the pinned commit, and it failed in run 36183358181 ([Hermes](clients.md#hermes)).
+There the installer clones a branch before it checks out the pinned commit, so the install depends on that branch at run time ([Hermes](clients.md#hermes)).
 Every client installs on the hosted runners with no account signed in ([How each client loads a package](clients.md)).
 For `prose-discipline`, the Claude Code and Codex cells also run the installed hook commands, `sh -c` on every runner and `cmd /C` for Codex's `commandWindows` on Windows.
 They compare what the commands print with the short form in `src/`.
@@ -529,4 +519,4 @@ Prompts inside a package would reach every user who installs it, because Claude 
 ## The repository records no maintainer verification
 
 A sentence about what the maintainer ran describes one machine on one date.
-[How each client loads a package](clients.md) shows what takes its place: every fact cites its kind and source.
+[`.agents/rules/claims.md`](../.agents/rules/claims.md) says what takes its place: the text states the fact, and the commit that writes it names the source.
