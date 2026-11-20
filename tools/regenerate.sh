@@ -43,12 +43,9 @@ render_template() {
   sed -e "s|{{name}}|$2|g" "$1"
 }
 
-# hermes_namespace NAME: the skill namespace Hermes gives a package that
-# `hermes plugins install` placed, `agent-plugin-<slug>-<first 8 hex of
-# sha256(NAME)>`. The documentation gives the form and not the hash:
-# https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/website/docs/developer-guide/plugins/index.md
-# The source gives both, in `_portable_skill_namespace` and `_portable_slug`:
-# https://github.com/NousResearch/hermes-agent/blob/749220ef0007f8d87bd1531f1c24b0fe93816385/hermes_cli/plugins_manifest.py
+# hermes_namespace NAME: the skill namespace a package placed by
+# `hermes plugins install` gets from the Hermes that integration.yml pins,
+# `agent-plugin-<slug>-<first 8 hex of sha256(NAME)>`.
 hermes_namespace() {
   local slug digest
   slug=$(printf '%s' "$1" | tr 'A-Z' 'a-z' | sed -e 's/[^a-z0-9_-]/-/g' -e 's/^[-_]*//' -e 's/[-_]*$//') ||
