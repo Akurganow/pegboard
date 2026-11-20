@@ -9,8 +9,7 @@ name: integration
 # form. Claude Code, skills-ref and Hermes also validate the builds. No step
 # calls a model.
 #
-# The windows-latest image installs Git with symlinks enabled
-# (source: https://github.com/actions/runner-images/blob/ebade26c60adcb867918b31c8f8caa37343a3d39/images/windows/scripts/build/Install-Git.ps1).
+# The windows-latest image installs Git with symlinks enabled.
 # A Windows job here proves loading on that image, not on a default Git for
 # Windows checkout.
 #
@@ -46,7 +45,7 @@ permissions:
 
 env:
   MARKETPLACE: pegboard
-  HERMES_COMMIT: f97608f178d1ffeca59860195ab7da295f7c8e5f # Hermes v0.21.5, tag v2026.9.24
+  HERMES_COMMIT: f97608f178d1ffeca59860195ab7da295f7c8e5f
 
 jobs:
   packages:
@@ -80,12 +79,11 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         client: [claude, codex, omp, hermes]
         exclude:
-          # Hermes 0.21.5's installer failed on the windows-latest image in run 36183358181:
-          # error: Your local changes to the following files would be overwritten by checkout:
-          # [X] Installation failed: git checkout f97608f178d1ffeca59860195ab7da295f7c8e5f failed (exit 1)
-          # install.ps1 clones upstream main before checking out the pinned commit.
-          # The result therefore depends on upstream at run time (source):
-          # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/scripts/install.ps1#L20-L24
+          # Hermes's installer can fail on the windows-latest image.
+          # scripts/install.ps1 clones upstream main before checking out the
+          # pinned commit, and the checkout can then stop with "Your local
+          # changes to the following files would be overwritten by checkout".
+          # The result depends on upstream at run time.
           - os: windows-latest
             client: hermes
     runs-on: ${{ matrix.os }}
@@ -96,21 +94,18 @@ jobs:
     env:
       CLIENT: ${{ matrix.client }}
       PAIRS: ${{ needs.packages.outputs.pairs }}
-      # Keeps Claude Code at the pinned version
-      # (documentation: https://code.claude.com/docs/en/setup, "Disable auto-updates").
+      # Keeps Claude Code at the pinned version.
       DISABLE_AUTOUPDATER: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Claude Code's npm package needs Node.js 22 or later
-      # (documentation: https://code.claude.com/docs/en/setup, "Install with npm").
+      # Claude Code's npm package needs Node.js 22 or later.
       - if: matrix.client == 'claude' || matrix.client == 'codex'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "26"
 
-      # Oh-My-Pi 18.2.8 declares bun >= 1.3.14 in its package.json engines (source,
-      # as the registry serves it: https://registry.npmjs.org/@oh-my-pi/pi-coding-agent/18.2.8).
+      # Oh-My-Pi declares the lowest bun it runs on in its package.json engines.
       - if: matrix.client == 'omp'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -120,18 +115,8 @@ jobs:
         if: matrix.client == 'hermes'
         run: echo "HERMES_HOME=${{ runner.temp }}/hermes-home" >> "$GITHUB_ENV"
 
-      # Claude Code 2.1.305 is the version whose `claude plugin validate --help` lists
-      # `--profile directory`, which the conformance job runs. 2.1.278, 2.1.293, 2.1.301,
-      # 2.1.303 and 2.1.304 do not (running: the help of each npm release). This pin
-      # moves with that job's pin.
-      #
-      # Install routes, documentation: https://code.claude.com/docs/en/setup,
-      # https://developers.openai.com/codex/cli and the Oh-My-Pi README:
-      # https://github.com/can1357/oh-my-pi/blob/6204b7508014bcdf12d95f0b3fd470905fd99344/README.md#L51-L55
-      # Hermes: installation.md (documentation), and install.sh's usage text (source)
-      # for --commit, --skip-setup and --hermes-home, both at the pinned commit:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/getting-started/installation.md#L138-L140
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/scripts/install.sh#L172-L190
+      # The validate-claude job needs a Claude Code whose `claude plugin validate`
+      # has `--profile directory`. This pin moves with that job's pin.
       - name: Install the client
         run: |
           case "$CLIENT" in
@@ -153,10 +138,7 @@ jobs:
 
       # Hermes documents installing a package from a repository. To test this checkout,
       # each package is copied into the user plugin directory, ~/.hermes/plugins, here under $HERMES_HOME.
-      # A portable package sits there too and stays disabled until enabled. Documentation:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/developer-guide/plugins/index.md#L62-L71
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/user-guide/features/plugins.md#L127
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/developer-guide/plugins/index.md#L748
+      # A portable package sits there too and stays disabled until enabled.
       # The root catalogues name ./bundles/<name> for each package. Hermes reads no
       # catalogue here, so it gets the Agent Plugins build in plugins/<name>.
       - name: Add the marketplace and install every package
@@ -185,13 +167,10 @@ jobs:
               hermes plugins list ;;
           esac
 
-      # claude plugin details prints a component inventory (documentation:
-      # https://code.claude.com/docs/en/plugins/cli-reference, "plugin details").
-      # codex debug prompt-input renders the model-visible prompt (documentation:
-      # https://learn.chatgpt.com/docs/developer-commands); running it shows the skill catalogue there.
-      # omp read is documented only by its own --help in 18.2.8 (running).
-      # It resolves skill://<name> to that skill's SKILL.md (documentation):
-      # https://github.com/can1357/oh-my-pi/blob/6204b7508014bcdf12d95f0b3fd470905fd99344/docs/skills.md#L169
+      # claude plugin details prints a component inventory.
+      # codex debug prompt-input renders the model-visible prompt; running it
+      # shows the skill catalogue there.
+      # omp read resolves skill://<name> to that skill's SKILL.md.
       # Each pattern matches the line naming the skill, because a package's name
       # or description can contain the skill name.
       - name: Assert every skill is listed
@@ -234,19 +213,12 @@ jobs:
           done
           exit "$status"
 
-      # Hermes 0.21.5 has no command that prints a portable package's skills
+      # The pinned Hermes has no command that prints a portable package's skills
       # without a model call, so this checks install and enable only.
-      # Source, at the pinned commit:
-      # plugins show prints name, version, description, Status, Source, Key, Emits and Listens:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/hermes_cli/plugins_cmd.py#L1814-L1836
-      # plugins list --json carries name, status, version, description, source and removed:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/hermes_cli/plugins_cmd.py#L1672-L1703
-      # skills list reads skill directories only, never the plugin-skill registry:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/hermes_cli/skills_hub.py#L782-L828
-      # Only the model-facing skills_list tool returns agent-plugin-<slug>-<sha256[:8]>:<skill>:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/tools/skills_tool.py#L234-L259
-      # The namespace is built by _portable_skill_namespace:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/hermes_cli/plugins_manifest.py#L60-L64
+      # plugins show prints name, version, description, Status, Source, Key, Emits and Listens.
+      # plugins list --json carries name, status, version, description, source and removed.
+      # skills list reads skill directories only, never the plugin-skill registry.
+      # Only its model-facing skills_list tool returns agent-plugin-<slug>-<sha256[:8]>:<skill>.
       - name: Assert every package is installed and enabled (Hermes)
         if: matrix.client == 'hermes'
         run: |
@@ -277,18 +249,11 @@ jobs:
       # It proves that the commands print the text, not that a client delivers it.
       # Claude Code: a relative-path plugin of a marketplace added from a local path
       # loads in place, and `readFromFolder` names that folder. `installPath` names
-      # the cache copy of any other plugin (documentation:
-      # https://code.claude.com/docs/en/plugins/loading.md#in-place-and-copied-plugins,
-      # https://code.claude.com/docs/en/plugins/cli-reference, "plugin list", "JSON output").
+      # the cache copy of any other plugin.
       # Codex: the installed copy is plugins/cache/<marketplace>/<plugin>/<version> under
-      # CODEX_HOME, which defaults to ~/.codex (source, at rust-v0.155.1:
-      # https://github.com/openai/codex/blob/be2951ea34f0d295ed0becf97079f92fa5f6950e/codex-rs/core-plugins/src/store.rs#L26,
-      # https://github.com/openai/codex/blob/be2951ea34f0d295ed0becf97079f92fa5f6950e/codex-rs/core-plugins/src/store.rs#L131-L138,
-      # https://github.com/openai/codex/blob/be2951ea34f0d295ed0becf97079f92fa5f6950e/codex-rs/utils/home-dir/src/lib.rs#L59).
-      # `codex plugin add` installed the same path under CODEX_HOME in a local run of codex-cli 0.155.1.
+      # CODEX_HOME, which defaults to ~/.codex.
       # Git Bash rewrites arguments that look like Unix paths. MSYS2_ARG_CONV_EXCL='*'
-      # turns that off, so the /C switch reaches cmd as written (documentation:
-      # https://www.msys2.org/docs/filesystem-paths/, "Automatic Unix to Windows path conversion").
+      # turns that off, so the /C switch reaches cmd as written.
       - name: Run the prose-discipline hook commands (Claude Code and Codex)
         if: matrix.client == 'claude' || matrix.client == 'codex'
         run: |
@@ -354,12 +319,10 @@ jobs:
           done <<<"$handlers"
           exit "$status"
 
-  # Cursor has no install route this workflow can run. The Cursor docs read on
-  # 2026-11-04 document no command that installs a plugin from a catalogue
-  # (documentation: https://cursor.com/docs/plugins.md, "Installing plugins"). The
-  # CLI's API-key route for automation reads CURSOR_API_KEY (documentation:
-  # https://cursor.com/docs/cli/reference/authentication.md, "API key authentication").
-  # The notice keeps the gap visible in the run.
+  # Cursor has no install route this workflow can run. Cursor's documentation
+  # names no command that installs a plugin from a catalogue. The CLI's
+  # API-key route for automation reads CURSOR_API_KEY. The notice keeps the
+  # gap visible in the run.
   cursor:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -377,22 +340,19 @@ jobs:
       run:
         shell: bash
     timeout-minutes: 20
-    # Keeps the pinned version the one that runs
-    # (documentation: https://code.claude.com/docs/en/setup, "Disable auto-updates").
+    # Keeps the pinned version the one that runs.
     env:
       DISABLE_AUTOUPDATER: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # The npm package needs Node.js 22 or later
-      # (documentation: https://code.claude.com/docs/en/setup, "Install with npm").
+      # The npm package needs Node.js 22 or later.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "26"
 
-      # 2.1.305 is the version whose `claude plugin validate --help` lists
-      # `--profile directory`, which the step below needs. 2.1.278, 2.1.293,
-      # 2.1.301, 2.1.303 and 2.1.304 do not (running: the help of each npm release).
+      # The `--profile directory` step below needs a Claude Code whose
+      # `claude plugin validate` has that option.
       - name: Install Claude Code
         run: |
           npm install -g @anthropic-ai/claude-code@2.1.305
@@ -400,7 +360,6 @@ jobs:
 
       # --strict treats the warnings as errors, so an unrecognised field or a
       # missing metadata field fails the run.
-      # (documentation: https://code.claude.com/docs/en/plugins/cli-reference, "plugin validate").
       - name: claude plugin validate --strict, per bundle and catalogue
         run: |
           status=0
@@ -417,13 +376,11 @@ jobs:
       # The directory profile runs some of the checks the plugin directory applies
       # before it accepts a submission. The plain command runs fewer. The profile exits 1
       # on a finding that blocks a submission, and on a check it cannot make, such
-      # as a hooks file that is not valid JSON (running: the help of
-      # `claude plugin validate`, Claude Code 2.1.305). This step fails on either,
+      # as a hooks file that is not valid JSON. This step fails on either,
       # and on any other finding, so a bundle without its icon fails with ICON_MISSING.
       # The directory also runs a safety scan and a policy review that this command
-      # does not (running: its output, Claude Code 2.1.305), and its Validate blocks
-      # files this step passes (docs/clients.md, "Anthropic plugin directory"). So a
-      # passing step does not clear a submission.
+      # does not, and its Validate blocks files this step passes (docs/clients.md,
+      # "Anthropic plugin directory"). So a passing step does not clear a submission.
       - name: claude plugin validate --profile directory, per bundle
         run: |
           status=0
@@ -457,8 +414,7 @@ jobs:
           python-version: "3.15"
 
       # skills-ref documents only a source install, so it is installed from its
-      # repository at a pinned commit (version 0.1.0). Documentation:
-      # https://github.com/agentskills/agentskills/blob/69ef37e9424c0a7ea9dd2293b559e43ec8176379/skills-ref/README.md
+      # repository at a pinned commit.
       - name: Install skills-ref
         run: >-
           python -m pip install --disable-pip-version-check
@@ -483,9 +439,6 @@ jobs:
 
       # The project's own installer, fetched and checked out at the pinned
       # commit. --skip-setup and --skip-browser skip the wizard and Playwright.
-      # Documentation for --skip-browser; the script's usage text (source) for the rest:
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/website/docs/getting-started/installation.md#L138-L140
-      # https://github.com/NousResearch/hermes-agent/blob/f97608f178d1ffeca59860195ab7da295f7c8e5f/scripts/install.sh#L172-L180
       - name: Install Hermes
         run: |
           curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors "https://raw.githubusercontent.com/NousResearch/hermes-agent/$HERMES_COMMIT/scripts/install.sh" \
